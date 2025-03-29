@@ -138,7 +138,7 @@ try {
 			margin: 5px 0;
 		}
 	</style>
-	 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
@@ -182,7 +182,7 @@ try {
 	</div>
 
 	<script>
-		// Pie chart implementation using Chart.js or any other library
+		// Pie chart implementation using Chart.js
 		const ctx = document.getElementById('scoreChart').getContext('2d');
 		const scoreChart = new Chart(ctx, {
 			type: 'pie',
@@ -190,7 +190,12 @@ try {
 				labels: ['0-25', '25-50', '50-75', '75-100'],
 				datasets: [{
 					label: 'Scores Distribution',
-					data: [<?php echo "$score_0_25, $score_25_50, $score_50_75, $score_75_100"; ?>],
+					data: [
+						<?php echo isset($score_0_25) ? $score_0_25 : 0; ?>,
+						<?php echo isset($score_25_50) ? $score_25_50 : 0; ?>,
+						<?php echo isset($score_50_75) ? $score_50_75 : 0; ?>,
+						<?php echo isset($score_75_100) ? $score_75_100 : 0; ?>
+					],
 					backgroundColor: ['#ff6384', '#36a2eb', '#ffce56', '#4bc0c0']
 				}]
 			}
