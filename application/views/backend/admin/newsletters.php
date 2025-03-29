@@ -20,7 +20,7 @@
   </div> <!-- end col-->
 </div>
 
-<iframe src="https://academy.reviewcenterphil.com/cyd/news/news.php" height="500px" width="100%" title="news"></iframe>
+<iframe src="https://academy.reviewcenterphil.com/cyd/news/news.php" height="900px" width="100%" title="news"></iframe>
 
 <div class="row">
   <div class="col-lg-8">
