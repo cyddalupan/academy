@@ -323,8 +323,8 @@
                       </li>  
                     <?php endif; ?>
                     <li>
-                      <a href="#" data-toggle="modal" data-target="#myResultModal">
-                        <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                      <a href="#" id="myResultTrigger">
+                        <i class="fa fa-check"></i>
                         My Result
                       </a>
                     </li>
@@ -355,22 +355,42 @@
 </nav>
 
 <!-- Modal -->
-<div class="modal fade" id="myResultModal" tabindex="-1" role="dialog" aria-labelledby="myResultModalLabel" aria-hidden="true">
+<div class="modal" id="myResultModal" tabindex="-1" role="dialog" aria-labelledby="myResultModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="myResultModalLabel">My Result</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <button type="button" class="close" id="myResultClose">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="modal-body">
-        <!-- Content for My Result goes here -->
         <p>Your results will be displayed here.</p>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-secondary" id="myResultCloseFooter">Close</button>
       </div>
     </div>
   </div>
 </div>
+
+<script>
+  document.getElementById('myResultTrigger').onclick = function() {
+    document.getElementById('myResultModal').style.display = 'block';
+  }
+  
+  document.getElementById('myResultClose').onclick = function() {
+    document.getElementById('myResultModal').style.display = 'none';
+  }
+  
+  document.getElementById('myResultCloseFooter').onclick = function() {
+    document.getElementById('myResultModal').style.display = 'none';
+  }
+  
+  // Close modal when clicking outside of it
+  window.onclick = function(event) {
+    if (event.target == document.getElementById('myResultModal')) {
+      document.getElementById('myResultModal').style.display = 'none';
+    }
+  }
+</script>
