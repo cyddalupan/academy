@@ -96,13 +96,13 @@ try {
 		</div>
 
 		<div class="row">
-			<div class="col-md-6">
+			<div class="col-md-3">
 				<div class="chart-container">
 					<canvas id="scoreChart"></canvas>
 				</div>
 			</div>
 
-			<div class="col-md-6">
+			<div class="col-md-9">
 				<div class="summary">
 					<h2>Top 3 Students</h2>
 					<div class="row">
@@ -110,10 +110,12 @@ try {
 							<div class="col-4">
 								<div class="card mb-3">
 									<div class="card-body">
-										<h5 class="card-title">
-											<?php echo $index + 1 . '. ' . htmlspecialchars($student['summary']); ?></h5>
-										<p class="card-text">Average Score:
-											<?php echo htmlspecialchars($student['average_score']); ?></p>
+										<h5 class="card-title">Average Score:
+											<?php echo htmlspecialchars($student['average_score']); ?>
+										</h5>
+										<p class="card-text">
+											<?php echo $index + 1 . '. ' . htmlspecialchars($student['summary']); ?>
+										</p>
 									</div>
 								</div>
 							</div>
@@ -129,9 +131,12 @@ try {
 								<div class="card mb-3">
 									<div class="card-body">
 										<h5 class="card-title">
-											<?php echo $index + 1 . '. ' . htmlspecialchars($student['summary']); ?></h5>
-										<p class="card-text">Average Score:
-											<?php echo htmlspecialchars($student['average_score']); ?></p>
+											Average Score:
+											<?php echo htmlspecialchars($student['average_score']); ?>
+										</h5>
+										<p class="card-text">
+											<?php echo $index + 1 . '. ' . htmlspecialchars($student['summary']); ?>
+										</p>
 									</div>
 								</div>
 							</div>
