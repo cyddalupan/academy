@@ -89,14 +89,14 @@ try {
 
 <div class="container">
     <div class="header">
-        <h1>Total Average Score: <?php echo number_format($averageScore, 2); ?></h1>
+        <h1>Total Average Score: <?php echo number_format($score_counts[4], 2); ?></h1>
     </div>
 
     <div class="flex">
-        <div class="group">0 - 25: <?php echo $score_0_25; ?></div>
-        <div class="group">25 - 50: <?php echo $score_25_50; ?></div>
-        <div class="group">50 - 75: <?php echo $score_50_75; ?></div>
-        <div class="group">75 - 100: <?php echo $score_75_100; ?></div>
+        <div class="group">0 - 25: <?php echo $score_counts[0]; ?></div>
+        <div class="group">25 - 50: <?php echo $score_counts[1]; ?></div>
+        <div class="group">50 - 75: <?php echo $score_counts[2]; ?></div>
+        <div class="group">75 - 100: <?php echo $score_counts[3]; ?></div>
     </div>
 
     <div class="chart-container">
