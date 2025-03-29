@@ -373,10 +373,6 @@
     document.getElementById('myResultModal').style.display = 'block';
   }
   
-  document.getElementById('myResultClose').onclick = function() {
-    document.getElementById('myResultModal').style.display = 'none';
-  }
-  
   document.getElementById('myResultCloseFooter').onclick = function() {
     document.getElementById('myResultModal').style.display = 'none';
   }
