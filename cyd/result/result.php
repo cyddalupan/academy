@@ -51,6 +51,12 @@ try {
     <div class="container mt-4">
         <h2>Student Exam Results</h2>
 
+        <?php if (empty($answers)): ?>
+            <div class="alert alert-info" role="alert">
+                No results available at the moment.
+            </div>
+        <?php else: ?>
+
         <?php
         // Group by batch_id (course)
         $groupedAnswers = [];
