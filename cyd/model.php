@@ -12,7 +12,7 @@ function fetchRandomQuestion($userId, $courseId)
     $query = "
     SELECT q.q_id, q.q_question, q.q_answer 
     FROM quiz_new q
-    WHERE NOT EXISTS (
+    WHERE q.q_course_id = :courseId AND NOT EXISTS (
         SELECT 1 FROM diag_ans d 
         WHERE d.question_id = q.q_id AND d.user_id = :userId AND d.batch_id = :courseId
     )
