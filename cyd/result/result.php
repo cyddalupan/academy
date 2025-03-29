@@ -75,7 +75,7 @@ try {
             echo "<div class='card mb-3'>";
             echo "<div class='card-header' id='heading-$batchId'>";
             echo "<h5 class='mb-0'>";
-            echo "<button class='btn btn-link' onclick='toggleCollapse(\"collapse-$batchId\")'>";
+            echo "<button class='btn btn-outline-light' onclick='toggleCollapse(\"collapse-$batchId\")'>";
             echo $courseName . " (Avg Score: " . number_format($averageScore, 2) . ")";
             echo "</button></h5></div>";
 
