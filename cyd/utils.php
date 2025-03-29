@@ -96,7 +96,7 @@ function summarizeFeedback($answers) {
         'Authorization: Bearer ' . $apiKey
     ];
 
-    $messages = [["role" => "system", "content" => "Provide a summary based on the following feedback and scores."]];
+    $messages = [["role" => "system", "content" => "Provide a summary based on the following feedback and scores. in less than 400 characters"]];
 
     foreach ($answers as $answer) {
         $messages[] = [
