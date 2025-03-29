@@ -163,7 +163,7 @@ try {
 			<h2>Top 3 Students</h2>
 			<?php foreach ($top_scores as $index => $student): ?>
 				<div class="card">
-					<h3><?php echo $index + 1 . '. ' . htmlspecialchars($student['name']); ?></h3>
+					<h3><?php echo $index + 1 . '. ' . htmlspecialchars($student['summary']); ?></h3>
 					<p>Average Score: <?php echo htmlspecialchars($student['average_score']); ?></p>
 				</div>
 			<?php endforeach; ?>
@@ -173,7 +173,7 @@ try {
 			<h2>Lowest 3 Students</h2>
 			<?php foreach ($lowest_scores as $index => $student): ?>
 				<div class="card">
-					<h3><?php echo $index + 1 . '. ' . htmlspecialchars($student['name']); ?></h3>
+					<h3><?php echo $index + 1 . '. ' . htmlspecialchars($student['summary']); ?></h3>
 					<p>Average Score: <?php echo htmlspecialchars($student['average_score']); ?></p>
 				</div>
 			<?php endforeach; ?>
