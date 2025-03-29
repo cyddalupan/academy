@@ -27,10 +27,8 @@ try {
     echo "Connection failed: " . $e->getMessage() . PHP_EOL;
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -40,9 +38,15 @@ try {
         .collapse {
             display: none;
         }
+        .card-header {
+            background-color: #007bff; /* Bootstrap primary color */
+            color: white;
+        }
+        .card-body {
+            background-color: #f8f9fa; /* Light background for the body */
+        }
     </style>
 </head>
-
 <body>
     <div class="container mt-4">
         <h2>Student Exam Results</h2>
@@ -60,17 +64,25 @@ try {
             $totalScore = 0;
             $totalQuestions = count($results);
 
+            // Display individual results and calculate total score
+            foreach ($results as $result) {
+                $totalScore += $result['score']; // Accumulate score
+            }
+
+            // Final average score calculation
+            $averageScore = $totalQuestions ? ($totalScore / $totalQuestions) : 0;
+
             echo "<div class='card mb-3'>";
             echo "<div class='card-header' id='heading-$batchId'>";
             echo "<h5 class='mb-0'>";
             echo "<button class='btn btn-link' onclick='toggleCollapse(\"collapse-$batchId\")'>";
-            echo $courseName . " (Avg Score: " . number_format($totalScore / ($totalQuestions ?: 1), 2) . ")";
+            echo $courseName . " (Avg Score: " . number_format($averageScore, 2) . ")";
             echo "</button></h5></div>";
 
             echo "<div id='collapse-$batchId' class='collapse'>";
             echo "<div class='card-body'>";
 
-            // Display individual results and calculate total score
+            // Display individual question details
             foreach ($results as $result) {
                 echo "<div class='border rounded p-2 mb-2'>";
                 echo "<h6>Question: " . $result['q_question'] . "</h6>";
@@ -78,13 +90,7 @@ try {
                 echo "<p><strong>Feedback:</strong> " . $result['feedback'] . "</p>";
                 echo "<p><strong>Score:</strong> " . $result['score'] . "</p>";
                 echo "</div>";
-
-                $totalScore += $result['score']; // Accumulate score
             }
-
-            // Final average score calculation
-            $averageScore = $totalQuestions ? ($totalScore / $totalQuestions) : 0;
-            echo "<h6>Final Average Score for $courseName: " . number_format($averageScore, 2) . "</h6>";
 
             echo "</div></div></div>";
         }
@@ -95,13 +101,8 @@ try {
     <script>
         function toggleCollapse(id) {
             const collapseElement = document.getElementById(id);
-            if (collapseElement.style.display === "block") {
-                collapseElement.style.display = "none";
-            } else {
-                collapseElement.style.display = "block";
-            }
+            collapseElement.style.display = (collapseElement.style.display === "block") ? "none" : "block";
         }
     </script>
 </body>
-
 </html>
