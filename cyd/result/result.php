@@ -29,6 +29,7 @@ try {
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -38,15 +39,20 @@ try {
         .collapse {
             display: none;
         }
+
         .card-header {
-            background-color: #007bff; /* Bootstrap primary color */
+            background-color: #007bff;
+            /* Bootstrap primary color */
             color: white;
         }
+
         .card-body {
-            background-color: #f8f9fa; /* Light background for the body */
+            background-color: #f8f9fa;
+            /* Light background for the body */
         }
     </style>
 </head>
+
 <body>
     <div class="container mt-4">
         <h2>Student Exam Results</h2>
@@ -55,7 +61,7 @@ try {
             <div class="alert alert-info" role="alert">
                 No results available at the moment.
             </div>
-        <?php else: ?>
+        <?php endif; ?>
 
         <?php
         // Group by batch_id (course)
@@ -111,4 +117,5 @@ try {
         }
     </script>
 </body>
+
 </html>
