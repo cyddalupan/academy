@@ -3,12 +3,15 @@
     document.addEventListener('DOMContentLoaded', function () {
         try {
             const userId = window.parent.localStorage.getItem('user_id');
+            const courseId = window.parent.localStorage.getItem('course_id');
             const contentDiv = document.getElementById('content');
             const userIdInput = document.getElementById('userIdInput');
+            const courseIdInput = document.getElementById('courseIdInput');
 
-            if (userId) {
+            if (userId && userId !== 0) {
                 console.log('User ID:', userId);
                 userIdInput.value = userId;
+                courseIdInput.value = courseId;
             } else {
                 const message = "Please log in to access the diagnostic exam.";
                 console.log(message);

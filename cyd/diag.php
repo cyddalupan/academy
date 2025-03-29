@@ -20,17 +20,19 @@ try {
 	$pdo = new PDO($dsn, $username, $password);
 	$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
+
 	if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+		$userId = $_POST['userId'];
+		$courseId = $_POST['courseId'];
+
 		if (isset($_POST['start']) || isset($_POST['continue']) || isset($_POST['skip'])) {
 			// Get new Question.
-			$userId = $_POST['userId'];
-			$result = fetchRandomQuestion($userId);
+			$result = fetchRandomQuestion($userId, $courseId);
 			$question = $result ? $result['q_question'] : "No data found.";
 			$questionId = $result ? $result['q_id'] : null;
 		} elseif (isset($_POST['userInput'])) {
 			// After user answer.
 			try {
-				$userId = $_POST['userId'];
 				if (!$userId) {
 					die("User ID is not set.");
 				}
@@ -66,32 +68,32 @@ try {
 		if (isset($_POST['remaining-seconds'])) {
 			// Update the remaining_seconds
 			$remainingSeconds = $_POST['remaining-seconds'];
-			updateRemainingSeconds($pdo, $userId, $remainingSeconds);
+			updateRemainingSeconds($pdo, $userId, $remainingSeconds, $courseId);
 		} else {
 			// Fetch existing remaining_seconds
-			$existingData = getRemainingSeconds($pdo, $userId, 0);
+			$existingData = getRemainingSeconds($pdo, $userId, $courseId);
 
 			if ($existingData) {
 				$remainingSeconds = $existingData['remaining_seconds'];
 			} else {
 				// No record found, create one
-				createUserCourse($pdo, $userId, $totalQuestions, $timer_minutes);
+				createUserCourse($pdo, $userId, $courseId, $totalQuestions, $timer_minutes);
 				$remainingSeconds = $timer_minutes * 60 * $totalQuestions; // Calculate new remaining seconds
 			}
 		}
 
-		$answerCount = countUserAnswersBatchZero($pdo, $userId);
+		$answerCount = countUserAnswers($pdo, $userId, $courseId);
 		$progressPercentage = ($answerCount / $totalQuestions) * 100;
 		// Turn percentage to 100 when no time remaining.
 		if (isset($remainingSeconds) && $remainingSeconds == 0) {
 			$progressPercentage = 100;
 		}
 		if ($progressPercentage == 100) {
-			$answers = getAllUserAnswersBatchZero($pdo, $userId);
+			$answers = getAllUserAnswers($pdo, $userId, $courseId);
 			$averageScore = calculateAverageScore($answers, $totalQuestions);
-			if (!hasSummary($pdo, $userId, 0)) {
+			if (!hasSummary($pdo, $userId, $courseId)) {
 				$summary = summarizeFeedback($answers);
-				updateSummary($pdo, $userId, 0, $averageScore, $summary);
+				updateSummary($pdo, $userId, $courseId, $averageScore, $summary);
 			}
 		}
 	}
@@ -137,22 +139,25 @@ try {
 					<p><strong>Feedback:</strong> <?php echo nl2br($feedback); ?></p>
 					<form method="post" action="">
 						<input type="hidden" name="userId" id="userIdInput">
+						<input type="hidden" name="courseId" id="courseIdInput">
 						<button id="submitButton" type="submit" name="continue">Continue</button>
 					</form>
 				</div>
 			<?php elseif (!isset($userId)): ?>
 				<!-- Start Page -->
 				<div class="instruction">
-					<p>Begin your diagnostic exam to assess your knowledge and skills!</p>
+					<p>Begin your exam to assess your knowledge and skills!</p>
 				</div>
 				<form method="post" action="">
 					<input type="hidden" name="userId" id="userIdInput">
-					<button id="submitButton" type="submit" name="start">Start Diagnostics</button>
+					<input type="hidden" name="courseId" id="courseIdInput">
+					<button id="submitButton" type="submit" name="start">Start Exam</button>
 				</form>
 			<?php elseif (isset($questionId) && $progressPercentage !== 100): ?>
 				<!-- Q&A Page -->
 				<form method="post" action="">
 					<input type="hidden" name="userId" id="userIdInput">
+					<input type="hidden" name="courseId" id="courseIdInput">
 					<input type="hidden" name="questionId" value="<?php echo htmlspecialchars($questionId); ?>">
 					<input type="hidden" id="remaining-seconds" name="remaining-seconds">
 					<div class="form-group">

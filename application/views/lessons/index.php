@@ -145,8 +145,6 @@ if($language_dirs){
 					<div class="<?php if($full_page){ echo 'col-lg-12'; }else{ echo 'col-lg-8'; } ?> order-1">
 						<?php if(is_array($lesson_details)): ?>
 							<div class="course-playing-content">
-								<h1>TEST1 <?php echo $course_details['id']; ?></h1>
-								
 								<div class="mb-4 mt-2" <?php if($full_page) echo 'style="margin-top: -2px; margin-left: -12px; margin-right: -12px;"'; ?>>
 									<?php if(in_array($lesson_details['id'], $locked_lesson_ids) && $course_details['enable_drip_content']): ?>
 					                    <div class="py-5">
@@ -194,14 +192,11 @@ if($language_dirs){
     <?php include APPPATH."views/frontend/default-new/common_scripts.php"; ?>
     <?php include APPPATH."views/frontend/default-new/init.php"; ?>
 	<script>
-	var userId = <?php echo json_encode($this->session->userdata('user_id')); ?>;
-	if (userId) {
+		var userId = <?php echo json_encode($this->session->userdata('user_id') ?: 0); ?>;
 		localStorage.setItem('user_id', userId);
-	} else {
-		console.warn('User ID not found in session.');
-		localStorage.removeItem('user_id');
-	}
-	//$course_details['id']
+
+		var courseId = <?php echo json_encode(isset($course_details['id']) ? $course_details['id'] : 0); ?>;
+		localStorage.setItem('course_id', courseId);
 	</script>
 </body>
 </html>
