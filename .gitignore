@@ -1,0 +1,31 @@
+# system files
+/system/*
+!/system/index.html
+
+# application files
+/application/config/config.php
+/application/config/database.php
+/application/config/*.php
+/application/cache/
+/application/logs/
+/application/views/cache/
+
+# vendor directory
+/vendor/
+
+# IDE-specific files
+*.sublime-workspace
+*.sublime-project
+.idea/
+.vscode/
+
+# environment files
+.env
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# CYD IGNORE
+/cyd/config.php
+/uploads/install.sql
