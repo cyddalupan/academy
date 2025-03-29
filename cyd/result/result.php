@@ -19,28 +19,35 @@ function getUserAnswers($pdo, $userId): mixed
 }
 
 try {
-	$pdo = new PDO($dsn, $username, $password);
-	$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $pdo = new PDO($dsn, $username, $password);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     $userId = $_GET['id'];
     $answers = getUserAnswers($pdo, $userId);
 } catch (PDOException $e) {
-	echo "Connection failed: " . $e->getMessage() . PHP_EOL;
+    echo "Connection failed: " . $e->getMessage() . PHP_EOL;
 }
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Result Data</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .collapse {
+            display: none;
+        }
+    </style>
 </head>
+
 <body>
     <div class="container mt-4">
         <h2>Student Exam Results</h2>
 
-        <?php 
+        <?php
         // Group by batch_id (course)
         $groupedAnswers = [];
         foreach ($answers as $answer) {
@@ -56,12 +63,11 @@ try {
             echo "<div class='card mb-3'>";
             echo "<div class='card-header' id='heading-$batchId'>";
             echo "<h5 class='mb-0'>";
-            echo "<button class='btn btn-link' data-toggle='collapse' data-target='#collapse-$batchId' aria-expanded='true' aria-controls='collapse-$batchId'>";
-            echo $courseName;
-            echo "</button>";
-            echo "</h5></div>";
+            echo "<button class='btn btn-link' onclick='toggleCollapse(\"collapse-$batchId\")'>";
+            echo $courseName . " (Avg Score: " . number_format($totalScore / ($totalQuestions ?: 1), 2) . ")";
+            echo "</button></h5></div>";
 
-            echo "<div id='collapse-$batchId' class='collapse' aria-labelledby='heading-$batchId' data-parent='#accordionExample'>";
+            echo "<div id='collapse-$batchId' class='collapse'>";
             echo "<div class='card-body'>";
 
             // Display individual results and calculate total score
@@ -72,13 +78,13 @@ try {
                 echo "<p><strong>Feedback:</strong> " . $result['feedback'] . "</p>";
                 echo "<p><strong>Score:</strong> " . $result['score'] . "</p>";
                 echo "</div>";
-                
+
                 $totalScore += $result['score']; // Accumulate score
             }
 
-            // Display average score
+            // Final average score calculation
             $averageScore = $totalQuestions ? ($totalScore / $totalQuestions) : 0;
-            echo "<h6>Average Score for $courseName: " . number_format($averageScore, 2) . "</h6>";
+            echo "<h6>Final Average Score for $courseName: " . number_format($averageScore, 2) . "</h6>";
 
             echo "</div></div></div>";
         }
@@ -86,8 +92,16 @@ try {
 
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        function toggleCollapse(id) {
+            const collapseElement = document.getElementById(id);
+            if (collapseElement.style.display === "block") {
+                collapseElement.style.display = "none";
+            } else {
+                collapseElement.style.display = "block";
+            }
+        }
+    </script>
 </body>
+
 </html>
