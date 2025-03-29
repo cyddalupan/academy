@@ -76,126 +76,68 @@ try {
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 	<title>Dashboard</title>
-	<style>
-		body {
-			font-family: Arial, sans-serif;
-			background-color: #f4f4f4;
-			margin: 0;
-			padding: 20px;
-		}
-
-		.container {
-			max-width: 1200px;
-			margin: auto;
-		}
-
-		.header {
-			text-align: center;
-			padding: 10px;
-			/* Reduced padding */
-			background-color: #007bff;
-			color: white;
-		}
-
-		.group {
-			display: inline-block;
-			width: calc(50% - 10px);
-			/* Two columns */
-			padding: 5px;
-			/* Reduced padding */
-			text-align: center;
-			margin: 5px;
-			/* Reduced margin */
-		}
-
-		.chart-container {
-			width: 50%;
-			/* Make it half */
-			display: inline-block;
-			/* For column layout */
-			vertical-align: top;
-			/* Align with summary */
-		}
-
-		.summary {
-			display: flex;
-			/* Using flexbox */
-			flex-wrap: wrap;
-			/* Allow wrapping */
-			justify-content: space-between;
-			/* Space between */
-			margin: 10px 0;
-		}
-
-		.summary h3 {
-			font-size: 14px;
-			/* Smaller text */
-			margin-bottom: 5px;
-			/* Reduced margin */
-		}
-
-		.summary p {
-			font-size: 12px;
-			/* Smaller text */
-			margin: 2px 0;
-			/* Reduced margin */
-		}
-
-		.card {
-			background: white;
-			border-radius: 8px;
-			padding: 10px;
-			/* Reduced padding */
-			margin: 5px;
-			/* Reduced margin */
-			box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-			/* Reduced shadow */
-			flex-basis: calc(33% - 10px);
-			/* Make 3 columns in summary boxes */
-		}
-	</style>
 	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
 
 	<div class="container">
-
 		<div class="header">
 			<h1>Total Average Score: <?php echo number_format($score_counts['average'], 2); ?></h1>
 		</div>
 
-		<div class="flex">
-			<div class="group">0 - 25: <?php echo $score_counts['0_25']; ?></div>
-			<div class="group">25 - 50: <?php echo $score_counts['25_50']; ?></div>
-			<div class="group">50 - 75: <?php echo $score_counts['50_75']; ?></div>
-			<div class="group">75 - 100: <?php echo $score_counts['75_100']; ?></div>
+		<div class="row text-center mb-3">
+			<div class="col-md-3">0 - 25: <?php echo $score_counts['0_25']; ?></div>
+			<div class="col-md-3">25 - 50: <?php echo $score_counts['25_50']; ?></div>
+			<div class="col-md-3">50 - 75: <?php echo $score_counts['50_75']; ?></div>
+			<div class="col-md-3">75 - 100: <?php echo $score_counts['75_100']; ?></div>
 		</div>
 
-		<div class="flex">
-			<div class="chart-container">
-				<canvas id="scoreChart"></canvas>
+		<div class="row">
+			<div class="col-md-6">
+				<div class="chart-container">
+					<canvas id="scoreChart"></canvas>
+				</div>
 			</div>
 
-			<div class="summary">
-				<h2>Top 3 Students</h2>
-				<?php foreach ($top_scores as $index => $student): ?>
-					<div class="card">
-						<h3><?php echo $index + 1 . '. ' . htmlspecialchars($student['summary']); ?></h3>
-						<p>Average Score: <?php echo htmlspecialchars($student['average_score']); ?></p>
+			<div class="col-md-6">
+				<div class="summary">
+					<h2>Top 3 Students</h2>
+					<div class="row">
+						<?php foreach ($top_scores as $index => $student): ?>
+							<div class="col-4">
+								<div class="card mb-3">
+									<div class="card-body">
+										<h5 class="card-title">
+											<?php echo $index + 1 . '. ' . htmlspecialchars($student['summary']); ?></h5>
+										<p class="card-text">Average Score:
+											<?php echo htmlspecialchars($student['average_score']); ?></p>
+									</div>
+								</div>
+							</div>
+						<?php endforeach; ?>
 					</div>
-				<?php endforeach; ?>
-			</div>
+				</div>
 
-			<div class="summary">
-				<h2>Lowest 3 Students</h2>
-				<?php foreach ($lowest_scores as $index => $student): ?>
-					<div class="card">
-						<h3><?php echo $index + 1 . '. ' . htmlspecialchars($student['summary']); ?></h3>
-						<p>Average Score: <?php echo htmlspecialchars($student['average_score']); ?></p>
+				<div class="summary">
+					<h2>Lowest 3 Students</h2>
+					<div class="row">
+						<?php foreach ($lowest_scores as $index => $student): ?>
+							<div class="col-4">
+								<div class="card mb-3">
+									<div class="card-body">
+										<h5 class="card-title">
+											<?php echo $index + 1 . '. ' . htmlspecialchars($student['summary']); ?></h5>
+										<p class="card-text">Average Score:
+											<?php echo htmlspecialchars($student['average_score']); ?></p>
+									</div>
+								</div>
+							</div>
+						<?php endforeach; ?>
 					</div>
-				<?php endforeach; ?>
+				</div>
 			</div>
 		</div>
 	</div>
