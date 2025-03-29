@@ -110,11 +110,11 @@ try {
 							<div class="col-4">
 								<div class="card mb-3">
 									<div class="card-body">
-										<h5 class="card-title">Average Score:
-											<?php echo htmlspecialchars($student['average_score']); ?>
+										<h5 class="card-title">Avg Score:
+											<?php echo htmlspecialchars(round($student['average_score'])); ?>
 										</h5>
-										<p class="card-text">
-											<?php echo $index + 1 . '. ' . htmlspecialchars($student['summary']); ?>
+										<p class="card-text small">
+											<?php echo htmlspecialchars(mb_substr($student['summary'], 0, 200) . (strlen($student['summary']) > 200 ? '...' : '')); ?>
 										</p>
 									</div>
 								</div>
@@ -131,11 +131,10 @@ try {
 								<div class="card mb-3">
 									<div class="card-body">
 										<h5 class="card-title">
-											Average Score:
-											<?php echo htmlspecialchars($student['average_score']); ?>
+											Avg Score: <?php echo htmlspecialchars(round($student['average_score'])); ?>
 										</h5>
-										<p class="card-text">
-											<?php echo $index + 1 . '. ' . htmlspecialchars($student['summary']); ?>
+										<p class="card-text small">
+											<?php echo htmlspecialchars(mb_substr($student['summary'], 0, 200) . (strlen($student['summary']) > 200 ? '...' : '')); ?>
 										</p>
 									</div>
 								</div>
