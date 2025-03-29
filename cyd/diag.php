@@ -9,10 +9,6 @@ if (ENV == "dev") {
 	header("Pragma: no-cache");
 }
 
-// Database credentials
-$dsn = DSN_PATH;
-$username = DB_USER;
-$password = DB_PASS;
 $timer_minutes = 12;
 
 $answerCount = 0;
@@ -73,7 +69,7 @@ try {
 			updateRemainingSeconds($pdo, $userId, $remainingSeconds);
 		} else {
 			// Fetch existing remaining_seconds
-			$existingData = getRemainingSeconds($pdo, $userId);
+			$existingData = getRemainingSeconds($pdo, $userId, 0);
 
 			if ($existingData) {
 				$remainingSeconds = $existingData['remaining_seconds'];
@@ -92,10 +88,11 @@ try {
 		}
 		if ($progressPercentage == 100) {
 			$answers = getAllUserAnswersBatchZero($pdo, $userId);
-			$summary = summarizeFeedback($answers);
-			echo "<br> SUMMARY:" . $summary;
 			$averageScore = calculateAverageScore($answers, $totalQuestions);
-			updateSummary($pdo, $userId, 0, $averageScore, $summary);
+			if (!hasSummary($pdo, $userId, 0)) {
+				$summary = summarizeFeedback($answers);
+				updateSummary($pdo, $userId, 0, $averageScore, $summary);
+			}
 		}
 	}
 } catch (PDOException $e) {

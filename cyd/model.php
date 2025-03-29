@@ -55,11 +55,11 @@ function getAllUserAnswersBatchZero($pdo, $userId)
     return $results;
 }
 
-function getRemainingSeconds($pdo, $userId)
-{
-    $query = "SELECT remaining_seconds FROM custom_users_course WHERE user_id = :userId AND course_id = 0";
+function getRemainingSeconds($pdo, $userId, $course_id) {
+    $query = "SELECT remaining_seconds FROM custom_users_course WHERE user_id = :userId AND course_id = :course_id";
     $stmt = $pdo->prepare($query);
     $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
+    $stmt->bindParam(':course_id', $course_id, PDO::PARAM_INT);
     $stmt->execute();
     return $stmt->fetch(PDO::FETCH_ASSOC);
 }
@@ -93,4 +93,13 @@ function updateSummary($pdo, $userId, $course_id, $average, $summary)
     $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
     $stmt->bindParam(':course_id', $course_id, PDO::PARAM_INT);
     return $stmt->execute();
+}
+
+function hasSummary($pdo, $userId, $course_id) {
+    $query = "SELECT COUNT(*) FROM custom_users_course WHERE user_id = :userId AND course_id = :course_id AND summary IS NOT NULL";
+    $stmt = $pdo->prepare($query);
+    $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
+    $stmt->bindParam(':course_id', $course_id, PDO::PARAM_INT);
+    $stmt->execute();
+    return $stmt->fetchColumn() > 0;
 }
