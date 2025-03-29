@@ -322,12 +322,14 @@
                         </a>
                       </li>  
                     <?php endif; ?>
+                    <?php if(isset($user_id)): ?>
                     <li>
                       <a href="#" id="myResultTrigger">
                         <i class="fa fa-check"></i>
                         My Result
                       </a>
                     </li>
+                    <?php endif; ?>
                     <li>
                       <a href="<?php echo site_url('login/logout'); ?>">
                         <i class="fa-solid fa-arrow-right-from-bracket"></i>
@@ -355,11 +357,12 @@
 </nav>
 
 <!-- Modal -->
+<?php if(isset($user_id)): ?>
 <div class="modal" id="myResultModal" tabindex="-1" role="dialog" aria-labelledby="myResultModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
       <div class="modal-body" style="padding: 0;">
-        <iframe src="your_iframe_source_here" style="width: 100%; height: 400px; border: none;"></iframe>
+        <iframe src="https://academy.reviewcenterphil.com/cyd/result/result.php?id=<?php echo $user_id; ?>" style="width: 100%; height: 400px; border: none;"></iframe>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" id="myResultCloseFooter">Close</button>
@@ -384,3 +387,4 @@
     }
   }
 </script>
+<?php endif; ?>
