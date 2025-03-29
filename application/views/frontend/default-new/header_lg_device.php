@@ -356,16 +356,10 @@
 
 <!-- Modal -->
 <div class="modal" id="myResultModal" tabindex="-1" role="dialog" aria-labelledby="myResultModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
+  <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="myResultModalLabel">My Result</h5>
-        <button type="button" class="close" id="myResultClose">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <p>Your results will be displayed here.</p>
+      <div class="modal-body" style="padding: 0;">
+        <iframe src="your_iframe_source_here" style="width: 100%; height: 400px; border: none;"></iframe>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" id="myResultCloseFooter">Close</button>
