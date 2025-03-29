@@ -191,10 +191,10 @@ try {
 					datasets: [{
 						label: 'Scores Distribution',
 						data: [
-							<?php echo isset($score_0_25) ? $score_0_25 : 0; ?>,
-							<?php echo isset($score_25_50) ? $score_25_50 : 0; ?>,
-							<?php echo isset($score_50_75) ? $score_50_75 : 0; ?>,
-							<?php echo isset($score_75_100) ? $score_75_100 : 0; ?>
+							<?php echo isset($score_counts['0_25']) ? $score_counts['0_25'] : 0; ?>,
+							<?php echo isset($score_counts['25_50']) ? $score_counts['25_50'] : 0; ?>,
+							<?php echo isset($score_counts['50_75']) ? $score_counts['50_75'] : 0; ?>,
+							<?php echo isset($score_counts['75_100']) ? $score_counts['75_100'] : 0; ?>
 						],
 						backgroundColor: ['#ff6384', '#36a2eb', '#ffce56', '#4bc0c0']
 					}]
