@@ -86,3 +86,42 @@ function calculateAverageScore($answers, $totalQuestions)
 
     return $count > 0 ? $totalScore / $count : 0;
 }
+
+function summarizeFeedback($answers) {
+    $apiKey = OPEN_AI;
+    $url = 'https://api.openai.com/v1/chat/completions';
+
+    $headers = [
+        'Content-Type: application/json',
+        'Authorization: Bearer ' . $apiKey
+    ];
+
+    $messages = [["role" => "system", "content" => "Provide a summary based on the following feedback and scores."]];
+
+    foreach ($answers as $answer) {
+        $messages[] = [
+            "role" => "user",
+            "content" => "Score: {$answer['score']}. Feedback: {$answer['feedback']}"
+        ];
+    }
+
+    $postData = json_encode([
+        "model" => "gpt-4o",
+        "messages" => $messages,
+    ]);
+
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
+
+    $response = curl_exec($ch);
+    if ($response === false) {
+        throw new Exception('cURL Error: ' . curl_error($ch));
+    }
+
+    curl_close($ch);
+    $response = json_decode($response, true);
+    return $response['choices'][0]['message']['content'];
+}

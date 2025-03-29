@@ -92,7 +92,10 @@ try {
 		}
 		if ($progressPercentage == 100) {
 			$answers = getAllUserAnswersBatchZero($pdo, $userId);
+			$summary = summarizeFeedback($answers);
+			echo "<br> SUMMARY:" . $summary;
 			$averageScore = calculateAverageScore($answers, $totalQuestions);
+			updateSummary($pdo, $userId, 0, $averageScore, $summary);
 		}
 	}
 } catch (PDOException $e) {

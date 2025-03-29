@@ -83,3 +83,14 @@ function updateRemainingSeconds($pdo, $userId, $remainingSeconds)
     $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
     return $stmt->execute();
 }
+
+function updateSummary($pdo, $userId, $course_id, $average, $summary)
+{
+    $query = "UPDATE custom_users_course SET average_score = :average, summary = :summary WHERE user_id = :userId AND course_id = :course_id";
+    $stmt = $pdo->prepare($query);
+    $stmt->bindParam(':average', $average, PDO::PARAM_STR);
+    $stmt->bindParam(':summary', $summary, PDO::PARAM_STR);
+    $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
+    $stmt->bindParam(':course_id', $course_id, PDO::PARAM_INT);
+    return $stmt->execute();
+}
