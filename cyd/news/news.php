@@ -138,6 +138,7 @@ try {
 			margin: 5px 0;
 		}
 	</style>
+	 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
