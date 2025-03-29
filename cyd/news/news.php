@@ -89,6 +89,7 @@ try {
 
 <div class="container">
     <div class="header">
+		<?php echo $score_counts; ?>
         <h1>Total Average Score: <?php echo number_format($score_counts[4], 2); ?></h1>
     </div>
 
