@@ -20,6 +20,8 @@
   </div> <!-- end col-->
 </div>
 
+<h2>ADDING DASHBOARD</h2>
+
 <div class="row">
   <div class="col-lg-8">
     <div id="accordion" class="custom-accordion mb-4">
