@@ -13,17 +13,17 @@ function getLast200CustomUsersCourses($pdo)
 
 function getTop3Scores($pdo)
 {
-	$query = "SELECT * FROM (SELECT * FROM custom_users_course ORDER BY id DESC LIMIT 200) AS last_courses ORDER BY average_score DESC LIMIT 3";
-	$stmt = $pdo->query($query);
-	return $stmt->fetchAll(PDO::FETCH_ASSOC);
-}
-function getLowest3Scores($pdo)
-{
-	$query = "SELECT * FROM (SELECT * FROM custom_users_course ORDER BY id DESC LIMIT 200) AS last_courses ORDER BY average_score ASC LIMIT 3";
+	$query = "SELECT * FROM (SELECT * FROM custom_users_course WHERE average_score IS NOT NULL AND average_score > 0 ORDER BY id DESC LIMIT 200) AS last_courses ORDER BY average_score DESC LIMIT 3";
 	$stmt = $pdo->query($query);
 	return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
+function getLowest3Scores($pdo)
+{
+	$query = "SELECT * FROM (SELECT * FROM custom_users_course WHERE average_score IS NOT NULL AND average_score > 0 ORDER BY id DESC LIMIT 200) AS last_courses ORDER BY average_score ASC LIMIT 3";
+	$stmt = $pdo->query($query);
+	return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
 // utils function
 function countScoreByGroup($courses_results)
 {
