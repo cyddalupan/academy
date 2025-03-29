@@ -11,7 +11,7 @@ if (ENV == "dev") {
 
 // Database credentials
 $dsn = DSN_PATH;
-$username = DB_NAME;
+$username = DB_USER;
 $password = DB_PASS;
 $timer_minutes = 12;
 
