@@ -10,6 +10,7 @@ if (ENV == "dev") {
 }
 
 $progressPercentage = 0;
+$allow_practice = false;
 
 $is_practice = isset($_GET['is_practice']) && $_GET['is_practice'] === 'true';
 
@@ -21,12 +22,6 @@ try {
 
 		$userId = isset($_POST['userId']) ? $_POST['userId'] : null;
         $courseId = isset($_POST['courseId']) ? $_POST['courseId'] : 0;
-        echo "user:". $userId;
-        echo "course:".$courseId;
-		
-		if (!$userId || !$courseId) {
-            throw new Exception("User ID or Course ID is missing.");
-        }
 
 		handleUserInput($pdo, $userId, $courseId, $is_practice);
 
@@ -105,13 +100,27 @@ try {
                 <?php elseif (!isset($userId)): ?>
                 <!-- Start Page -->
                 <div class="mb-3 lead">
-                    <p><?= $is_practice ? 'Start your practice exam to be well-prepared for the bar.' : 'Start your diagnostic exam to evaluate your knowledge and skills.' ?></p>
+                    <p>
+                        <?php if ($courseId !== 0): ?>
+                            Start your mock exam.
+                        <? elseif ($is_practice): ?>
+                            Start your practice exam to be well-prepared for the bar.
+                        <? else: ?>
+                            Start your diagnostic exam to evaluate your knowledge and skills.
+                        <?php endif; ?>
+                    </p>
                 </div>
                 <form method="post" action="">
                     <input type="hidden" name="userId" id="userIdInput">
                     <input type="hidden" name="courseId" id="courseIdInput">
                     <button type="submit" name="start" class="btn btn-primary">
-                        <?= $is_practice ? 'Start Practice Exam' : 'Start Diagnostic Exam' ?>
+                        <?php if ($courseId !== 0): ?>
+                            Start Mock Exam
+                        <? elseif ($is_practice): ?>
+                            Start Practice Exam
+                        <? else: ?>
+                            Start Diagnostic Exam
+                        <?php endif; ?>
                     </button>
                 </form>
                 <?php elseif (isset($questionId) && $progressPercentage !== 100 && (!$is_practice || $allow_practice)): ?>
