@@ -24,11 +24,11 @@
     });
 
     // Summary Accordion
-    document.querySelectorAll('.accordion-header').forEach(header => {
-        header.addEventListener('click', function () {
-            const index = this.getAttribute('data-index');
-            const content = document.getElementById('content-' + index);
-            const allContent = document.querySelectorAll('.accordion-content');
+    document.querySelectorAll('.accordion-button').forEach(button => {
+        button.addEventListener('click', function () {
+            const index = this.getAttribute('data-bs-target').replace('#collapse-', '');
+            const content = document.getElementById('collapse-' + index);
+            const allContent = document.querySelectorAll('.accordion-collapse');
 
             allContent.forEach(c => {
                 if (c !== content) c.style.display = 'none';
