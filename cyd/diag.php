@@ -17,7 +17,7 @@ try {
 
 	if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 		$userId = $_POST['userId'] ?? null;
-		$courseId = $_POST['courseId'] ?? null;
+		$courseId = $_POST['courseId'] ?? 0;
 		
 		if (!$userId || !$courseId) {
             throw new Exception("User ID or Course ID is missing.");
