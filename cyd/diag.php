@@ -21,6 +21,8 @@ try {
 
 		$userId = isset($_POST['userId']) ? $_POST['userId'] : null;
         $courseId = isset($_POST['courseId']) ? $_POST['courseId'] : 0;
+        echo "user:". $userId;
+        echo "course:".$courseId;
 		
 		if (!$userId || !$courseId) {
             throw new Exception("User ID or Course ID is missing.");
