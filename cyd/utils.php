@@ -126,33 +126,6 @@ function summarizeFeedback($answers) {
     return $response['choices'][0]['message']['content'];
 }
 
-function handleUserInput($pdo, $userId, $courseId, $is_practice) {
-	if (isset($_POST['start'])) {
-		if ($is_practice && hasCompletedDiagnosticAndCourse($pdo, $userId)) {
-			$allow_practice = true;
-		}
-	}
-
-	if (isset($_POST['start']) || isset($_POST['continue']) || isset($_POST['skip'])) {
-		$result = fetchRandomQuestion($pdo, $userId, $courseId, $is_practice);
-		$question = $result['q_question'] ?? "No data found.";
-		$questionId = $result['q_id'] ?? null;
-	} elseif (isset($_POST['userInput'])) {
-		$userInput = $_POST['userInput'];
-		$questionId = $_POST['questionId'];
-
-		$expected = getExpectedAnswer($pdo, $questionId);
-
-		$response = callOpenAI($userInput, $expected);
-
-		if (isset($response['choices'][0]['message']['function_call'])) {
-			processResponse($pdo, $userId, $questionId, $userInput, $courseId, $response, $is_practice);
-		} else {
-			echo "Response: " . $response['choices'][0]['message']['content'] . PHP_EOL;
-		}
-	}
-}
-
 function processResponse($pdo, $userId, $questionId, $userInput, $courseId, $response, $is_practice) {
 	$choice = $response['choices'][0]['message']['function_call'];
 	$decodedParams = json_decode($choice['arguments'], true);
