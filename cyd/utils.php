@@ -185,41 +185,36 @@ function send_email($pdo, $to, $subject, $message, $from) {
     $smtp_user = $settings['smtp_user'];
     $smtp_pass = $settings['smtp_pass'];
 
-    // Message headers
-    $headers = [
-        'From' => $from,
-        'Reply-To' => $from,
-        'X-Mailer' => 'PHP/' . phpversion()
-    ];
+    // Create email headers
+    $headers = "From: " . $from . "\r\n";
+    $headers .= "Reply-To: " . $from . "\r\n";
+    $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
 
-    // Set SMTP options
-    $options = [
-        'ssl' => [
-            'verify_peer'       => false,
-            'verify_peer_name'  => false,
-            'allow_self_signed' => true
-        ]
-    ];
+    // Establish an SMTP connection
+    $socket = fsockopen($smtp_host, $smtp_port, $errno, $errstr, 30);
 
-    // Create a stream context
-    $context = stream_context_create([
-        'smtp' => [
-            'host' => $smtp_host,
-            'port' => $smtp_port,
-            'auth' => true,
-            'username' => $smtp_user,
-            'password' => $smtp_pass,
-            'crypto_method' => STREAM_CRYPTO_METHOD_TLS_CLIENT,
-            'options' => $options
-        ]
-    ]);
-
-    // Send email
-    $success = mail($to, $subject, $message, $headers, $context);
-
-    if ($success) {
-        echo 'Email sent successfully';
-    } else {
-        echo 'Email could not be sent.';
+    if (!$socket) {
+        echo "Failed to connect: $errstr ($errno)\n";
+        return;
     }
+
+    function send_command($socket, $command) {
+        fwrite($socket, $command);
+        return fgets($socket, 512);
+    }
+
+    send_command($socket, "EHLO $smtp_host\r\n");
+    send_command($socket, "AUTH LOGIN\r\n");
+    send_command($socket, base64_encode($smtp_user) . "\r\n");
+    send_command($socket, base64_encode($smtp_pass) . "\r\n");
+
+    send_command($socket, "MAIL FROM: <$from>\r\n");
+    send_command($socket, "RCPT TO: <$to>\r\n");
+    send_command($socket, "DATA\r\n");
+    send_command($socket, $headers . "\r\n" . $message . "\r\n.\r\n");
+    send_command($socket, "QUIT\r\n");
+
+    fclose($socket);
+
+    echo "Email sent successfully to $to";
 }
