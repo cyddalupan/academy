@@ -11,7 +11,7 @@
             if (userId && userId !== 0) {
                 console.log('User ID:', userId);
                 userIdInput.value = userId;
-                courseIdInput.value = courseId;
+                courseIdInput.value = courseId || 0;
             } else {
                 const message = "Please log in to access the diagnostic exam.";
                 console.log(message);
