@@ -208,7 +208,7 @@ function finalizeAssessment($pdo, $userId, $courseId, $totalQuestions, &$answers
 	if (!hasSummary($pdo, $userId, $courseId)) {
 		$summary = summarizeFeedback($answers);
 		updateSummary($pdo, $userId, $courseId, $averageScore, $summary);
-        $user = getUserEmail($pdo, $userId);
+        $user = getCurrentUser($pdo, $userId);
 		$ai_email_diagnose = ai_email_diagnose($answers, $user['firs_name'] . " " . $user['last_name']);
         send_email_with_phpmailer($pdo, $user['email'], 'Diagnostic Exam', $ai_email_diagnose, 'ehajjonlinephilippines@gmail.com');
 	}
