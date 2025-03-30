@@ -13,6 +13,9 @@ $progressPercentage = 0;
 $allow_practice = false;
 $userId = null;
 $courseId = 0;
+$answerCount = 0;
+$totalQuestions = 0;
+
 
 $is_practice = isset($_GET['is_practice']) && $_GET['is_practice'] === 'true';
 
