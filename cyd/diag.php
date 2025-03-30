@@ -2,6 +2,7 @@
 require 'config.php';
 require 'utils.php';
 require 'model.php';
+require 'mail.php';
 
 if (ENV == "dev") {
 	header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
