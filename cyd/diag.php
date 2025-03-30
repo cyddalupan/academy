@@ -34,10 +34,8 @@ try {
 		$userId = isset($_POST['userId']) ? $_POST['userId'] : null;
         $courseId = isset($_POST['courseId']) ? $_POST['courseId'] : 0;
 
-        if (isset($_POST['start'])) {
-            if ($is_practice && hasCompletedDiagnosticAndCourse($pdo, $userId)) {
-                $allow_practice = true;
-            }
+        if ($is_practice && hasCompletedDiagnosticAndCourse($pdo, $userId)) {
+            $allow_practice = true;
         }
     
         if (isset($_POST['start']) || isset($_POST['continue']) || isset($_POST['skip'])) {
@@ -178,7 +176,7 @@ try {
                 <?php endif; ?>
 
                 <?php if (!empty($answers)): ?>
-                <h3>Grade: <?= $averageScore; ?> / 100 </h3>
+                <h3>Grade: <?= round($averageScore); ?> / 100 </h3>
                 <div class="accordion" id="accordionExample">
                     <?php foreach ($answers as $index => $answer): ?>
                     <div class="accordion-item">
