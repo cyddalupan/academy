@@ -171,3 +171,55 @@ function finalizeAssessment($pdo, $userId, $courseId, $totalQuestions, &$answers
 		updateSummary($pdo, $userId, $courseId, $averageScore, $summary);
 	}
 }
+
+function send_email($pdo, $to, $subject, $message, $from) {
+    // Retrieve SMTP settings from your database
+    $stmt = $pdo->query("SELECT `key`, `value` FROM `settings` WHERE `key` IN ('smtp_host', 'smtp_port', 'smtp_user', 'smtp_pass')");
+    $settings = [];
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $settings[$row['key']] = $row['value'];
+    }
+
+    $smtp_host = $settings['smtp_host'];
+    $smtp_port = $settings['smtp_port'];
+    $smtp_user = $settings['smtp_user'];
+    $smtp_pass = $settings['smtp_pass'];
+
+    // Message headers
+    $headers = [
+        'From' => $from,
+        'Reply-To' => $from,
+        'X-Mailer' => 'PHP/' . phpversion()
+    ];
+
+    // Set SMTP options
+    $options = [
+        'ssl' => [
+            'verify_peer'       => false,
+            'verify_peer_name'  => false,
+            'allow_self_signed' => true
+        ]
+    ];
+
+    // Create a stream context
+    $context = stream_context_create([
+        'smtp' => [
+            'host' => $smtp_host,
+            'port' => $smtp_port,
+            'auth' => true,
+            'username' => $smtp_user,
+            'password' => $smtp_pass,
+            'crypto_method' => STREAM_CRYPTO_METHOD_TLS_CLIENT,
+            'options' => $options
+        ]
+    ]);
+
+    // Send email
+    $success = mail($to, $subject, $message, $headers, $context);
+
+    if ($success) {
+        echo 'Email sent successfully';
+    } else {
+        echo 'Email could not be sent.';
+    }
+}
