@@ -32,69 +32,70 @@ try {
 			if (isset($_POST['start'])) {
 				// First Post check only
 				$allow_practice = hasCompletedDiagnosticAndCourse($pdo, $userId);
-                echo "Practice ALLOWED: " . ($allow_practice ? 'Yes' : 'No');
 			}
 		}
 
 		if (isset($_POST['start']) || isset($_POST['continue']) || isset($_POST['skip'])) {
 			// Get new Question.
-			$result = fetchRandomQuestion($userId, $courseId);
+			$result = fetchRandomQuestion($pdo, $userId, $courseId, $is_practice);
 			$question = $result ? $result['q_question'] : "No data found.";
 			$questionId = $result ? $result['q_id'] : null;
 		} elseif (isset($_POST['userInput'])) {
 			// After user answer.
 			try {
 				if (!$userId) {
-					die("User ID is not set.");
-				}
-				$userInput = $_POST['userInput'];
-				$questionId = $_POST['questionId'];
-
-				$query = "SELECT q_answer FROM quiz_new WHERE q_id = :questionId";
-				$stmt = $pdo->prepare($query);
-				$stmt->bindParam(':questionId', $questionId, PDO::PARAM_INT);
-				$stmt->execute();
-				$expected = $stmt->fetchColumn();
-
-				$response = callOpenAI($userInput, $expected);
-
-				if (isset($response['choices'][0]['message']['function_call'])) {
-					$choice = $response['choices'][0]['message']['function_call'];
-					$decodedParams = json_decode($choice['arguments'], true);
-					$score = $decodedParams['score'];
-					$feedback = $decodedParams['feedback'];
-
-					$query = "INSERT INTO diag_ans (user_id, batch_id, question_id, answer, score, feedback, date_created) VALUES (?, ?, ?, ?, ?, ?, NOW())";
-					$stmt = $pdo->prepare($query);
-					$stmt->execute([$userId, 0, $questionId, $userInput, $score, $feedback]);
-
-				} else {
-					echo "Response: " . $response['choices'][0]['message']['content'] . PHP_EOL;
-				}
+                    die("User ID is not set.");
+                }
+                
+                $userInput = $_POST['userInput'];
+                $questionId = $_POST['questionId'];
+                
+                $expected = getExpectedAnswer($pdo, $questionId);
+                
+                $response = callOpenAI($userInput, $expected);
+                
+                if (isset($response['choices'][0]['message']['function_call'])) {
+                    $choice = $response['choices'][0]['message']['function_call'];
+                    $decodedParams = json_decode($choice['arguments'], true);
+                    $score = $decodedParams['score'];
+                    $feedback = $decodedParams['feedback'];
+                    if (!$is_practice) {
+                        insertAnswer($pdo, $userId, $questionId, $userInput, $course_id, $score, $feedback);
+                    }                    
+                } else {
+                    echo "Response: " . $response['choices'][0]['message']['content'] . PHP_EOL;
+                }
 			} catch (Exception $e) {
 				echo "Error: " . $e->getMessage();
 			}
 		}
 		// Manage Timer
-		if (isset($_POST['remaining-seconds'])) {
+        if ($is_practice) {
+            $remainingSeconds = 9999;
+        } else if (isset($_POST['remaining-seconds'])) {
 			// Update the remaining_seconds
-			$remainingSeconds = $_POST['remaining-seconds'];
-			updateRemainingSeconds($pdo, $userId, $remainingSeconds, $courseId);
-		} else {
-			// Fetch existing remaining_seconds
-			$existingData = getRemainingSeconds($pdo, $userId, $courseId);
+            $remainingSeconds = $_POST['remaining-seconds'];
+            updateRemainingSeconds($pdo, $userId, $remainingSeconds, $courseId);
+		} else {  
+            // Fetch existing remaining_seconds
+            $existingData = getRemainingSeconds($pdo, $userId, $courseId);
 
-			if ($existingData) {
-				$remainingSeconds = $existingData['remaining_seconds'];
-			} else {
-				// No record found, create one
-				createUserCourse($pdo, $userId, $courseId, $totalQuestions, $timer_minutes);
-				$remainingSeconds = $timer_minutes * 60 * $totalQuestions; // Calculate new remaining seconds
-			}
+            if ($existingData) {
+                $remainingSeconds = $existingData['remaining_seconds'];
+            } else {
+                // No record found, create one
+                createUserCourse($pdo, $userId, $courseId, $totalQuestions, $timer_minutes);
+                $remainingSeconds = $timer_minutes * 60 * $totalQuestions; // Calculate new remaining seconds
+            }
 		}
 
-		$answerCount = countUserAnswers($pdo, $userId, $courseId);
-		$progressPercentage = ($answerCount / $totalQuestions) * 100;
+        if ($is_practice) {
+            $answerCount = 0;
+            $progressPercentage = 0;
+        } else {
+            $answerCount = countUserAnswers($pdo, $userId, $courseId);
+            $progressPercentage = ($answerCount / $totalQuestions) * 100;
+        }
 		// Turn percentage to 100 when no time remaining.
 		if (isset($remainingSeconds) && $remainingSeconds == 0) {
 			$progressPercentage = 100;

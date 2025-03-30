@@ -6,25 +6,50 @@ if (ENV == "dev") {
 }
 
 
-function fetchRandomQuestion($userId, $courseId)
+function fetchRandomQuestion($pdo, $userId, $courseId, $is_practice = false)
 {
-    global $pdo;
-    $query = "
-    SELECT q.q_id, q.q_question, q.q_answer 
-    FROM quiz_new q
-    WHERE q.q_course_id = :courseId AND NOT EXISTS (
-        SELECT 1 FROM diag_ans d 
-        WHERE d.question_id = q.q_id AND d.user_id = :userId AND d.batch_id = :courseId
-    )
-    ORDER BY RAND()
-    LIMIT 1";
+    if ($is_practice) {
+        $query = "
+        SELECT q.q_id, q.q_question, q.q_answer 
+        FROM quiz_new q
+        ORDER BY RAND()
+        LIMIT 1";
+    } else {
+        $query = "
+        SELECT q.q_id, q.q_question, q.q_answer 
+        FROM quiz_new q
+        WHERE q.q_course_id = :courseId AND NOT EXISTS (
+            SELECT 1 FROM diag_ans d 
+            WHERE d.question_id = q.q_id AND d.user_id = :userId AND d.batch_id = :courseId
+        )
+        ORDER BY RAND()
+        LIMIT 1";
+    }
 
     $stmt = $pdo->prepare($query);
-    $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
-    $stmt->bindParam(':courseId', $courseId, PDO::PARAM_INT);
+    if (!$is_practice) {
+        $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
+        $stmt->bindParam(':courseId', $courseId, PDO::PARAM_INT);
+    }
     $stmt->execute();
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
     return $result ?: null;
+}
+
+function getExpectedAnswer($pdo, $questionId)
+{
+    $query = "SELECT q_answer FROM quiz_new WHERE q_id = :questionId";
+    $stmt = $pdo->prepare($query);
+    $stmt->bindParam(':questionId', $questionId, PDO::PARAM_INT);
+    $stmt->execute();
+    return $stmt->fetchColumn();
+}
+
+function insertAnswer($pdo, $userId, $questionId, $userInput, $course_id, $score, $feedback)
+{
+    $query = "INSERT INTO diag_ans (user_id, batch_id, question_id, answer, score, feedback, date_created) VALUES (?, ?, ?, ?, ?, ?, NOW())";
+    $stmt = $pdo->prepare($query);
+    $stmt->execute([$userId, $course_id, $questionId, $userInput, $score, $feedback]);
 }
 
 function countUserAnswers($pdo, $userId, $courseId)
