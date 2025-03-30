@@ -128,7 +128,7 @@ try {
                     <form method="post" action="">
                         <input type="hidden" name="userId" id="userIdInput">
                         <input type="hidden" name="courseId" id="courseIdInput">
-                        <button type="submit" name="continue" class="btn btn-primary">Continue</button>
+                        <button id="submitButton" type="submit" name="continue" class="btn btn-primary">Continue</button>
                     </form>
                 </div>
                 <?php elseif (!isset($userId)): ?>
@@ -147,7 +147,7 @@ try {
                 <form method="post" action="">
                     <input type="hidden" name="userId" id="userIdInput">
                     <input type="hidden" name="courseId" id="courseIdInput">
-                    <button type="submit" name="start" class="btn btn-primary">
+                    <button id="submitButton" type="submit" name="start" class="btn btn-primary">
                         <?php if ($courseId !== 0): ?>
                             Start Mock Exam
                         <? elseif ($is_practice): ?>
@@ -168,8 +168,8 @@ try {
                         <p><?= htmlspecialchars($question); ?></p>
                         <textarea name="userInput" class="form-control bg-light border" rows="4" placeholder="Your answer here..."></textarea>
                     </div>
-                    <button type="submit" class="btn btn-primary">Submit Answer</button>
-                    <button type="submit" name="skip" class="btn btn-secondary ms-2">Skip</button>
+                    <button id="submitButton" type="submit" class="btn btn-primary">Submit Answer</button>
+                    <button id="skipButton" skip="submitButton" type="submit" name="skip" class="btn btn-secondary ms-2">Skip</button>
                 </form>
                 <?php elseif (isset($questionId) && $progressPercentage !== 100 && !$allow_practice): ?>
                 <div class="alert alert-warning" role="alert">
