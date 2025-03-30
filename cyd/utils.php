@@ -173,7 +173,6 @@ function finalizeAssessment($pdo, $userId, $courseId, $totalQuestions, &$answers
 }
 
 function send_email($pdo, $to, $subject, $message, $from) {
-    // Retrieve SMTP settings from your database
     $stmt = $pdo->query("SELECT `key`, `value` FROM `settings` WHERE `key` IN ('smtp_host', 'smtp_port', 'smtp_user', 'smtp_pass')");
     $settings = [];
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
@@ -185,13 +184,11 @@ function send_email($pdo, $to, $subject, $message, $from) {
     $smtp_user = $settings['smtp_user'];
     $smtp_pass = $settings['smtp_pass'];
 
-    // Create email headers
     $headers = "From: " . $from . "\r\n";
     $headers .= "Reply-To: " . $from . "\r\n";
     $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
 
-    // Establish an SMTP connection
-    $socket = fsockopen($smtp_host, $smtp_port, $errno, $errstr, 30);
+    $socket = fsockopen("tls://{$smtp_host}", $smtp_port, $errno, $errstr, 30);
 
     if (!$socket) {
         echo "Failed to connect: $errstr ($errno)\n";
@@ -199,8 +196,11 @@ function send_email($pdo, $to, $subject, $message, $from) {
     }
 
     function send_command($socket, $command) {
+        echo "Command: $command";
         fwrite($socket, $command);
-        return fgets($socket, 512);
+        $response = fgets($socket, 512);
+        echo "Response: $response";
+        return $response;
     }
 
     send_command($socket, "EHLO $smtp_host\r\n");
@@ -216,5 +216,5 @@ function send_email($pdo, $to, $subject, $message, $from) {
 
     fclose($socket);
 
-    echo "Email sent successfully to $to";
+    echo "Email sent attempt to $to";
 }
