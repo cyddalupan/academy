@@ -17,6 +17,7 @@ $answerCount = 0;
 $totalQuestions = 6;
 $progressPercentage = 0;
 $averageScore = 0;
+$allow_practice = false;
 
 try {
 	$pdo = new PDO($dsn, $username, $password);
