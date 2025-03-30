@@ -32,6 +32,7 @@ try {
 			if (isset($_POST['start'])) {
 				// First Post check only
 				$allow_practice = hasCompletedDiagnosticAndCourse($pdo, $userId);
+                echo "Practice ALLOWED". $allow_practice;
 			}
 		}
 
