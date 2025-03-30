@@ -126,7 +126,7 @@ function summarizeFeedback($answers) {
     return $response['choices'][0]['message']['content'];
 }
 
-function ai_email_diagnose($answers) {
+function ai_email_diagnose($answers, $fullname) {
     $apiKey = OPEN_AI;
     $url = 'https://api.openai.com/v1/chat/completions';
 
@@ -135,7 +135,7 @@ function ai_email_diagnose($answers) {
         'Authorization: Bearer ' . $apiKey
     ];
 
-    $messages = [["role" => "system", "content" => "Provide a student diagnostic email (just the body of the email in HTML format) content based on the following feedback and scores"]];
+    $messages = [["role" => "system", "content" => "Provide a student (name:".$fullname.") an assessment email (just the body of the email in HTML format) content based on the following feedback and scores, but do not follow the feedback format"]];
 
     foreach ($answers as $answer) {
         $messages[] = [
@@ -208,8 +208,8 @@ function finalizeAssessment($pdo, $userId, $courseId, $totalQuestions, &$answers
 	if (!hasSummary($pdo, $userId, $courseId)) {
 		$summary = summarizeFeedback($answers);
 		updateSummary($pdo, $userId, $courseId, $averageScore, $summary);
-		$ai_email_diagnose = ai_email_diagnose($answers);
-        $email = getUserEmail($pdo, $userId);
-        send_email_with_phpmailer($pdo, $email, 'Diagnostic Exam', $ai_email_diagnose, 'ehajjonlinephilippines@gmail.com');
+        $user = getUserEmail($pdo, $userId);
+		$ai_email_diagnose = ai_email_diagnose($answers, $user['firs_name'] . " " . $user['last_name']);
+        send_email_with_phpmailer($pdo, $user['email'], 'Diagnostic Exam', $ai_email_diagnose, 'ehajjonlinephilippines@gmail.com');
 	}
 }

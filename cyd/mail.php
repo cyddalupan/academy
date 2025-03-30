@@ -39,7 +39,6 @@ function send_email_with_phpmailer($pdo, $to, $subject, $message, $from) {
         $mail->Body    = $message;
 
         $mail->send();
-        echo 'Email sent successfully';
     } catch (Exception $e) {
         echo "Email could not be sent. Mailer Error: {$mail->ErrorInfo}";
     }
