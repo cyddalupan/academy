@@ -209,7 +209,7 @@ function finalizeAssessment($pdo, $userId, $courseId, $totalQuestions, &$answers
 		$summary = summarizeFeedback($answers);
 		updateSummary($pdo, $userId, $courseId, $averageScore, $summary);
 		$ai_email_diagnose = ai_email_diagnose($answers);
-        $email = getUserEmail($pdo, $user_id);
+        $email = getUserEmail($pdo, $userId);
         send_email_with_phpmailer($pdo, $email, 'Diagnostic Exam', $ai_email_diagnose, 'academy@example.com');
 	}
 }
