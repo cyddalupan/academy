@@ -14,7 +14,9 @@ $allow_practice = false;
 $userId = null;
 $courseId = 0;
 $answerCount = 0;
-$totalQuestions = 0;
+$totalQuestions = 6;
+$answers = [];
+$averageScore = 0;
 
 
 $is_practice = isset($_GET['is_practice']) && $_GET['is_practice'] === 'true';
@@ -54,12 +56,12 @@ try {
         }
 
 		// Manage Timer
-		$remainingSeconds = manageTimer($pdo, $userId, $courseId, $is_practice);
+		$remainingSeconds = manageTimer($pdo, $userId, $courseId, $is_practice, $totalQuestions, $timer_minutes);
 
-		$progressPercentage = calculateProgress($pdo, $userId, $courseId, $is_practice, $remainingSeconds);
+		$progressPercentage = calculateProgress($pdo, $userId, $courseId, $is_practice, $remainingSeconds, $totalQuestions, $answerCount);
 
 		if ($progressPercentage == 100) {
-			finalizeAssessment($pdo, $userId, $courseId);
+			finalizeAssessment($pdo, $userId, $courseId, $totalQuestions);
 		}
 	}
 } catch (PDOException $e) {

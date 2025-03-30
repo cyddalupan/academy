@@ -94,7 +94,7 @@ function getRemainingSeconds($pdo, $userId, $course_id) {
 
 function createUserCourse($pdo, $userId, $courseId, $totalQuestions, $timer_minutes)
 {
-    $remainingSeconds = $timer_minutes * 60 * $totalQuestions; 
+    $remainingSeconds = ($timer_minutes * 60) * $totalQuestions; 
     $query = "INSERT INTO custom_users_course (user_id, course_id, remaining_seconds, date_created)
               VALUES (:userId, :courseId, :remainingSeconds, NOW())";
     $stmt = $pdo->prepare($query);

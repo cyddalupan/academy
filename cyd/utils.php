@@ -136,7 +136,7 @@ function processResponse($pdo, $userId, $questionId, $userInput, $courseId, $res
 	}
 }
 
-function manageTimer($pdo, $userId, $courseId, $is_practice) {
+function manageTimer($pdo, $userId, $courseId, $is_practice, $totalQuestions, $timer_minutes) {
 	if ($is_practice) {
 		return 9999;
 	} elseif (isset($_POST['remaining-seconds'])) {
@@ -148,24 +148,24 @@ function manageTimer($pdo, $userId, $courseId, $is_practice) {
 		if ($existingData) {
 			return $existingData['remaining_seconds'];
 		} else {
-			createUserCourse($pdo, $userId, $courseId, 6, 12); // Use 6 as totalQuestions and 12 minutes
-			return 12 * 60 * 6;
+			createUserCourse($pdo, $userId, $courseId, $totalQuestions, $timer_minutes);
+			return ($timer_minutes * 60) * $totalQuestions;
 		}
 	}
 }
 
-function calculateProgress($pdo, $userId, $courseId, $is_practice, $remainingSeconds) {
+function calculateProgress($pdo, $userId, $courseId, $is_practice, $remainingSeconds, $totalQuestions, &$answerCount) {
 	if ($is_practice) {
 		return 0;
 	} else {
 		$answerCount = countUserAnswers($pdo, $userId, $courseId);
-		return $remainingSeconds === 0 ? 100 : ($answerCount / 6) * 100; // Assume 6 total questions
+		return $remainingSeconds === 0 ? 100 : ($answerCount / $totalQuestions) * 100;
 	}
 }
 
-function finalizeAssessment($pdo, $userId, $courseId) {
+function finalizeAssessment($pdo, $userId, $courseId, $totalQuestions, &$answers, &$averageScore) {
 	$answers = getAllUserAnswers($pdo, $userId, $courseId);
-	$averageScore = calculateAverageScore($answers, 6); // Assume 6 total questions
+	$averageScore = calculateAverageScore($answers, $totalQuestions);
 	if (!hasSummary($pdo, $userId, $courseId)) {
 		$summary = summarizeFeedback($answers);
 		updateSummary($pdo, $userId, $courseId, $averageScore, $summary);
