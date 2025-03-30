@@ -95,10 +95,6 @@ function getRemainingSeconds($pdo, $userId, $course_id) {
 function createUserCourse($pdo, $userId, $courseId, $totalQuestions, $timer_minutes)
 {
     $remainingSeconds = ($timer_minutes * 60) * $totalQuestions; 
-    echo "createUserCourse<br>";
-    echo "remainingSeconds: ". $remainingSeconds."<br>";
-    echo "timer_minutes: ". $timer_minutes ."<br>";
-    echo "totalQuestions: ". $totalQuestions ."<br>";
     $query = "INSERT INTO custom_users_course (user_id, course_id, remaining_seconds, date_created)
               VALUES (:userId, :courseId, :remainingSeconds, NOW())";
     $stmt = $pdo->prepare($query);
@@ -110,10 +106,7 @@ function createUserCourse($pdo, $userId, $courseId, $totalQuestions, $timer_minu
 
 function updateRemainingSeconds($pdo, $userId, $remainingSeconds, $courseId, $timer_minutes, $totalQuestions)
 {
-    
     $remainingSeconds = ($timer_minutes * 60) * $totalQuestions; 
-    echo "updateRemainingSeconds<br>";
-    echo "remainingSeconds: ". $remainingSeconds."<br>";
 
     $query = "UPDATE custom_users_course SET remaining_seconds = :remainingSeconds WHERE user_id = :userId AND course_id = :courseId";
     $stmt = $pdo->prepare($query);
@@ -125,9 +118,6 @@ function updateRemainingSeconds($pdo, $userId, $remainingSeconds, $courseId, $ti
 
 function updateSummary($pdo, $userId, $course_id, $average, $summary)
 {
-    echo "updateSummary<br>";
-    echo "average: ". $average."<br>";
-    echo "summary: ". $summary ."<br>";
     $query = "UPDATE custom_users_course SET average_score = :average, summary = :summary WHERE user_id = :userId AND course_id = :course_id";
     $stmt = $pdo->prepare($query);
     $stmt->bindParam(':average', $average, PDO::PARAM_STR);
