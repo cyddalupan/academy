@@ -126,6 +126,45 @@ function summarizeFeedback($answers) {
     return $response['choices'][0]['message']['content'];
 }
 
+function ai_email_diagnose($answers) {
+    $apiKey = OPEN_AI;
+    $url = 'https://api.openai.com/v1/chat/completions';
+
+    $headers = [
+        'Content-Type: application/json',
+        'Authorization: Bearer ' . $apiKey
+    ];
+
+    $messages = [["role" => "system", "content" => "Provide a student diagnostic email content based on the following feedback and scores"]];
+
+    foreach ($answers as $answer) {
+        $messages[] = [
+            "role" => "user",
+            "content" => "Score: {$answer['score']}. Feedback: {$answer['feedback']}"
+        ];
+    }
+
+    $postData = json_encode([
+        "model" => "gpt-4o",
+        "messages" => $messages,
+    ]);
+
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
+
+    $response = curl_exec($ch);
+    if ($response === false) {
+        throw new Exception('cURL Error: ' . curl_error($ch));
+    }
+
+    curl_close($ch);
+    $response = json_decode($response, true);
+    return $response['choices'][0]['message']['content'];
+}
+
 function processResponse($pdo, $userId, $questionId, $userInput, $courseId, $response, $is_practice, &$score, &$feedback) {
 	$choice = $response['choices'][0]['message']['function_call'];
 	$decodedParams = json_decode($choice['arguments'], true);
@@ -169,5 +208,8 @@ function finalizeAssessment($pdo, $userId, $courseId, $totalQuestions, &$answers
 	if (!hasSummary($pdo, $userId, $courseId)) {
 		$summary = summarizeFeedback($answers);
 		updateSummary($pdo, $userId, $courseId, $averageScore, $summary);
+		$ai_email_diagnose = ai_email_diagnose($answers);
+        $email = getUserEmail($pdo, $user_id);
+        send_email_with_phpmailer($pdo, $email, 'Diagnostic Exam', $ai_email_diagnose, 'academy@example.com');
 	}
 }

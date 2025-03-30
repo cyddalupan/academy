@@ -159,3 +159,9 @@ function hasCompletedDiagnosticAndCourse($pdo, $userId) {
 
     return (bool)($diagnosticCompleted && $courseCompleted);
 }
+
+function getUserEmail($pdo, $user_id) {
+    $stmt = $pdo->prepare("SELECT email FROM users WHERE id = :id LIMIT 1");
+    $stmt->execute(['id' => $user_id]);
+    return $stmt->fetchColumn();
+}
