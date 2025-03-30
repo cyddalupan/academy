@@ -30,7 +30,7 @@ function send_email_with_phpmailer($pdo, $to, $subject, $message, $from) {
         $mail->Port = (int)$settings['smtp_port'];
 
         // Recipients
-        $mail->setFrom($from, 'Your Name');
+        $mail->setFrom($from, 'TopBar Asssist PH');
         $mail->addAddress($to);
 
         // Content

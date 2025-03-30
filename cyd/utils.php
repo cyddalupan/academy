@@ -135,7 +135,7 @@ function ai_email_diagnose($answers) {
         'Authorization: Bearer ' . $apiKey
     ];
 
-    $messages = [["role" => "system", "content" => "Provide a student diagnostic email content based on the following feedback and scores"]];
+    $messages = [["role" => "system", "content" => "Provide a student diagnostic email (just the body of the email in HTML format) content based on the following feedback and scores"]];
 
     foreach ($answers as $answer) {
         $messages[] = [
@@ -210,6 +210,6 @@ function finalizeAssessment($pdo, $userId, $courseId, $totalQuestions, &$answers
 		updateSummary($pdo, $userId, $courseId, $averageScore, $summary);
 		$ai_email_diagnose = ai_email_diagnose($answers);
         $email = getUserEmail($pdo, $userId);
-        send_email_with_phpmailer($pdo, $email, 'Diagnostic Exam', $ai_email_diagnose, 'academy@example.com');
+        send_email_with_phpmailer($pdo, $email, 'Diagnostic Exam', $ai_email_diagnose, 'ehajjonlinephilippines@gmail.com');
 	}
 }
