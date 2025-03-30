@@ -28,10 +28,10 @@ try {
 		$courseId = $_POST['courseId'];
 
 		if($is_practice) {
-			$allow_pratice = true;
+			$allow_practice = true; 
 			if (isset($_POST['start'])) {
 				// First Post check only
-				$allow_pratice = !hasCompletedDiagnosticAndCourse($pdo, $userId);
+				$allow_practice = !hasCompletedDiagnosticAndCourse($pdo, $userId);
 			}
 		}
 
