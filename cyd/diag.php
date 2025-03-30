@@ -9,6 +9,8 @@ if (ENV == "dev") {
 	header("Pragma: no-cache");
 }
 
+$progressPercentage = 0;
+
 $is_practice = isset($_GET['is_practice']) && $_GET['is_practice'] === 'true';
 
 try {
@@ -16,6 +18,9 @@ try {
 	$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 	if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        echo "user:".$_POST['userId'];
+        echo "user:".$_POST['courseId'];
+
 		$userId = $_POST['userId'] ?? null;
 		$courseId = $_POST['courseId'] ?? 0;
 		
