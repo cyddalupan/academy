@@ -126,7 +126,7 @@ function summarizeFeedback($answers) {
     return $response['choices'][0]['message']['content'];
 }
 
-function processResponse($pdo, $userId, $questionId, $userInput, $courseId, $response, $is_practice) {
+function processResponse($pdo, $userId, $questionId, $userInput, $courseId, $response, $is_practice, &$score, &$feedback) {
 	$choice = $response['choices'][0]['message']['function_call'];
 	$decodedParams = json_decode($choice['arguments'], true);
 	$score = $decodedParams['score'];

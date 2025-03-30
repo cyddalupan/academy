@@ -18,6 +18,8 @@ $totalQuestions = 6;
 $answers = [];
 $averageScore = 0;
 $timer_minutes = 12;
+$score = 0;
+$feedback = "";
 
 
 $is_practice = isset($_GET['is_practice']) && $_GET['is_practice'] === 'true';
@@ -50,7 +52,7 @@ try {
             $response = callOpenAI($userInput, $expected);
     
             if (isset($response['choices'][0]['message']['function_call'])) {
-                processResponse($pdo, $userId, $questionId, $userInput, $courseId, $response, $is_practice);
+                processResponse($pdo, $userId, $questionId, $userInput, $courseId, $response, $is_practice, $score, $feedback);
             } else {
                 echo "Response: " . $response['choices'][0]['message']['content'] . PHP_EOL;
             }
@@ -62,7 +64,7 @@ try {
 		$progressPercentage = calculateProgress($pdo, $userId, $courseId, $is_practice, $remainingSeconds, $totalQuestions, $answerCount);
 
 		if ($progressPercentage == 100) {
-			finalizeAssessment($pdo, $userId, $courseId, $totalQuestions);
+			finalizeAssessment($pdo, $userId, $courseId, $totalQuestions, $answers, $averageScore);
 		}
 	}
 } catch (PDOException $e) {
