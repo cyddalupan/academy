@@ -18,11 +18,9 @@ try {
 	$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 	if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        echo "user:".$_POST['userId'];
-        echo "user:".$_POST['courseId'];
 
-		$userId = $_POST['userId'] ?? null;
-		$courseId = $_POST['courseId'] ?? 0;
+		$userId = isset($_POST['userId']) ? $_POST['userId'] : null;
+        $courseId = isset($_POST['courseId']) ? $_POST['courseId'] : 0;
 		
 		if (!$userId || !$courseId) {
             throw new Exception("User ID or Course ID is missing.");

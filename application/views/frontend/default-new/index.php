@@ -33,6 +33,7 @@ if($language_dirs){
 </head>
 <body class="<?php echo $this->session->userdata('theme_mode'); ?>">
 	<script>
+	localStorage.removeItem('course_id');
 	var userId = <?php echo json_encode($this->session->userdata('user_id')); ?>;
 	if (userId) {
 		localStorage.setItem('user_id', userId);
