@@ -207,14 +207,23 @@ function send_email($pdo, $to, $subject, $message, $from) {
     send_command($socket, "EHLO $smtp_host\r\n");
 
     // Send STARTTLS command to upgrade the connection
-    send_command($socket, "STARTTLS\r\n");
-    if (!stream_socket_enable_crypto($socket, true, STREAM_CRYPTO_METHOD_TLS_CLIENT)) {
-        echo "Failed to start TLS\n";
+    $response = send_command($socket, "STARTTLS\r\n");
+
+    if (strpos($response, '220') === 0) {
+        $crypto_enabled = stream_socket_enable_crypto($socket, true, STREAM_CRYPTO_METHOD_TLS_ANY_CLIENT);
+
+        if (!$crypto_enabled) {
+            echo "Failed to start TLS\n";
+            fclose($socket);
+            return;
+        }
+    } else {
+        echo "STARTTLS not supported: $response\n";
         fclose($socket);
         return;
     }
 
-    send_command($socket, "EHLO $smtp_host\r\n");
+    send_command($socket, "EHLO $smtp_host\r\n"); 
     send_command($socket, "AUTH LOGIN\r\n");
     send_command($socket, base64_encode($smtp_user) . "\r\n");
     send_command($socket, base64_encode($smtp_pass) . "\r\n");
