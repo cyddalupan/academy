@@ -135,7 +135,7 @@ function ai_email_diagnose($answers, $fullname) {
         'Authorization: Bearer ' . $apiKey
     ];
 
-    $messages = [["role" => "system", "content" => "Provide a student (name:".$fullname.") an assessment email (just the body of the email in HTML format) content based on the following feedback and scores, but do not follow the feedback format. note: the result will be emailed dirrectly to do not put variable or text thats needed to be changed"]];
+    $messages = [["role" => "system", "content" => "Provide a student (name:".$fullname.") an assessment email (just the body of the email in HTML format) content based on the following feedback and scores, but do not follow the feedback format, this needs to convince the student to use our online course 'TopBar Asssist PH'. note: the result will be emailed dirrectly to do not put variable or text thats needed to be changed"]];
 
     foreach ($answers as $answer) {
         $messages[] = [
