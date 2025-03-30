@@ -98,9 +98,9 @@ try {
     $showTimer = isset($questionId) && $progressPercentage !== 100 && (!isset($_POST['userInput']) || isset($_POST['skip'])) && !$is_practice;
     if ($showTimer): ?>
     <div id="timer" class="d-flex justify-content-center fixed-top bg-white p-2 rounded border fixed-top-timer">
-        <div class="badge bg-primary mx-1">00</div>
+        <div id="minutes" class="badge bg-primary mx-1">00</div>
         <div>:</div>
-        <div class="badge bg-primary mx-1">00</div>
+        <div id="seconds" class="badge bg-primary mx-1">00</div>
     </div>
     <?php endif; ?>
     
