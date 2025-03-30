@@ -11,7 +11,8 @@ if (ENV == "dev") {
 
 $progressPercentage = 0;
 $allow_practice = false;
-$courseId = 0
+$userId = null;
+$courseId = 0;
 
 $is_practice = isset($_GET['is_practice']) && $_GET['is_practice'] === 'true';
 
