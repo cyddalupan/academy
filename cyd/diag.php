@@ -123,8 +123,8 @@ try {
 	<?php // require 'style.php'; ?>
 </head>
 <body> 
-    <?php if (isset($questionId) && $progressPercentage !== 100 && (!isset($_POST['userInput']) || isset($_POST['skip'])) && (!$is_practice || $allow_practice)): ?> 
-        <div id="timer" class="d-flex justify-content-center fixed-top bg-white p-2 rounded border" style="margin: 20px;">
+    <?php if (isset($questionId) && $progressPercentage !== 100 && (!isset($_POST['userInput']) || isset($_POST['skip'])) && !$is_practice): ?> 
+        <div id="timer" class="d-flex justify-content-center fixed-top bg-white p-2 rounded border" style="margin: auto;width: 89px;top: 7px;box-shadow: 4px 10px 15px;">
             <div class="badge bg-primary mx-1">00</div>
             <div>:</div> 
             <div class="badge bg-primary mx-1">00</div>
@@ -158,12 +158,22 @@ try {
                 <?php elseif (!isset($userId)): ?> 
                     <!-- Start Page --> 
                     <div class="mb-3 lead"> 
-                        <p>Begin your exam to assess your knowledge and skills!</p> 
+                    <?php if ($is_practice): ?>
+    <p>Start your practice exam to be well-prepared for the bar.</p>
+<?php else: ?>
+    <p>Start your diagnostic exam to evaluate your knowledge and skills.</p>
+<?php endif; ?>
                     </div> 
                     <form method="post" action=""> 
                         <input type="hidden" name="userId" id="userIdInput"> 
                         <input type="hidden" name="courseId" id="courseIdInput"> 
-                        <button type="submit" name="start" class="btn btn-primary">Start Exam</button> 
+                        <button type="submit" name="start" class="btn btn-primary">
+                            <?php if ($is_practice): ?>
+                                Start Practice Exam
+                            <?php else: ?>
+                                Start Diagnostic Exam
+                            <?php endif; ?>
+                        </button> 
                     </form> 
                 <?php elseif ((isset($questionId) && $progressPercentage !== 100) && (!$is_practice || $allow_practice)): ?> 
                     <!-- Q&A Page --> 
