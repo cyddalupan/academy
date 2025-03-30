@@ -20,6 +20,7 @@ $averageScore = 0;
 $timer_minutes = 12;
 $score = 0;
 $feedback = "";
+$remainingSeconds = 9999;
 
 
 $is_practice = isset($_GET['is_practice']) && $_GET['is_practice'] === 'true';
