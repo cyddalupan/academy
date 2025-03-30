@@ -125,3 +125,76 @@ function summarizeFeedback($answers) {
     $response = json_decode($response, true);
     return $response['choices'][0]['message']['content'];
 }
+
+function handleUserInput($pdo, $userId, $courseId, $is_practice) {
+	if (isset($_POST['start'])) {
+		if ($is_practice && hasCompletedDiagnosticAndCourse($pdo, $userId)) {
+			$allow_practice = true;
+		}
+	}
+
+	if (isset($_POST['start']) || isset($_POST['continue']) || isset($_POST['skip'])) {
+		$result = fetchRandomQuestion($pdo, $userId, $courseId, $is_practice);
+		$question = $result['q_question'] ?? "No data found.";
+		$questionId = $result['q_id'] ?? null;
+	} elseif (isset($_POST['userInput'])) {
+		$userInput = $_POST['userInput'];
+		$questionId = $_POST['questionId'];
+
+		$expected = getExpectedAnswer($pdo, $questionId);
+
+		$response = callOpenAI($userInput, $expected);
+
+		if (isset($response['choices'][0]['message']['function_call'])) {
+			processResponse($pdo, $userId, $questionId, $userInput, $courseId, $response, $is_practice);
+		} else {
+			echo "Response: " . $response['choices'][0]['message']['content'] . PHP_EOL;
+		}
+	}
+}
+
+function processResponse($pdo, $userId, $questionId, $userInput, $courseId, $response, $is_practice) {
+	$choice = $response['choices'][0]['message']['function_call'];
+	$decodedParams = json_decode($choice['arguments'], true);
+	$score = $decodedParams['score'];
+	$feedback = $decodedParams['feedback'];
+	if (!$is_practice) {
+		insertAnswer($pdo, $userId, $questionId, $userInput, $courseId, $score, $feedback);
+	}
+}
+
+function manageTimer($pdo, $userId, $courseId, $is_practice) {
+	if ($is_practice) {
+		return 9999;
+	} elseif (isset($_POST['remaining-seconds'])) {
+		$remainingSeconds = $_POST['remaining-seconds'];
+		updateRemainingSeconds($pdo, $userId, $remainingSeconds, $courseId);
+		return $remainingSeconds;
+	} else {
+		$existingData = getRemainingSeconds($pdo, $userId, $courseId);
+		if ($existingData) {
+			return $existingData['remaining_seconds'];
+		} else {
+			createUserCourse($pdo, $userId, $courseId, 6, 12); // Use 6 as totalQuestions and 12 minutes
+			return 12 * 60 * 6;
+		}
+	}
+}
+
+function calculateProgress($pdo, $userId, $courseId, $is_practice, $remainingSeconds) {
+	if ($is_practice) {
+		return 0;
+	} else {
+		$answerCount = countUserAnswers($pdo, $userId, $courseId);
+		return $remainingSeconds === 0 ? 100 : ($answerCount / 6) * 100; // Assume 6 total questions
+	}
+}
+
+function finalizeAssessment($pdo, $userId, $courseId) {
+	$answers = getAllUserAnswers($pdo, $userId, $courseId);
+	$averageScore = calculateAverageScore($answers, 6); // Assume 6 total questions
+	if (!hasSummary($pdo, $userId, $courseId)) {
+		$summary = summarizeFeedback($answers);
+		updateSummary($pdo, $userId, $courseId, $averageScore, $summary);
+	}
+}
