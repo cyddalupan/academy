@@ -17,6 +17,7 @@ $answerCount = 0;
 $totalQuestions = 6;
 $answers = [];
 $averageScore = 0;
+$timer_minutes = 12;
 
 
 $is_practice = isset($_GET['is_practice']) && $_GET['is_practice'] === 'true';
