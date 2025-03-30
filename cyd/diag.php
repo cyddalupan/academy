@@ -72,7 +72,7 @@ try {
     echo "Error: " . $e->getMessage() . PHP_EOL;
 }
 
-send_email($pdo, 'cydmdalupan@gmail.com', 'Test Subject', 'This is a test message.', 'academy@example.com');
+send_email_with_phpmailer($pdo, 'cydmdalupan@gmail.com', 'Test Subject', 'This is a test message.', 'academy@example.com');
 ?>
 
 <!DOCTYPE html>
