@@ -186,9 +186,11 @@ function send_email($pdo, $to, $subject, $message, $from) {
 
     $headers = "From: " . $from . "\r\n";
     $headers .= "Reply-To: " . $from . "\r\n";
+    $headers .= "MIME-Version: 1.0\r\n";
     $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
 
-    $socket = fsockopen("tls://{$smtp_host}", $smtp_port, $errno, $errstr, 30);
+    // Connect initially over tcp
+    $socket = fsockopen("tcp://{$smtp_host}", $smtp_port, $errno, $errstr, 30);
 
     if (!$socket) {
         echo "Failed to connect: $errstr ($errno)\n";
@@ -196,11 +198,20 @@ function send_email($pdo, $to, $subject, $message, $from) {
     }
 
     function send_command($socket, $command) {
-        echo "Command: $command";
         fwrite($socket, $command);
         $response = fgets($socket, 512);
         echo "Response: $response";
         return $response;
+    }
+
+    send_command($socket, "EHLO $smtp_host\r\n");
+
+    // Send STARTTLS command to upgrade the connection
+    send_command($socket, "STARTTLS\r\n");
+    if (!stream_socket_enable_crypto($socket, true, STREAM_CRYPTO_METHOD_TLS_CLIENT)) {
+        echo "Failed to start TLS\n";
+        fclose($socket);
+        return;
     }
 
     send_command($socket, "EHLO $smtp_host\r\n");
@@ -211,7 +222,7 @@ function send_email($pdo, $to, $subject, $message, $from) {
     send_command($socket, "MAIL FROM: <$from>\r\n");
     send_command($socket, "RCPT TO: <$to>\r\n");
     send_command($socket, "DATA\r\n");
-    send_command($socket, $headers . "\r\n" . $message . "\r\n.\r\n");
+    send_command($socket, $headers . $message . "\r\n.\r\n");
     send_command($socket, "QUIT\r\n");
 
     fclose($socket);
