@@ -108,3 +108,27 @@ function hasSummary($pdo, $userId, $course_id) {
     $stmt->execute();
     return $stmt->fetchColumn() > 0;
 }
+
+function hasCompletedDiagnosticAndCourse($pdo, $userId) {
+    $queryDiagnostic = "
+    SELECT COUNT(*) FROM custom_users_course 
+    WHERE user_id = :userId AND course_id = 0 AND summary IS NOT NULL";
+    
+    $queryCourse = "
+    SELECT COUNT(*) FROM custom_users_course 
+    WHERE user_id = :userId AND course_id != 0 AND summary IS NOT NULL";
+    
+    // Check for diagnostic completion
+    $stmt = $pdo->prepare($queryDiagnostic);
+    $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
+    $stmt->execute();
+    $diagnosticCompleted = $stmt->fetchColumn() > 0;
+
+    // Check for at least one course completion
+    $stmt = $pdo->prepare($queryCourse);
+    $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
+    $stmt->execute();
+    $courseCompleted = $stmt->fetchColumn() > 0;
+
+    return $diagnosticCompleted && $courseCompleted;
+}
