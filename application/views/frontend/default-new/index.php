@@ -19,10 +19,8 @@ if($language_dirs){
 
 	<?php include 'seo.php'; ?>
 
-	<h1>test data</h1>
-	<pre>
-	<?php print_r($this->session->userdata()); ?>
-	</pre>
+	
+
 	<link rel="icon" href="<?php echo base_url('uploads/system/'.get_frontend_settings('favicon')); ?>" type="image/x-icon">
 	<link rel="apple-touch-icon" sizes="180x180" href="<?php echo base_url('uploads/system/'.get_frontend_settings('favicon')); ?>">
 
