@@ -130,5 +130,5 @@ function hasCompletedDiagnosticAndCourse($pdo, $userId) {
     $stmt->execute();
     $courseCompleted = $stmt->fetchColumn() > 0;
 
-    return $diagnosticCompleted && $courseCompleted;
+    return (bool)($diagnosticCompleted && $courseCompleted);
 }
