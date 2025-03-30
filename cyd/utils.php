@@ -141,7 +141,7 @@ function manageTimer($pdo, $userId, $courseId, $is_practice, $totalQuestions, $t
 		return 9999;
 	} elseif (isset($_POST['remaining-seconds'])) {
 		$remainingSeconds = $_POST['remaining-seconds'];
-		updateRemainingSeconds($pdo, $userId, $remainingSeconds, $courseId);
+		updateRemainingSeconds($pdo, $userId, $remainingSeconds, $courseId, $timer_minutes, $totalQuestions);
 		return $remainingSeconds;
 	} else {
 		$existingData = getRemainingSeconds($pdo, $userId, $courseId);
