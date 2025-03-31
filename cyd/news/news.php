@@ -13,7 +13,6 @@ try {
 	$top_scores = getTop3Scores($pdo);
 	$lowest_scores = getLowest3Scores($pdo);
 	$quizData = getQuizData($pdo);
-
 } catch (PDOException $e) {
 	echo "Connection failed: " . $e->getMessage() . PHP_EOL;
 }
@@ -35,7 +34,7 @@ try {
 	<pre>
 		<?php print_r($quizData); ?>
 	</pre>
-	
+
 	<div class="container">
 		<div class="header">
 			<h1>Total Average Score: <?php echo number_format($score_counts['average'], 2); ?></h1>
@@ -97,6 +96,26 @@ try {
 				</div>
 			</div>
 		</div>
+		<table class="table table-bordered">
+			<thead>
+				<tr>
+					<th>Average Score</th>
+					<th>Course Title</th>
+					<th>Take Count</th>
+					<th>Question</th>
+				</tr>
+			</thead>
+			<tbody>
+				<?php foreach ($quizData as $quiz): ?>
+					<tr>
+						<td><?php echo htmlspecialchars($quiz['average_score']); ?></td>
+						<td><?php echo htmlspecialchars($quiz['title']); ?></td>
+						<td><?php echo htmlspecialchars($quiz['take_count']); ?></td>
+						<td><?php echo htmlspecialchars($quiz['q_question']); ?></td>
+					</tr>
+				<?php endforeach; ?>
+			</tbody>
+		</table>
 	</div>
 
 	<?php require 'script.php'; ?>

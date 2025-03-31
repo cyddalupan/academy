@@ -26,7 +26,7 @@ function getQuizData($pdo) {
     SELECT quiz.q_id, quiz.q_question, quiz.q_answer, quiz.q_level, quiz.q_timer,
            AVG(diag.score) as average_score, COUNT(diag.question_id) as take_count, course.title
     FROM quiz_new AS quiz
-    LEFT JOIN diag_ans AS diag ON quiz.q_id = diag.question_id
+    INNER JOIN diag_ans AS diag ON quiz.q_id = diag.question_id
     LEFT JOIN course ON quiz.q_course_id = course.id
     GROUP BY quiz.q_id
     ORDER BY average_score ASC";
