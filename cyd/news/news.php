@@ -109,7 +109,11 @@ try {
 				<?php foreach ($quizData as $quiz): ?>
 					<tr>
 						<td><?php echo htmlspecialchars($quiz['average_score']); ?></td>
-						<td><?php echo htmlspecialchars($quiz['title']); ?></td>
+						<td>
+							<?php
+							echo ($quiz['q_course_id'] == 0) ? 'Diagnostic Exam' : htmlspecialchars($quiz['title']);
+							?>
+						</td>
 						<td><?php echo htmlspecialchars($quiz['take_count']); ?></td>
 						<td><?php echo htmlspecialchars($quiz['q_question']); ?></td>
 					</tr>
