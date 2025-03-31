@@ -4,7 +4,7 @@
         const scoreChart = new Chart(ctx, {
             type: 'pie',
             data: {
-                labels: ['0-25', '25-50', '50-75', '75-100'],
+                labels: ['0-30', '31-60', '61-84', '85-100'],
                 datasets: [{
                     label: 'Scores Distribution',
                     data: [

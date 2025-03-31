@@ -35,10 +35,10 @@ try {
 		</div>
 
 		<div class="row text-center mb-3">
-			<div class="col-md-3">0 - 25: <?php echo $score_counts['0_25']; ?></div>
-			<div class="col-md-3">25 - 50: <?php echo $score_counts['25_50']; ?></div>
-			<div class="col-md-3">50 - 75: <?php echo $score_counts['50_75']; ?></div>
-			<div class="col-md-3">75 - 100: <?php echo $score_counts['75_100']; ?></div>
+			<div class="col-md-3">0 - 30: <?php echo $score_counts['0_25']; ?></div>
+			<div class="col-md-3">31 - 60: <?php echo $score_counts['25_50']; ?></div>
+			<div class="col-md-3">61 - 84: <?php echo $score_counts['50_75']; ?></div>
+			<div class="col-md-3">85 - 100: <?php echo $score_counts['75_100']; ?></div>
 		</div>
 
 		<div class="row">
@@ -102,7 +102,7 @@ try {
 			<tbody>
 				<?php foreach ($quizData as $quiz): ?>
 					<tr>
-						<td><?php echo htmlspecialchars($quiz['average_score']); ?></td>
+						<td><?php echo htmlspecialchars(round($quiz['average_score'])); ?></td>
 						<td>
 							<?php if ($quiz['q_course_id'] == 0): ?>
 								Diagnostic Exam

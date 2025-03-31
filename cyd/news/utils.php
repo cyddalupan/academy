@@ -10,13 +10,13 @@ function countScoreByGroup($courses_results)
 		$score = $course['average_score'];
 		$totalScore += $score;
 
-		if ($score >= 0 && $score < 25) {
+		if ($score >= 0 && $score < 30) {
 			$score_0_25++;
-		} elseif ($score >= 25 && $score < 50) {
+		} elseif ($score >= 31 && $score < 60) {
 			$score_25_50++;
-		} elseif ($score >= 50 && $score < 75) {
+		} elseif ($score >= 61 && $score < 84) {
 			$score_50_75++;
-		} elseif ($score >= 75 && $score <= 100) {
+		} elseif ($score >= 85 && $score <= 100) {
 			$score_75_100++;
 		}
 	}
