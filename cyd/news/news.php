@@ -31,7 +31,7 @@ try {
 <body>
 	<div class="container">
 		<div class="header">
-			<h1>Total Average Score: <?php echo number_format($score_counts['average'], 2); ?></h1>
+			<h1>Total Average Score: <?php echo number_format($score_counts['average'], 2); ?>%</h1>
 		</div>
 
 		<div class="row text-center mb-3">
@@ -57,7 +57,7 @@ try {
 								<div class="card mb-3">
 									<div class="card-body">
 										<h5 class="card-title">Avg Score:
-											<?php echo htmlspecialchars(round($student['average_score'])); ?>
+											<?php echo htmlspecialchars(round($student['average_score'])); ?>%
 										</h5>
 										<p class="card-text small">
 											<?php echo htmlspecialchars(mb_substr($student['summary'], 0, 200) . (strlen($student['summary']) > 200 ? '...' : '')); ?>
@@ -77,7 +77,7 @@ try {
 								<div class="card mb-3">
 									<div class="card-body">
 										<h5 class="card-title">
-											Avg Score: <?php echo htmlspecialchars(round($student['average_score'])); ?>
+											Avg Score: <?php echo htmlspecialchars(round($student['average_score'])); ?>%
 										</h5>
 										<p class="card-text small">
 											<?php echo htmlspecialchars(mb_substr($student['summary'], 0, 200) . (strlen($student['summary']) > 200 ? '...' : '')); ?>
@@ -102,7 +102,7 @@ try {
 			<tbody>
 				<?php foreach ($quizData as $quiz): ?>
 					<tr>
-						<td><?php echo htmlspecialchars(round($quiz['average_score'])); ?></td>
+						<td><?php echo htmlspecialchars(round($quiz['average_score'])); ?>%</td>
 						<td>
 							<?php if ($quiz['q_course_id'] == 0): ?>
 								Diagnostic Exam
