@@ -103,10 +103,14 @@ try {
 				<?php foreach ($quizData as $quiz): ?>
 					<tr>
 						<td><?php echo htmlspecialchars($quiz['average_score']); ?></td>
-						<td>
+						<
+							<?php if ($quiz['q_course_id'] == 0): ?>
+								Diagnostic Exam
+							<?php else: ?>
 							<a href="#" data-bs-toggle="tooltip" data-bs-title="<?php echo htmlspecialchars($quiz['title']); ?>">
-								<?php echo htmlspecialchars(mb_strimwidth($quiz['title'], 0, 30, '...')); ?>
-							</a></td>
+								<php echo htmlspecialchars(mb_strimwidth($quiz['title'], 0, 30, '...')); ?>
+							</a>
+							<?php endif; ?>
 						</td>
 						<td><?php echo htmlspecialchars($quiz['take_count']); ?></td>
 						<td>
