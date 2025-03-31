@@ -23,7 +23,7 @@ function getLowest3Scores($pdo)
 
 function getQuizData($pdo) {
     $sql = "
-    SELECT quiz.q_id, quiz.q_question, quiz.q_answer, quiz.q_level, quiz.q_timer,
+    SELECT quiz.q_id, quiz.q_question, quiz.q_answer, quiz.q_level, quiz.q_timer, quiz.q_course_id,
            AVG(diag.score) as average_score, COUNT(diag.question_id) as take_count, course.title
     FROM quiz_new AS quiz
     INNER JOIN diag_ans AS diag ON quiz.q_id = diag.question_id

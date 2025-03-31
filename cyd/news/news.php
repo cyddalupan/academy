@@ -30,11 +30,6 @@ try {
 </head>
 
 <body>
-
-	<pre>
-		<?php print_r($quizData); ?>
-	</pre>
-
 	<div class="container">
 		<div class="header">
 			<h1>Total Average Score: <?php echo number_format($score_counts['average'], 2); ?></h1>
@@ -115,7 +110,11 @@ try {
 							?>
 						</td>
 						<td><?php echo htmlspecialchars($quiz['take_count']); ?></td>
-						<td><?php echo htmlspecialchars($quiz['q_question']); ?></td>
+						<td>
+							<span title="<?php echo htmlspecialchars($quiz['q_question']); ?>">
+								<?php echo htmlspecialchars(mb_strimwidth($quiz['q_question'], 0, 30, '...')); ?>
+							</span>
+						</td>
 					</tr>
 				<?php endforeach; ?>
 			</tbody>
