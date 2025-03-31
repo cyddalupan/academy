@@ -104,15 +104,15 @@ try {
 					<tr>
 						<td><?php echo htmlspecialchars($quiz['average_score']); ?></td>
 						<td>
-							<span data-bs-toggle="tooltip" title="<?php echo htmlspecialchars($quiz['title']); ?>">
+							<a href="#" data-bs-toggle="tooltip" data-bs-title="<?php echo htmlspecialchars($quiz['title']); ?>">
 								<?php echo htmlspecialchars(mb_strimwidth($quiz['title'], 0, 30, '...')); ?>
-							</span>
+							</a></td>
 						</td>
 						<td><?php echo htmlspecialchars($quiz['take_count']); ?></td>
 						<td>
-							<span data-bs-toggle="tooltip" title="<?php echo htmlspecialchars($quiz['q_question']); ?>">
+							<a href="#" data-bs-toggle="tooltip" data-bs-title="<?php echo htmlspecialchars($quiz['q_question']); ?>">
 								<?php echo htmlspecialchars(mb_strimwidth($quiz['q_question'], 0, 150, '...')); ?>
-							</span>
+							</a>
 						</td>
 					</tr>
 				<?php endforeach; ?>
