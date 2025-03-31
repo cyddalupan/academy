@@ -108,7 +108,7 @@ try {
 								Diagnostic Exam
 							<?php else: ?>
 							<a href="#" data-bs-toggle="tooltip" data-bs-title="<?php echo htmlspecialchars($quiz['title']); ?>">
-								<php echo htmlspecialchars(mb_strimwidth($quiz['title'], 0, 30, '...')); ?>
+								<?php echo htmlspecialchars(mb_strimwidth($quiz['title'], 0, 30, '...')); ?>
 							</a>
 							<?php endif; ?>
 						</td>
