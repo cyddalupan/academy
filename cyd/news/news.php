@@ -103,7 +103,7 @@ try {
 				<?php foreach ($quizData as $quiz): ?>
 					<tr>
 						<td><?php echo htmlspecialchars($quiz['average_score']); ?></td>
-						<
+						<td>
 							<?php if ($quiz['q_course_id'] == 0): ?>
 								Diagnostic Exam
 							<?php else: ?>
@@ -111,6 +111,7 @@ try {
 								<php echo htmlspecialchars(mb_strimwidth($quiz['title'], 0, 30, '...')); ?>
 							</a>
 							<?php endif; ?>
+						</td>
 						</td>
 						<td><?php echo htmlspecialchars($quiz['take_count']); ?></td>
 						<td>
