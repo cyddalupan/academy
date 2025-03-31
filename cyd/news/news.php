@@ -105,14 +105,14 @@ try {
 					<tr>
 						<td><?php echo htmlspecialchars($quiz['average_score']); ?></td>
 						<td>
-							<?php
-							echo ($quiz['q_course_id'] == 0) ? 'Diagnostic Exam' : htmlspecialchars($quiz['title']);
-							?>
+							<span data-bs-toggle="tooltip" title="<?php echo htmlspecialchars($quiz['title']); ?>">
+								<?php echo htmlspecialchars(mb_strimwidth($quiz['title'], 0, 30, '...')); ?>
+							</span>
 						</td>
 						<td><?php echo htmlspecialchars($quiz['take_count']); ?></td>
 						<td>
-							<span title="<?php echo htmlspecialchars($quiz['q_question']); ?>">
-								<?php echo htmlspecialchars(mb_strimwidth($quiz['q_question'], 0, 30, '...')); ?>
+							<span data-bs-toggle="tooltip" title="<?php echo htmlspecialchars($quiz['q_question']); ?>">
+								<?php echo htmlspecialchars(mb_strimwidth($quiz['q_question'], 0, 150, '...')); ?>
 							</span>
 						</td>
 					</tr>
