@@ -121,7 +121,9 @@ try {
 		</table>
 	</div>
 
-	<?php require 'script.php'; ?>
+	<?php require 'script.php'; ?><!-- Include Bootstrap JS -->
+	<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2/dist/umd/popper.min.js"></script>
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.min.js"></script>
 
 </body>
 
