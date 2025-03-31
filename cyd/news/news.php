@@ -1,61 +1,9 @@
 <?php
 require '../config.php';
+require 'model.php';
+require 'utils.php';
 
 $dsn = DSN_PATH;
-
-// Model Functions
-function getLast200CustomUsersCourses($pdo)
-{
-	$query = "SELECT * FROM custom_users_course ORDER BY id DESC LIMIT 200";
-	$stmt = $pdo->query($query);
-	return $stmt->fetchAll(PDO::FETCH_ASSOC);
-}
-
-function getTop3Scores($pdo)
-{
-	$query = "SELECT * FROM (SELECT * FROM custom_users_course WHERE average_score IS NOT NULL AND average_score > 0 ORDER BY id DESC LIMIT 200) AS last_courses ORDER BY average_score DESC LIMIT 3";
-	$stmt = $pdo->query($query);
-	return $stmt->fetchAll(PDO::FETCH_ASSOC);
-}
-
-function getLowest3Scores($pdo)
-{
-	$query = "SELECT * FROM (SELECT * FROM custom_users_course WHERE average_score IS NOT NULL AND average_score > 0 ORDER BY id DESC LIMIT 200) AS last_courses ORDER BY average_score ASC LIMIT 3";
-	$stmt = $pdo->query($query);
-	return $stmt->fetchAll(PDO::FETCH_ASSOC);
-}
-// utils function
-function countScoreByGroup($courses_results)
-{
-	$score_0_25 = $score_25_50 = $score_50_75 = $score_75_100 = 0;
-	$totalScore = 0;
-	$count = count($courses_results);
-
-	foreach ($courses_results as $course) {
-		$score = $course['average_score'];
-		$totalScore += $score;
-
-		if ($score >= 0 && $score < 25) {
-			$score_0_25++;
-		} elseif ($score >= 25 && $score < 50) {
-			$score_25_50++;
-		} elseif ($score >= 50 && $score < 75) {
-			$score_50_75++;
-		} elseif ($score >= 75 && $score <= 100) {
-			$score_75_100++;
-		}
-	}
-
-	$averageScore = $count ? ($totalScore / $count) : 0;
-
-	return [
-		'0_25' => $score_0_25,
-		'25_50' => $score_25_50,
-		'50_75' => $score_50_75,
-		'75_100' => $score_75_100,
-		'average' => $averageScore,
-	];
-}
 
 try {
 	$pdo = new PDO($dsn, $username, $password);
@@ -64,6 +12,7 @@ try {
 	$score_counts = countScoreByGroup($courses_results);
 	$top_scores = getTop3Scores($pdo);
 	$lowest_scores = getLowest3Scores($pdo);
+	$quizData = getQuizData($pdo);
 
 } catch (PDOException $e) {
 	echo "Connection failed: " . $e->getMessage() . PHP_EOL;
@@ -83,6 +32,10 @@ try {
 
 <body>
 
+	<pre>
+		<?php print_r($quizData); ?>
+	</pre>
+	
 	<div class="container">
 		<div class="header">
 			<h1>Total Average Score: <?php echo number_format($score_counts['average'], 2); ?></h1>
@@ -146,27 +99,7 @@ try {
 		</div>
 	</div>
 
-	<script>
-		document.addEventListener('DOMContentLoaded', function () {
-			const ctx = document.getElementById('scoreChart').getContext('2d');
-			const scoreChart = new Chart(ctx, {
-				type: 'pie',
-				data: {
-					labels: ['0-25', '25-50', '50-75', '75-100'],
-					datasets: [{
-						label: 'Scores Distribution',
-						data: [
-							<?php echo isset($score_counts['0_25']) ? $score_counts['0_25'] : 0; ?>,
-							<?php echo isset($score_counts['25_50']) ? $score_counts['25_50'] : 0; ?>,
-							<?php echo isset($score_counts['50_75']) ? $score_counts['50_75'] : 0; ?>,
-							<?php echo isset($score_counts['75_100']) ? $score_counts['75_100'] : 0; ?>
-						],
-						backgroundColor: ['#ff6384', '#36a2eb', '#ffce56', '#4bc0c0']
-					}]
-				}
-			});
-		});
-	</script>
+	<?php require 'script.php'; ?>
 
 </body>
 
