@@ -170,7 +170,7 @@
             <li class="bg-light">
               <a href="#"  id="myResultTrigger-sm"
                 class="btn btn-toggle-list d-inline-flex align-items-center rounded border-0 text-dark text-16px fw-500">
-                <i class="fa fa-check"></i> My Result
+                <i class="fa fa-check me-2"></i> My Result
               </a>
             </li>
             <li class="bg-light">
@@ -202,7 +202,6 @@
 </div>
 <script>
   document.getElementById('myResultTrigger-sm').onclick = function() {
-    alert("small");
     document.getElementById('myResultModal-sm').style.display = 'block';
   }
   
