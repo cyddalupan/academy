@@ -167,8 +167,9 @@
           <?php endforeach; ?>
 
           <?php if ($user_id > 0): ?>
-            <li>
-              <a href="#" id="myResultTrigger">
+            <li class="bg-light">
+              <a href="#"  id="myResultTrigger"
+                class="btn btn-toggle-list d-inline-flex align-items-center rounded border-0 text-dark text-16px fw-500">
                 <i class="fa fa-check"></i>
                 My Result
               </a>
