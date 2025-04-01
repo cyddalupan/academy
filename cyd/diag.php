@@ -81,6 +81,7 @@ try {
     <meta charset="UTF-8">
     <title>Quiz Application</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css">
+    <?php require 'style-over.php'; ?>
     <style>
         .fixed-top-timer {
             margin: auto;
