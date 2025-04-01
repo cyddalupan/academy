@@ -24,4 +24,8 @@ body {
 .card-header {
     background-color: #021487 !important;
 }
+.tooltip-inner {
+    max-width: 300px; /* Adjust the width as needed */
+    word-wrap: break-word;  /* Ensure content wraps appropriately */
+}
 </style>
