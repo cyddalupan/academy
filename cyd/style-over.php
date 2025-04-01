@@ -1,7 +1,6 @@
 <style>
 body {
     font: Josefin Sans !important;
-    background-color: #606060;
 }
 .btn-primary {
     background-color: #021487;
