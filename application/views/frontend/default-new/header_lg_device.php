@@ -371,6 +371,7 @@
 
 <script>
   document.getElementById('myResultTrigger').onclick = function() {
+    alert("wn");
     document.getElementById('myResultModal').style.display = 'block';
   }
   
