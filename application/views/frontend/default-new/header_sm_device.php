@@ -166,9 +166,17 @@
             </li>
           <?php endforeach; ?>
 
-          <?php if($user_id > 0): ?>
+          <?php if ($user_id > 0): ?>
+            <li>
+              <a href="#" id="myResultTrigger">
+                <i class="fa fa-check"></i>
+                My Result
+              </a>
+            </li>
             <li class="bg-light">
-              <a href="<?php echo site_url('login/logout'); ?>" class="btn btn-toggle-list d-inline-flex align-items-center rounded border-0 text-dark text-16px fw-500"> <i class="fas fa-sign-out-alt me-2"></i> <?php echo get_phrase('Logout'); ?></a>
+              <a href="<?php echo site_url('login/logout'); ?>"
+                class="btn btn-toggle-list d-inline-flex align-items-center rounded border-0 text-dark text-16px fw-500"> <i
+                  class="fas fa-sign-out-alt me-2"></i> <?php echo get_phrase('Logout'); ?></a>
             </li>
           <?php endif; ?>
         </ul>
@@ -177,3 +185,34 @@
     </div>
   </div>
 </div>
+
+<!-- Modal -->
+<?php if(isset($user_id)): ?>
+<div class="modal" id="myResultModal" tabindex="-1" role="dialog" aria-labelledby="myResultModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-body" style="padding: 0;">
+        <iframe src="https://academy.reviewcenterphil.com/cyd/result/result.php?id=<?php echo $user_id; ?>" style="width: 100%; height: 400px; border: none;"></iframe>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="myResultCloseFooter">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  document.getElementById('myResultTrigger').onclick = function() {
+    document.getElementById('myResultModal').style.display = 'block';
+  }
+  
+  document.getElementById('myResultCloseFooter').onclick = function() {
+    document.getElementById('myResultModal').style.display = 'none';
+  }
+  
+  // Close modal when clicking outside of it
+  window.onclick = function(event) {
+    if (event.target == document.getElementById('myResultModal')) {
+      document.getElementById('myResultModal').style.display = 'none';
+    }
+  }
+</script>

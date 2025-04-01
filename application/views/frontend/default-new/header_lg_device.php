@@ -322,14 +322,12 @@
                         </a>
                       </li>  
                     <?php endif; ?>
-                    <?php if(isset($user_id)): ?>
                     <li>
                       <a href="#" id="myResultTrigger">
                         <i class="fa fa-check"></i>
                         My Result
                       </a>
                     </li>
-                    <?php endif; ?>
                     <li>
                       <a href="<?php echo site_url('login/logout'); ?>">
                         <i class="fa-solid fa-arrow-right-from-bracket"></i>
