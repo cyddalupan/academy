@@ -25,7 +25,7 @@ try {
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
-    <?php require '../style-over.php'; ?>
+	<?php require '../style-over.php'; ?>
 	<title>Dashboard</title>
 </head>
 
@@ -108,15 +108,22 @@ try {
 							<?php if ($quiz['q_course_id'] == 0): ?>
 								Diagnostic Exam
 							<?php else: ?>
-							<a href="#" data-bs-toggle="tooltip" data-bs-title="<?php echo htmlspecialchars($quiz['title']); ?>">
-								<?php echo htmlspecialchars(mb_strimwidth($quiz['title'], 0, 30, '...')); ?>
-							</a>
+								<a href="#" data-bs-toggle="tooltip"
+									data-bs-title="<?php echo htmlspecialchars($quiz['title']); ?>">
+									<?php echo htmlspecialchars(mb_strimwidth($quiz['title'], 0, 30, '...')); ?>
+								</a>
 							<?php endif; ?>
 						</td>
 						</td>
-						<td><?php echo htmlspecialchars($quiz['take_count']); ?></td>
 						<td>
-							<a href="#" data-bs-toggle="tooltip" data-bs-title="<?php echo htmlspecialchars($quiz['q_question']); ?>">
+							<a href="#" data-bs-toggle="tooltip"
+								data-bs-title="<?php echo htmlspecialchars($quiz['student_answers']); ?>">
+								<?php echo htmlspecialchars($quiz['take_count']); ?>
+							</a>
+						</td>
+						<td>
+							<a href="#" data-bs-toggle="tooltip"
+								data-bs-title="<?php echo htmlspecialchars($quiz['q_question']); ?>">
 								<?php echo htmlspecialchars(mb_strimwidth($quiz['q_question'], 0, 150, '...')); ?>
 							</a>
 						</td>
@@ -130,12 +137,12 @@ try {
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 	<script>
-	document.addEventListener('DOMContentLoaded', function () {
-		var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-		var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-		return new bootstrap.Tooltip(tooltipTriggerEl);
+		document.addEventListener('DOMContentLoaded', function () {
+			var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+			var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+				return new bootstrap.Tooltip(tooltipTriggerEl);
+			});
 		});
-	});
 	</script>
 </body>
 
