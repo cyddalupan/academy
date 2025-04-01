@@ -116,8 +116,8 @@ try {
 						</td>
 						</td>
 						<td>
-							<a href="#" data-bs-toggle="tooltip"
-								data-bs-title="<?php echo htmlspecialchars($quiz['student_answers']); ?>">
+							<a href="#" data-bs-toggle="tooltip" data-bs-html="true"
+								data-bs-title="<?php echo htmlspecialchars(nl2br(implode("\n", explode('; ', $quiz['student_answers'])))); ?>">
 								<?php echo htmlspecialchars($quiz['take_count']); ?>
 							</a>
 						</td>
