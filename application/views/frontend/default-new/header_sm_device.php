@@ -187,7 +187,7 @@
 </div>
 
 <!-- Modal -->
-<?php if(isset($user_id)): ?>
+<?php if ($user_id > 0): ?>
 <div class="modal" id="myResultModal" tabindex="-1" role="dialog" aria-labelledby="myResultModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
@@ -216,3 +216,4 @@
     }
   }
 </script>
+<?php endif; ?>
