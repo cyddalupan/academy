@@ -25,6 +25,7 @@ $remainingSeconds = 9999;
 
 
 $is_practice = isset($_GET['is_practice']) && $_GET['is_practice'] === 'true';
+$is_mock = isset($_GET['is_mock']) && $_GET['is_mock'] === 'true';
 
 try {
 	$pdo = new PDO($dsn, $username, $password);
@@ -135,7 +136,7 @@ try {
                 <!-- Start Page -->
                 <div class="mb-3 lead">
                     <p>
-                        <?php if ($courseId !== 0): ?>
+                        <?php if ($courseId !== 0 || $is_mock): ?>
                             Start your mock exam.
                         <? elseif ($is_practice): ?>
                             Start your practice exam to be well-prepared for the bar.
@@ -148,7 +149,7 @@ try {
                     <input type="hidden" name="userId" id="userIdInput">
                     <input type="hidden" name="courseId" id="courseIdInput">
                     <button id="submitButton" type="submit" name="start" class="btn btn-primary">
-                        <?php if ($courseId !== 0): ?>
+                        <?php if ($courseId !== 0 || $is_mock): ?>
                             Start Mock Exam
                         <? elseif ($is_practice): ?>
                             Start Practice Exam
