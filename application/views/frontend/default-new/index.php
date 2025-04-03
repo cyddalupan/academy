@@ -105,7 +105,7 @@ if($language_dirs){
             background-color: #007bff;
             color: #fff;
             padding: 10px;
-            border-radius: 50%;
+            border-radius: 19px;
             cursor: pointer;
         }
     </style>
@@ -114,6 +114,7 @@ if($language_dirs){
 
 	<div class="chatbox-container" id="chatboxContainer">
 		<div class="chatbox-header" onclick="toggleChatbox()">LawGPT</div>
+			<iframe src="https://academy.reviewcenterphil.com/chat/chat.php" height="300px" width="100%" title="Chat"></iframe>
 		content
 	</div>
 
