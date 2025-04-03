@@ -15,7 +15,7 @@ try {
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $messages = [];
-        for ($i = 1; $i <= 10; $i++) {
+        for ($i = 10; $i >= 1; $i--) {
             $messageVar = "message_$i";
             $replyVar = "reply_$i";
             if (!empty($_POST[$messageVar])) {
