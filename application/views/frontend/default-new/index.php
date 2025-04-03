@@ -97,16 +97,6 @@ if($language_dirs){
             padding: 10px;
             cursor: pointer;
         }
-        .chatbox-content {
-            background-color: #f8f9fa;
-            height: 300px;
-            overflow-y: auto;
-            padding: 10px;
-        }
-        .chatbox-footer {
-            padding: 10px;
-            background-color: #e9ecef;
-        }
         .chatbox-toggle {
             position: fixed;
             bottom: 0;
@@ -120,16 +110,11 @@ if($language_dirs){
         }
     </style>
 
-	<div class="chatbox-toggle" onclick="toggleChatbox()">Chat</div>
+	<div class="chatbox-toggle" onclick="toggleChatbox()">Chat LawGPT</div>
 
 	<div class="chatbox-container" id="chatboxContainer">
-		<div class="chatbox-header" onclick="toggleChatbox()">Support Chat</div>
-		<div class="chatbox-content">
-			<!-- Chat messages will go here -->
-		</div>
-		<div class="chatbox-footer">
-			<!-- Input box goes here -->
-		</div>
+		<div class="chatbox-header" onclick="toggleChatbox()">LawGPT</div>
+		content
 	</div>
 
 	<script>
