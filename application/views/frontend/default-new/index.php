@@ -90,6 +90,7 @@ if($language_dirs){
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             border-radius: 5px;
             overflow: hidden;
+			background: white;
         }
         .chatbox-header {
             background-color: #007bff;
