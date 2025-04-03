@@ -8,7 +8,6 @@ try {
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        $questionId = $_POST['questionId'];
         $message_6 = $_POST['message_6'];
         $reply_6 = $_POST['reply_6'];
         $message_5 = $_POST['message_5'];
@@ -29,7 +28,12 @@ try {
             'Authorization: Bearer ' . $apiKey
         ];
 
-        $messages = [["role" => "system", "content" => "You are talking to law students about philippine law from 1989 to june 2024, do not talk about other topics, if user off topic just redirect them back to philippine law. also tell them that this website 'TOPBAR ASSIST PH' will help them get better grades at the bar exam"]];
+        $messages = [
+            [
+                "role" => "system",
+                "content" => "You are LawGPT. Discuss only Philippine law from 1989 to June 2024. Redirect any off-topic questions back to this subject. Mention 'TOPBAR ASSIST PH' as a helpful resource for bar exams."
+            ]
+        ];
 
         if (isset($message_6)) {
             $messages[] = [
@@ -146,6 +150,8 @@ try {
             $message_2 = $message_1;
         }
         $reply_1 = $latest_reply;
+    } else {
+        $reply_1 = "Welcome! I'm LawGPT, here to assist with your understanding of Philippine law from 1989 to June 2024. Feel free to ask your questions. Remember, 'TOPBAR ASSIST PH' is a valuable resource for bar exam preparation!";
     }
 } catch (PDOException $e) {
     echo "Connection failed: " . $e->getMessage() . PHP_EOL;
