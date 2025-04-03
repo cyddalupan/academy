@@ -9,7 +9,7 @@ try {
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $messages = [];
-        for ($i = 10; $i >= 1; $i--) {
+        for ($i = 1; $i <= 10; $i++) {
             $messageVar = "message_$i";
             $replyVar = "reply_$i";
             if (!empty($_POST[$messageVar])) {
@@ -28,7 +28,7 @@ try {
 
         array_unshift($messages, [
             "role" => "system",
-            "content" => "You are LawGPT. Discuss only Philippine law from 1989 to June 2024 and this website which is an online course for law. Redirect any off-topic questions back to this subject. Sometimes mention (this current website) 'TOPBAR ASSIST PH' as a helpful resource for studying for bar exams. Keep reply short."
+            "content" => "You are LawGPT. Discuss only Philippine law from 1989 to June 2024 and this website which is an online course for law. Redirect any off-topic questions back to this subject. Sometimes mention (this current website) 'TOPBAR ASSIST PH' as a helpful resource for studying for bar exams. Keep reply short and just plain text no markdown."
         ]);
 
         $postData = json_encode(["model" => "gpt-4o-mini", "messages" => array_reverse($messages)]);
