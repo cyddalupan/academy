@@ -206,7 +206,7 @@ try {
                 </div>
                 <div class="d-flex justify-content-end">
                     <div class="chat-bubble chat-bubble-send">
-                    <?php echo $message_6; ?>
+                        <?php echo $message_6; ?>
                     </div>
                 </div>
             <?php endif; ?>
@@ -218,7 +218,7 @@ try {
                 </div>
                 <div class="d-flex justify-content-end">
                     <div class="chat-bubble chat-bubble-send">
-                    <?php echo $message_5; ?>
+                        <?php echo $message_5; ?>
                     </div>
                 </div>
             <?php endif; ?>
@@ -230,7 +230,7 @@ try {
                 </div>
                 <div class="d-flex justify-content-end">
                     <div class="chat-bubble chat-bubble-send">
-                    <?php echo $message_4; ?>
+                        <?php echo $message_4; ?>
                     </div>
                 </div>
             <?php endif; ?>
@@ -242,7 +242,7 @@ try {
                 </div>
                 <div class="d-flex justify-content-end">
                     <div class="chat-bubble chat-bubble-send">
-                    <?php echo $message_3; ?>
+                        <?php echo $message_3; ?>
                     </div>
                 </div>
             <?php endif; ?>
@@ -254,7 +254,7 @@ try {
                 </div>
                 <div class="d-flex justify-content-end">
                     <div class="chat-bubble chat-bubble-send">
-                    <?php echo $message_2; ?>
+                        <?php echo $message_2; ?>
                     </div>
                 </div>
             <?php endif; ?>
@@ -269,17 +269,17 @@ try {
 
         <!-- Chat Input -->
         <form method="post" action="">
-            <input type="hidden" name="reply_6" value="<?php echo $reply_6; ?>">
-            <input type="hidden" name="reply_5" value="<?php echo $reply_5; ?>">
-            <input type="hidden" name="reply_4" value="<?php echo $reply_4; ?>">
-            <input type="hidden" name="reply_3" value="<?php echo $reply_3; ?>">
-            <input type="hidden" name="reply_2" value="<?php echo $reply_2; ?>">
-            <input type="hidden" name="reply_1" value="<?php echo $reply_1; ?>">
-            <input type="hidden" name="message_6" value="<?php echo $message_6; ?>">
-            <input type="hidden" name="message_5" value="<?php echo $message_5; ?>">
-            <input type="hidden" name="message_4" value="<?php echo $message_4; ?>">
-            <input type="hidden" name="message_3" value="<?php echo $message_3; ?>">
-            <input type="hidden" name="message_2" value="<?php echo $message_2; ?>">
+            <input type="hidden" name="reply_6" value="<?php echo isset($reply_6) ? $reply_6 : ''; ?>">
+            <input type="hidden" name="reply_5" value="<?php echo isset($reply_5) ? $reply_5 : ''; ?>">
+            <input type="hidden" name="reply_4" value="<?php echo isset($reply_4) ? $reply_4 : ''; ?>">
+            <input type="hidden" name="reply_3" value="<?php echo isset($reply_3) ? $reply_3 : ''; ?>">
+            <input type="hidden" name="reply_2" value="<?php echo isset($reply_2) ? $reply_2 : ''; ?>">
+            <input type="hidden" name="reply_1" value="<?php echo isset($reply_1) ? $reply_1 : ''; ?>">
+            <input type="hidden" name="message_6" value="<?php echo isset($message_6) ? $message_6 : ''; ?>">
+            <input type="hidden" name="message_5" value="<?php echo isset($message_5) ? $message_5 : ''; ?>">
+            <input type="hidden" name="message_4" value="<?php echo isset($message_4) ? $message_4 : ''; ?>">
+            <input type="hidden" name="message_3" value="<?php echo isset($message_3) ? $message_3 : ''; ?>">
+            <input type="hidden" name="message_2" value="<?php echo isset($message_2) ? $message_2 : ''; ?>">
             <div class="input-group">
                 <input type="text" name="message_1" class="form-control" placeholder="Type a message">
                 <button class="btn btn-primary" type="submit">Send</button>
