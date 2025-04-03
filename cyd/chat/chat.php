@@ -29,7 +29,7 @@ require '../config.php';
         }
 
         .chat-container {
-            height: 300px;
+            height: 236px;
             overflow-y: auto;
         }
     </style>
@@ -71,13 +71,38 @@ require '../config.php';
     </div>
 
     <!-- Chat Input -->
-    <form>
+     <form method="post" action="">
         <div class="input-group">
             <input type="text" class="form-control" placeholder="Type a message">
             <button class="btn btn-primary" type="submit">Send</button>
         </div>
     </form>
 </div>
+<script>
+    document.querySelector('form').addEventListener('submit', function(event) {
+    event.preventDefault();
+
+    const sendButton = event.target.querySelector('button[type="submit"]');
+    sendButton.disabled = true;
+
+    const inputField = event.target.querySelector('input[type="text"]');
+    const message = inputField.value.trim();
+
+    // If there's a message, proceed with submission
+    if (message) {
+        // Simulate a form submission
+        console.log("Message sent: ", message);
+
+        // Reload the page to send the data or handle it via PHP
+        this.submit();
+
+        // Optionally, clear the input field
+        // inputField.value = '';
+    } else {
+        sendButton.disabled = false; // Re-enable button if no message
+    }
+});
+</script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
