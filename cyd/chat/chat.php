@@ -19,7 +19,7 @@ try {
             $messageVar = "message_$i";
             $replyVar = "reply_$i";
             if (!empty($_POST[$replyVar])) {
-                $messages[] = ["role" => "system", "content" => $_POST[$replyVar]];
+                $messages[] = ["role" => "assistant", "content" => $_POST[$replyVar]];
             }
             if (!empty($_POST[$messageVar])) {
                 $messages[] = ["role" => "user", "content" => $_POST[$messageVar]];
