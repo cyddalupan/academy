@@ -9,7 +9,7 @@ try {
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $messages = [];
-        for ($i = 6; $i >= 1; $i--) {
+        for ($i = 10; $i >= 1; $i--) {
             $messageVar = "message_$i";
             $replyVar = "reply_$i";
             if (!empty($_POST[$messageVar])) {
@@ -48,7 +48,7 @@ try {
         $response = json_decode($response, true);
         $latest_reply = $response['choices'][0]['message']['content'];
 
-        for ($i = 6; $i >= 2; $i--) {
+        for ($i = 10; $i >= 2; $i--) {
             $_POST["reply_$i"] = $_POST["reply_" . ($i - 1)] ?? '';
             $_POST["message_$i"] = $_POST["message_" . ($i - 1)] ?? '';
         }
@@ -83,7 +83,7 @@ try {
 
 <div class="container mt-3">
     <div class="chat-container border p-3 mb-2">
-        <?php for ($i = 6; $i >= 1; $i--): 
+        <?php for ($i = 10; $i >= 1; $i--): 
             $replyVar = $_POST["reply_$i"] ?? null;
             $messageVar = $_POST["message_$i"] ?? null;
             if (!empty($replyVar)): ?>
@@ -100,7 +100,7 @@ try {
 
     <!-- Chat Input -->
     <form method="post" action="">
-        <?php for ($i = 6; $i >= 1; $i--): ?>
+        <?php for ($i = 10; $i >= 1; $i--): ?>
             <input type="hidden" name="reply_<?= $i ?>" value="<?= htmlspecialchars($_POST["reply_$i"] ?? ''); ?>">
             <input type="hidden" name="message_<?= $i ?>" value="<?= htmlspecialchars($_POST["message_$i"] ?? ''); ?>">
         <?php endfor; ?>
