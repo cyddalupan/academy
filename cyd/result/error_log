@@ -1,0 +1,11 @@
+[29-Mar-2025 09:57:01 America/Chicago] PHP Parse error:  syntax error, unexpected end of file in /home1/ztbsytte/public_html/academy/cyd/result/result.php on line 114
+[01-Apr-2025 09:08:43 America/Chicago] PHP Warning:  require(../style-over.php): Failed to open stream: No such file or directory in /home1/ztbsytte/public_html/academy/cyd/result/result.php on line 38
+[01-Apr-2025 09:08:43 America/Chicago] PHP Fatal error:  Uncaught Error: Failed opening required '../style-over.php' (include_path='.:/opt/cpanel/ea-php82/root/usr/share/pear') in /home1/ztbsytte/public_html/academy/cyd/result/result.php:38
+Stack trace:
+#0 {main}
+  thrown in /home1/ztbsytte/public_html/academy/cyd/result/result.php on line 38
+[01-Apr-2025 09:08:44 America/Chicago] PHP Warning:  require(../style-over.php): Failed to open stream: No such file or directory in /home1/ztbsytte/public_html/academy/cyd/result/result.php on line 38
+[01-Apr-2025 09:08:44 America/Chicago] PHP Fatal error:  Uncaught Error: Failed opening required '../style-over.php' (include_path='.:/opt/cpanel/ea-php82/root/usr/share/pear') in /home1/ztbsytte/public_html/academy/cyd/result/result.php:38
+Stack trace:
+#0 {main}
+  thrown in /home1/ztbsytte/public_html/academy/cyd/result/result.php on line 38

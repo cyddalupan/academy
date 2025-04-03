@@ -2,7 +2,7 @@
   <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 <?php endif; ?>
 <!--------- footer Section Start--------------->
-<section class="footer wow  animate__animated animate__fadeIn" data-wow-duration="1000" data-wow-delay="500" data-wow-duration="1000" data-wow-delay="600">
+<section class="footer wow  animate__animated animate__fadeIn" data-wow-duration="1000" data-wow-delay="500" data-wow-duration="1000" data-wow-delay="600" style="background:#021487">
     <div class="container">
         <div class="row">
             <div class="col-lg-5 col-md-12 col-sm-12 col-12 mb-5">

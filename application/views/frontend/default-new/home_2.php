@@ -16,24 +16,17 @@
     <div class="container">
         <div class="h-2-banner-text">
             <div class="row">
+                    <img  src="https://reviewcenterphil.com/WhatsApp Image 2025-04-02 at 2.55.21 PM.jpeg" alt="" style="">
+                    
                 <div class="col-lg-2"></div>
-                <div class="col-lg-8">
-                    <?php
-                        $banner_title = site_phrase(get_frontend_settings('banner_title'));
-                        $banner_title_arr = explode(' ', $banner_title);
-                    ?>
-                    <h1>
-                        <?php
-                        foreach($banner_title_arr as $key => $value){
-                            if($key == count($banner_title_arr) - 1){
-                                echo '<span>'.$value.'</span>';
-                            }else{
-                                echo $value.' ';
-                            }
-                        }
-                        ?>
-                    </h1>
-                    <p><?php echo site_phrase(get_frontend_settings('banner_sub_title')); ?></p>
+                <div class="col-lg-12">
+                    
+                    
+             
+                    
+                    
+                    <div style="clear:both;height:20px"></div>
+                  
                     <div class="h-2-search-bar">
                          <form action="<?php echo site_url('home/search'); ?>" method="get">
                             <input class="form-control" type="text" placeholder="<?php echo get_phrase('What do you want to learn'); ?>" name="query">
@@ -41,87 +34,64 @@
                         </form>
                     </div>
                 </div>
+                
+                
+                
                 <div class="col-lg-2">
                 </div>
             </div>
             <div class="banner-image">
                 <div class="row">
-                    <div class="col-lg-3 col-md-3 col-sm-3 col-6">
-                        <div class="image-1">
-                            <img loading="lazy" src="<?php echo site_url('assets/frontend/default-new/'); ?>image/banner-man-1.png" alt="">
-                        </div>
-                    </div>
-                    <div class="col-lg-3 col-md-3 col-sm-3 col-6">
+                    
+                       
+                    <div class="col-lg-6 col-md-6 col-sm-6 col-6" style="margin-top:-50px">
                         <div class="image-1 image-bottom">
-                            <img loading="lazy" src="<?php echo site_url('assets/frontend/default-new/'); ?>image/banner-man-2.png" alt="">
+                           <a href="https://academy.reviewcenterphil.com/page/diagnostic">
+                           <img loading="lazy" src="https://reviewcenterphil.com/WhatsApp Image 2025-04-02 at 2.23.34 PM.jpeg" alt="" style="">
+                           </a>
+                           
+                           
                         </div>
                     </div>
-                    <div class="col-lg-3 col-md-3 col-sm-3 col-6">
-                        <div class="image-3 image-bottom">
-                            <img loading="lazy" src="<?php echo site_url('assets/frontend/default-new/'); ?>image/banner-man-3.png" alt="">
+                    
+                    <div class="col-lg-6 col-md-6 col-sm-6 col-6">
+                        <div class="image-1">
+                             <a href="https://academy.reviewcenterphil.com/home/courses">
+                            <img loading="lazy" src="https://reviewcenterphil.com/WhatsApp Image 2025-04-02 at 2.23.34 PM (1).jpeg" alt="" style="">
+                               </a>
+                               
+                               
                         </div>
                     </div>
-                    <div class="col-lg-3 col-md-3 col-sm-3 col-6">
-                        <div class="image-3">
-                            <img loading="lazy" src="<?php echo site_url('assets/frontend/default-new/'); ?>image/banner-man-4.png" alt="">
-                        </div>
-                    </div>
+                    
+                 
+                 
                 </div>
             </div>
         </div>  
     </div>
 </section>
 
-<section class="world-class mb-0">
+<?php
+
+//for edit
+?>
+
+
+<section class="world-class mb-0" style="background:#021487">
     <div class="container">
         <div class="world-class-content">
             <div class="row">
-                <div class="col-lg-3">
-                    <h1>
-                        <?php
-                        $we_provides = explode(' ', get_phrase('We Provides you World Class Performance'));
-                        foreach($we_provides as $key => $value){
-                            if($key == 0){
-                                echo '<span>'.$value.'</span>';
-                            }else{
-                                echo ' '.$value;
-                            }
-                        }
-                        ?>
-                        <span>.</span>
-                    </h1>
+                
+                <div class="col-lg-12">
+                 
+                      <img  src="https://reviewcenterphil.com/score.png" alt="" style="border:5px solid #021487">
+                    
+                   
                 </div>
-                <div class="col-lg-3 col-md-4 col-sm-4 col-4">
-                    <div class="world-cls-card">
-                        <div class="image-1">
-                            <img loading="lazy" src="<?php echo site_url('assets/frontend/default-new/'); ?>image/1.png" alt="">
-                        </div>
-                        <?php
-                            $status_wise_courses = $this->crud_model->get_status_wise_courses_front();
-                            $number_of_courses = $status_wise_courses['active']->num_rows();
-                        ?>
-                        <h4><?php echo $number_of_courses . ' ' . site_phrase('online_courses'); ?></h4>
-                        <h6><?php echo site_phrase('explore_a_variety_of_fresh_topics'); ?></h6>
-                    </div>  
-                </div>
-                <div class="col-lg-3 col-md-4 col-sm-4 col-4">
-                    <div class="world-cls-card">
-                        <div class="image-2">
-                            <img loading="lazy" src="<?php echo site_url('assets/frontend/default-new/'); ?>image/2.png" alt="">
-                        </div>
-                        <h4><?php echo site_phrase('expert_instruction'); ?></h4>
-                        <h6><?php echo site_phrase('find_the_right_course_for_you'); ?></h6>
-                    </div>                        
-                </div>
-                <div class="col-lg-3 col-md-4 col-sm-4 col-4">
-                    <div class="world-cls-card">
-                        <div class="image-3">
-                            <img loading="lazy" src="<?php echo site_url('assets/frontend/default-new/'); ?>image/3.png" alt="">
-                        </div>
-                        <h4><?php echo site_phrase('Smart solution'); ?></h4>
-                        <h6><?php echo site_phrase('learn_on_your_schedule'); ?></h6>
-                    </div>     
-                </div>
+                
+                
+            
             </div>
         </div>
     </div>
@@ -178,36 +148,13 @@
 <?php if(get_frontend_settings('top_category_section') == 1): ?>
 <!---------- Top Categories Start ------------->
 <section class="courses h-2-courses pb-2 pt-2">
-    <div class="container mt-5">
         <div class="row">
-            <div class="col-lg-3"></div>
-            <div class="col-lg-6">
-                <h1 class="text-center mt-4"><?php echo site_phrase('top_categories'); ?></h1>
-                <p class="text-center mt-4 mb-4"><?php echo site_phrase('These_are_the_most_popular_courses_among_Listen_Courses_learners_worldwide')?></p>
-            </div>
-            <div class="col-lg-3"></div>  
-        </div>
-        <div class="h-2-top-full">
-            <div class="row justify-content-center">
-                <?php $top_10_categories = $this->crud_model->get_top_categories(12, 'sub_category_id'); ?>
-                <?php foreach($top_10_categories as $top_10_category): ?>
-                <?php $category_details = $this->crud_model->get_category_details_by_id($top_10_category['sub_category_id'])->row_array(); ?>
-                    <div class="col-lg-2 col-md-3 col-sm-3 col-4 mb-3">
-                        <div class="h-2-top-body" onclick="redirectTo('<?php echo site_url('home/courses?category='.$category_details['slug']); ?>')">
-                            <div class="h-2-top">
-                                <a href="<?php echo site_url('home/courses?category='.$category_details['slug']); ?>" style="color: #<?php echo rand(100000, 999999); ?>">
-                                    <i class="<?php echo $category_details['font_awesome_class']; ?>"></i>
-                                </a>
-                             </div>
-                             <a href="<?php echo site_url('home/courses?category='.$category_details['slug']); ?>"><?php echo $category_details['name']; ?></a>
-                             <p><?php echo $top_10_category['course_number'].' '.site_phrase('Courses'); ?></p>
-                        </div>
-                    </div>
-                <?php endforeach; ?>
-            </div>
-        </div>
-        
-    </div>
+            <div class="col-lg-8" style="margin:0 auto ">
+            <img  src="https://reviewcenterphil.com/WhatsApp Image 2025-04-02 at 3.14.11 PM.jpeg" alt="" style="border:0px solid #021487;width:800px;margin:20px">
+         </div>  
+        </div>           
+    
+   
 </section>
 <!---------- Top Categories end ------------->
 <?php endif; ?>
