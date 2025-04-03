@@ -76,5 +76,68 @@ if($language_dirs){
 
 	<?php echo get_frontend_settings('embed_code'); ?>
 
+	<!-- Chatbox -->
+	 
+    <style>
+        .chatbox-container {
+            position: fixed;
+            bottom: 0;
+            right: 0;
+            margin: 20px;
+            width: 300px;
+            display: none;
+            border: 1px solid #ccc;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        .chatbox-header {
+            background-color: #007bff;
+            color: #fff;
+            padding: 10px;
+            cursor: pointer;
+        }
+        .chatbox-content {
+            background-color: #f8f9fa;
+            height: 300px;
+            overflow-y: auto;
+            padding: 10px;
+        }
+        .chatbox-footer {
+            padding: 10px;
+            background-color: #e9ecef;
+        }
+        .chatbox-toggle {
+            position: fixed;
+            bottom: 0;
+            right: 0;
+            margin: 20px;
+            background-color: #007bff;
+            color: #fff;
+            padding: 10px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+    </style>
+
+	<div class="chatbox-toggle" onclick="toggleChatbox()">Chat</div>
+
+	<div class="chatbox-container" id="chatboxContainer">
+		<div class="chatbox-header" onclick="toggleChatbox()">Support Chat</div>
+		<div class="chatbox-content">
+			<!-- Chat messages will go here -->
+		</div>
+		<div class="chatbox-footer">
+			<!-- Input box goes here -->
+		</div>
+	</div>
+
+	<script>
+		function toggleChatbox() {
+			const chatbox = document.getElementById('chatboxContainer');
+			chatbox.style.display = chatbox.style.display === 'block' ? 'none' : 'block';
+		}
+	</script>
+
 </body>
 </html>
