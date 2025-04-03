@@ -38,7 +38,6 @@ try {
         ]);
 
         $postData = json_encode(["model" => "gpt-4o-mini", "messages" => $messages]);
-        echo "<pre>".print_r($postData)."</pre>";
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_POST, true);
