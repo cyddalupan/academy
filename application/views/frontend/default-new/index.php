@@ -111,10 +111,10 @@ if($language_dirs){
         }
     </style>
 
-	<div class="chatbox-toggle" onclick="toggleChatbox()">Chat LawGPT</div>
+	<div class="chatbox-toggle" onclick="toggleChatbox()">💬Chat LawGPT</div>
 
 	<div class="chatbox-container" id="chatboxContainer">
-		<div class="chatbox-header" onclick="toggleChatbox()">LawGPT</div>
+		<div class="chatbox-header" onclick="toggleChatbox()">💬LawGPT</div>
 		<iframe src="https://academy.reviewcenterphil.com/cyd/chat/chat.php" height="300px" width="100%" title="Chat"></iframe>
 	</div>
 
