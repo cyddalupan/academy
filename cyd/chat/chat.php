@@ -90,7 +90,7 @@ try {
             <div class="d-flex">
                 <div class="chat-bubble chat-bubble-receive"><?= htmlspecialchars($replyVar); ?></div>
             </div>
-            <?php if (!empty($messageVar)): ?>
+            <?php if (!empty($messageVar) && $i !== 0): ?>
             <div class="d-flex justify-content-end">
                 <div class="chat-bubble chat-bubble-send"><?= htmlspecialchars($messageVar); ?></div>
             </div>
