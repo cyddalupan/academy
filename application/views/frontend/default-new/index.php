@@ -114,8 +114,7 @@ if($language_dirs){
 
 	<div class="chatbox-container" id="chatboxContainer">
 		<div class="chatbox-header" onclick="toggleChatbox()">LawGPT</div>
-			<iframe src="https://academy.reviewcenterphil.com/chat/chat.php" height="300px" width="100%" title="Chat"></iframe>
-		content
+		<iframe src="https://academy.reviewcenterphil.com/chat/chat.php" height="300px" width="100%" title="Chat"></iframe>
 	</div>
 
 	<script>
