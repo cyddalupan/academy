@@ -35,73 +35,73 @@ try {
             ]
         ];
 
-        if (isset($message_6)) {
+        if (isset($message_6) && $message_6 != "") {
             $messages[] = [
                 "role" => "user",
                 "content" => $message_6
             ];
         }
-        if (isset($reply_6)) {
+        if (isset($reply_6) && $reply_6 != "") {
             $messages[] = [
                 "role" => "system",
                 "content" => $reply_6
             ];
         }
-        if (isset($message_5)) {
+        if (isset($message_5) && $message_5 != "") {
             $messages[] = [
                 "role" => "user",
                 "content" => $message_5
             ];
         }
-        if (isset($reply_5)) {
+        if (isset($reply_5) && $reply_5 != "") {
             $messages[] = [
                 "role" => "system",
                 "content" => $reply_5
             ];
         }
-        if (isset($message_4)) {
+        if (isset($message_4) && $message_4 != "") {
             $messages[] = [
                 "role" => "user",
                 "content" => $message_4
             ];
         }
-        if (isset($reply_4)) {
+        if (isset($reply_4) && $reply_4 != "") {
             $messages[] = [
                 "role" => "system",
                 "content" => $reply_4
             ];
         }
-        if (isset($message_3)) {
+        if (isset($message_3) && $message_3 != "") {
             $messages[] = [
                 "role" => "user",
                 "content" => $message_3
             ];
         }
-        if (isset($reply_3)) {
+        if (isset($reply_3) && $reply_3 != "") {
             $messages[] = [
                 "role" => "system",
                 "content" => $reply_3
             ];
         }
-        if (isset($message_2)) {
+        if (isset($message_2) && $message_2 != "") {
             $messages[] = [
                 "role" => "user",
                 "content" => $message_2
             ];
         }
-        if (isset($reply_2)) {
+        if (isset($reply_2) && $reply_2 != "") {
             $messages[] = [
                 "role" => "system",
                 "content" => $reply_2
             ];
         }
-        if (isset($message_1)) {
+        if (isset($message_1) && $message_1 != "") {
             $messages[] = [
                 "role" => "user",
                 "content" => $message_1
             ];
         }
-        if (isset($reply_1)) {
+        if (isset($reply_1) && $reply_1 != "") {
             $messages[] = [
                 "role" => "system",
                 "content" => $reply_1
@@ -129,23 +129,23 @@ try {
         $response = json_decode($response, true);
         $latest_reply = $response['choices'][0]['message']['content'];
 
-        if (isset($reply_5)) {
+        if (isset($reply_5) && $reply_5 != "") {
             $reply_6 = $reply_5;
             $message_6 = $message_5;
         }
-        if (isset($reply_4)) {
+        if (isset($reply_4) && $reply_4 != "") {
             $reply_5 = $reply_4;
             $message_5 = $message_4;
         }
-        if (isset($reply_3)) {
+        if (isset($reply_3) && $reply_3 != "") {
             $reply_4 = $reply_3;
             $message_4 = $message_3;
         }
-        if (isset($reply_2)) {
+        if (isset($reply_2) && $reply_2 != "") {
             $reply_3 = $reply_2;
             $message_3 = $message_2;
         }
-        if (isset($reply_1)) {
+        if (isset($reply_1) && $reply_1 != "") {
             $reply_2 = $reply_1;
             $message_2 = $message_1;
         }
@@ -198,7 +198,7 @@ try {
 
     <div class="container mt-3">
         <div class="chat-container border p-3 mb-2">
-            <?php if (isset($reply_6)): ?>
+            <?php if (isset($reply_6) && $reply_6 != ""): ?>
                 <div class="d-flex">
                     <div class="chat-bubble chat-bubble-receive">
                         <?php echo $reply_6; ?>
@@ -210,7 +210,7 @@ try {
                     </div>
                 </div>
             <?php endif; ?>
-            <?php if (isset($reply_5)): ?>
+            <?php if (isset($reply_5) && $reply_5 != ""): ?>
                 <div class="d-flex">
                     <div class="chat-bubble chat-bubble-receive">
                         <?php echo $reply_5; ?>
@@ -222,7 +222,7 @@ try {
                     </div>
                 </div>
             <?php endif; ?>
-            <?php if (isset($reply_4)): ?>
+            <?php if (isset($reply_4) && $reply_4 != ""): ?>
                 <div class="d-flex">
                     <div class="chat-bubble chat-bubble-receive">
                         <?php echo $reply_4; ?>
@@ -234,7 +234,7 @@ try {
                     </div>
                 </div>
             <?php endif; ?>
-            <?php if (isset($reply_3)): ?>
+            <?php if (isset($reply_3) && $reply_3 != ""): ?>
                 <div class="d-flex">
                     <div class="chat-bubble chat-bubble-receive">
                         <?php echo $reply_3; ?>
@@ -246,7 +246,7 @@ try {
                     </div>
                 </div>
             <?php endif; ?>
-            <?php if (isset($reply_2)): ?>
+            <?php if (isset($reply_2) && $reply_2 != ""): ?>
                 <div class="d-flex">
                     <div class="chat-bubble chat-bubble-receive">
                         <?php echo $reply_2; ?>
@@ -258,7 +258,7 @@ try {
                     </div>
                 </div>
             <?php endif; ?>
-            <?php if (isset($reply_1)): ?>
+            <?php if (isset($reply_1) && $reply_1 != ""): ?>
                 <div class="d-flex">
                     <div class="chat-bubble chat-bubble-receive">
                         <?php echo $reply_1; ?>
