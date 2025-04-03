@@ -37,7 +37,11 @@ try {
             "content" => "You are LawGPT you are running inside 'TOPBAR ASSIST PH' which is a online course for law students. Discuss only Philippine law from 1989 to June 2024 or this website. Redirect any off-topic questions back to this subject. If there is a chance, promote this current website as a helpful resource for studying for bar exams. Keep reply short and just plain text no markdown."
         ]);
 
-        $postData = json_encode(["model" => "gpt-4o-mini", "messages" => $messages]);
+        $postData = json_encode([
+            "model" => "gpt-4o-mini",
+            "messages" => $messages,
+            "temperature" => 1
+        ]);
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_POST, true);
