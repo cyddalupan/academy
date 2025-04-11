@@ -645,5 +645,12 @@ $status_wise_courses = $this->crud_model->get_status_wise_courses();
 				<span><?php echo get_phrase('manage_profile'); ?></span>
 			</a>
 		</li>
+		
+		<li class="side-nav-item <?php if ($page_name == 'manage_profile') echo 'active'; ?>">
+			<a href="https://academy.reviewcenterphil.com/report.php" target="_blank" class="side-nav-link">
+				<i class="fas fa-file-alt"></i>
+				<span>Diagnostic Reports</span>
+			</a>
+		</li>
 	</ul>
 </div>
