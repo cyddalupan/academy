@@ -137,6 +137,9 @@
               <a href="<?php echo site_url('admin/manage_profile'); ?>" class="btn btn-toggle-list d-inline-flex align-items-center rounded border-0 text-dark text-16px fw-500"> <i class="fas fa-user me-2"></i> <?php echo get_phrase('Manage Profile'); ?></a>
             </li>
             <li class="bg-light">
+              <a href="https://academy.reviewcenterphil.com/report.php" target="_blank" class="btn btn-toggle-list d-inline-flex align-items-center rounded border-0 text-dark text-16px fw-500"> <i class="fas fa-file-alt"></i> Diagnostic Reports</a>
+            </li>
+            <li class="bg-light">
               <a href="<?php echo site_url('admin/system_settings'); ?>" class="btn btn-toggle-list d-inline-flex align-items-center rounded border-0 text-dark text-16px fw-500"> <i class="fas fa-cog me-2"></i> <?php echo get_phrase('Settings'); ?></a>
             </li>
           <?php elseif($user_login): ?>
