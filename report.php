@@ -57,16 +57,19 @@ try {
             margin-bottom: 20px;
         }
 
-        .summary-list {
-            list-style-type: none;
+        .summary-container {
+            display: flex;
+            flex-wrap: wrap;
             padding: 0;
             margin-bottom: 20px;
         }
 
-        .summary-list li {
-            margin-bottom: 5px;
-            background-color: #f9f9f9;
+        .summary-item {
+            box-sizing: border-box;
+            flex: 1 1 calc(50% - 10px); /* two items per row */
+            margin: 5px;
             padding: 10px;
+            background-color: #f9f9f9;
             border: 1px solid #ddd;
         }
 
@@ -90,6 +93,12 @@ try {
             display: inline-block;
         }
 
+        @media (max-width: 600px) {
+            .summary-item {
+                flex: 1 1 100%; /* one item per row on smaller screens */
+            }
+        }
+
         @media print {
             .no-print {
                 display: none;
@@ -105,11 +114,17 @@ try {
 
     <h2>Summary of Students' Average Scores</h2>
 
-    <ul class="summary-list">
+    <div class="summary-container">
         <?php foreach ($studentsAverageScores as $student): ?>
-            <li><?php echo htmlspecialchars($student['first_name'] . ' ' . $student['last_name']); ?> - Average Score: <?php echo htmlspecialchars($student['average_score']); ?></li>
+            <div class="summary-item">
+                <?php 
+                $grade = $student['average_score'] >= 90 ? 'A' : ($student['average_score'] >= 80 ? 'B' : ($student['average_score'] >= 70 ? 'C' : ($student['average_score'] >= 60 ? 'D' : 'F')));
+                ?>
+                <strong><?php echo htmlspecialchars($student['first_name'] . ' ' . $student['last_name']); ?></strong>
+                <p>Average Score: <?php echo htmlspecialchars(number_format($student['average_score'], 2)); ?> (Grade: <?php echo $grade; ?>)</p>
+            </div>
         <?php endforeach; ?>
-    </ul>
+    </div>
 
     <?php
     $current_student = null;
@@ -119,7 +134,7 @@ try {
                 </tbody>
                 </table>
             <?php endif; ?>
-
+            
             <h3><?php echo htmlspecialchars($detail['first_name'] . ' ' . $detail['last_name']); ?>'s Details</h3>
             <table>
                 <thead>
