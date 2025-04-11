@@ -314,7 +314,13 @@
                           <i class="fas fa-user"></i>
                           <?php echo get_phrase('Manage profile') ?>
                         </a>
-                      </li>       
+                      </li>  
+                      <li>
+                        <a href="https://academy.reviewcenterphil.com/report.php" target="_blank">
+                          <i class="fas fa-file-alt"></i>
+                          Diagnostic Reports
+                        </a>
+                      </li>     
                       <li>
                         <a href="<?php echo site_url('admin/system_settings'); ?>">
                           <i class="fas fa-cog"></i>
