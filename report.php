@@ -14,23 +14,29 @@ try {
     // Query to get students' average scores with their names, ordered by highest average score
     $stmt = $pdo->prepare(
         "SELECT u.first_name, u.last_name, da.user_id, AVG(da.score) as average_score
-     FROM diag_ans da
-     JOIN users u ON da.user_id = u.id
-     WHERE da.batch_id = 0
-     GROUP BY da.user_id
-     ORDER BY average_score DESC"
+         FROM diag_ans da
+         JOIN users u ON da.user_id = u.id
+         WHERE da.batch_id = 0
+         GROUP BY da.user_id
+         ORDER BY average_score DESC"
     );
     $stmt->execute();
     $studentsAverageScores = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Query to get each student's details including their name
+    // Get a list of user IDs in the order of their average score
+    $orderedUserIds = array_column($studentsAverageScores, 'user_id');
+
+    // Convert the ordered user IDs to a comma-separated string for use in SQL IN clause
+    $orderedUserIdsStr = implode(",", $orderedUserIds);
+
+    // Query to get each student's details including their name, ordered by the average score
     $stmt = $pdo->prepare(
         "SELECT u.first_name, u.last_name, da.user_id, q.q_question, da.answer, da.score, da.feedback
-     FROM diag_ans da
-     JOIN users u ON da.user_id = u.id
-     JOIN quiz_new q ON da.question_id = q.q_id
-     WHERE da.batch_id = 0
-     ORDER BY da.user_id, da.question_id"
+         FROM diag_ans da
+         JOIN users u ON da.user_id = u.id
+         JOIN quiz_new q ON da.question_id = q.q_id
+         WHERE da.batch_id = 0
+         ORDER BY FIELD(da.user_id, $orderedUserIdsStr), da.question_id"
     );
     $stmt->execute();
     $studentsDetails = $stmt->fetchAll(PDO::FETCH_ASSOC);
