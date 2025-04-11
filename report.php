@@ -11,13 +11,14 @@ try {
     $pdo = new PDO($dsn, $username, $password);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-    // Query to get students' average scores with their names
+    // Query to get students' average scores with their names, ordered by highest average score
     $stmt = $pdo->prepare(
         "SELECT u.first_name, u.last_name, da.user_id, AVG(da.score) as average_score
      FROM diag_ans da
      JOIN users u ON da.user_id = u.id
      WHERE da.batch_id = 0
-     GROUP BY da.user_id"
+     GROUP BY da.user_id
+     ORDER BY average_score DESC"
     );
     $stmt->execute();
     $studentsAverageScores = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -56,16 +57,17 @@ try {
             margin-bottom: 20px;
         }
 
-        .summary-card {
-            border: 1px solid #ddd;
-            padding: 15px;
+        .summary-list {
+            list-style-type: none;
+            padding: 0;
             margin-bottom: 20px;
-            background-color: #f9f9f9;
         }
 
-        .summary-card h3,
-        .summary-card p {
-            margin: 5px 0;
+        .summary-list li {
+            margin-bottom: 5px;
+            background-color: #f9f9f9;
+            padding: 10px;
+            border: 1px solid #ddd;
         }
 
         table {
@@ -103,12 +105,11 @@ try {
 
     <h2>Summary of Students' Average Scores</h2>
 
-    <?php foreach ($studentsAverageScores as $student): ?>
-        <div class="summary-card">
-            <h3><?php echo htmlspecialchars($student['first_name'] . ' ' . $student['last_name']); ?></h3>
-            <p>Average Score: <?php echo htmlspecialchars($student['average_score']); ?></p>
-        </div>
-    <?php endforeach; ?>
+    <ul class="summary-list">
+        <?php foreach ($studentsAverageScores as $student): ?>
+            <li><?php echo htmlspecialchars($student['first_name'] . ' ' . $student['last_name']); ?> - Average Score: <?php echo htmlspecialchars($student['average_score']); ?></li>
+        <?php endforeach; ?>
+    </ul>
 
     <?php
     $current_student = null;
