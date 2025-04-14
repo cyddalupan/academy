@@ -104,10 +104,8 @@ function createUserCourse($pdo, $userId, $courseId, $totalQuestions, $timer_minu
     return $stmt->execute();
 }
 
-function updateRemainingSeconds($pdo, $userId, $remainingSeconds, $courseId, $timer_minutes, $totalQuestions)
+function updateRemainingSeconds($pdo, $userId, $remainingSeconds, $courseId)
 {
-    $remainingSeconds = ($timer_minutes * 60) * $totalQuestions; 
-
     $query = "UPDATE custom_users_course SET remaining_seconds = :remainingSeconds WHERE user_id = :userId AND course_id = :courseId";
     $stmt = $pdo->prepare($query);
     $stmt->bindParam(':remainingSeconds', $remainingSeconds, PDO::PARAM_INT);
