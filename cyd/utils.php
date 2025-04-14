@@ -176,11 +176,9 @@ function processResponse($pdo, $userId, $questionId, $userInput, $courseId, $res
 }
 
 function manageTimer($pdo, $userId, $courseId, $is_practice, $totalQuestions, $timer_minutes) {
-    echo "<br>manageTimer";
 	if ($is_practice) {
 		return 9999;
 	} elseif (isset($_POST['remaining-seconds'])) {
-        echo "<br>manageTimer POST Value:" . $_POST['remaining-seconds'];
 		$remainingSeconds = $_POST['remaining-seconds'];
 		updateRemainingSeconds($pdo, $userId, $remainingSeconds, $courseId);
 		return $remainingSeconds;

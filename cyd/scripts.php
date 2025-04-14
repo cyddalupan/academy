@@ -9,12 +9,10 @@
             const courseIdInput = document.getElementById('courseIdInput');
 
             if (userId && userId !== 0) {
-                console.log('User ID:', userId);
                 userIdInput.value = userId;
                 courseIdInput.value = courseId || 0;
             } else {
                 const message = "Please log in to access the diagnostic exam.";
-                console.log(message);
                 contentDiv.style.display = 'none';
                 document.body.insertAdjacentHTML('afterbegin', `<h1>${message}</h1>`);
             }
@@ -64,7 +62,6 @@
 
             minutesElement.textContent = String(minutes).padStart(2, '0');
             secondsElement.textContent = String(seconds).padStart(2, '0');
-            console.log("### countdownTime", countdownTime);
             countdownTime--;
         }, 1000);
 
@@ -74,8 +71,7 @@
             const loadingSpinner = document.getElementById('loadingSpinner');
 
             function handleButtonClick() {
-                remainingSecondsInput.value = countdownTime >= 0 ? countdownTime : 0; // Save remaining seconds
-                console.log("### remainingSecondsInput.value", remainingSecondsInput.value);
+                remainingSecondsInput.value = countdownTime >= 0 ? countdownTime : 0;
                 loadingSpinner.style.display = 'block'; // Add Spinner
             }
 
