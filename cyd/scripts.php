@@ -64,7 +64,7 @@
 
             minutesElement.textContent = String(minutes).padStart(2, '0');
             secondsElement.textContent = String(seconds).padStart(2, '0');
-
+            console.log("### countdownTime", countdownTime);
             countdownTime--;
         }, 1000);
 
@@ -75,6 +75,7 @@
 
             function handleButtonClick() {
                 remainingSecondsInput.value = countdownTime >= 0 ? countdownTime : 0; // Save remaining seconds
+                console.log("### remainingSecondsInput.value", remainingSecondsInput.value);
                 loadingSpinner.style.display = 'block'; // Add Spinner
             }
 
