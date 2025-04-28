@@ -16,7 +16,7 @@ function callOpenAI($userInput, $expected)
     ];
 
     $postData = json_encode([
-        "model" => "gpt-4o",
+        "model" => "gpt-4.1",
         "messages" => [
             [
                 "role" => "system",
