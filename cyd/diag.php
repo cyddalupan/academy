@@ -167,7 +167,7 @@ try {
                     <input type="hidden" id="remaining-seconds" name="remaining-seconds">
                     <div class="form-group mb-3">
                         <p><?= htmlspecialchars($question); ?></p>
-                        <textarea name="userInput" class="form-control bg-light border" rows="4" placeholder="Your answer here..."></textarea>
+                        <textarea name="userInput" class="form-control bg-light border" rows="8" placeholder="Your answer here..."></textarea>
                     </div>
                     <button id="submitButton" type="submit" class="btn btn-primary">Submit Answer</button>
                     <button id="skipButton" skip="submitButton" type="submit" name="skip" class="btn btn-secondary ms-2">Skip</button>
