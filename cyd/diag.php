@@ -197,7 +197,7 @@ try {
                                 <hr>
                                 <p><strong>Answer:</strong> <?= htmlspecialchars($answer['answer']); ?></p>
                                 <hr>
-                                <p><strong>Feedback:</strong> <?= nl2br($answer['feedback']); ?></p>
+                                <p><strong>Feedback:</strong> <?= $answer['feedback']; ?></p>
                             </div>
                         </div>
                     </div>
