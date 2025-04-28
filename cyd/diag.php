@@ -125,7 +125,7 @@ try {
                 <!-- Result Page -->
                 <div class="alert alert-secondary p-3">
                     <p><strong>Score:</strong> <?= htmlspecialchars($score); ?></p>
-                    <><strong>Feedback:</strong> <?= $answer['feedback']; ?></p>
+                    <p><strong>Feedback:</strong> <?= $feedback; ?></p>
                     <form method="post" action="">
                         <input type="hidden" name="userId" id="userIdInput">
                         <input type="hidden" name="courseId" id="courseIdInput">
