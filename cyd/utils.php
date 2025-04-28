@@ -20,7 +20,7 @@ function callOpenAI($userInput, $expected)
         "messages" => [
             [
                 "role" => "system",
-                "content" => "Trigger the score_answer function 100% no need for reply. You compare user_answer to expected_answer you give score (100 if they are really close) and feedback (base feedback on answer, legal basis, application, conclusion and grammar)"
+                "content" => "Trigger the score_answer function 100% no need for reply. Compare user_answer to expected_answer and provide a score (100 for close answers and 0 for unrelated answers) and feedback based on Conclusion, Legal Basis, Logic, and Grammar & Composition. Include Other Suggestions without points for any additional recommendations not covered above."
             ],
             [
                 "role" => "system",
@@ -48,7 +48,7 @@ function callOpenAI($userInput, $expected)
                         ],
                         "feedback" => [
                             "type" => "string",
-                            "description" => "Feedback to user. base feedback on answer, legal basis, application, grammar and conclusion. use html instead of markdown."
+                            "description" => "Provide feedback for the user based on specified criteria, formatted in an HTML table. Each row should include the specific basis, explanation, and score for that criterion.\n\n# Criteria\n\n- **Conclusion**: Evaluate the response's conclusion. If the student's conclusion differs from the predetermined one but is considered correct by the teacher, full credit should be awarded.\n- **Legal Basis**: Analyze the statement of doctrine (law, jurisprudence, or both). Ensure the necessary legal elements are determined for completeness before evaluation.\n- **Logic**: Connect doctrines to facts in the question, ensuring the logical flow. Relevant facts must be identified and linked appropriately by the teacher.\n- **Grammar & Composition**: Assess grammatical accuracy and composition.\n\nEnsure the total score aligns with a pre-defined scale.\n\n# Additional Insights\n\nInclude any suggestions or observations not covered by the primary criteria. These should be conveyed as additional insights or improvements without a numeric score.\n\n# Output Format\n\nThe feedback must be formatted as an HTML table, with each row including:\n- **Basis**: The criterion being evaluated.\n- **Explanation**: A detailed explanation of the evaluation.\n- **Score**: The numerical score assigned.\n\nThe table should be structured like:\n\n<table>\n    <tr>\n        <th>Basis</th>\n        <th>Explanation</th>\n        <th>Score</th>\n    </tr>\n    <tr>\n        <td>[Basis]</td>\n        <td>[Explanation]</td>\n        <td>[Score]</td>\n    </tr>\n    [Additional Rows for Each Criterion]\n</table>\n\nInclude a section for Additional Insights without a numeric score, formatted as plain text following the table."
                         ]
                     ],
                     "required" => ["score", "feedback"]
