@@ -92,10 +92,11 @@ function callOpenAI($userInput, $expected)
                         # Scoring
                         
                         Each criterion has an assigned weight:
-                        - Conclusion: 4.25/5
-                        - Legal Basis: 8.5/10
-                        - Logic: 12.75/15
-                        - Grammar & Composition: 17/20
+                        - Conclusion: <score>/5
+                        - Legal Basis: <score>/10
+                        - Logic: <score>/15
+                        - Grammar & Composition: <score>/20
+                        - give total but should match the percentage
                         
                         Ensure the total score sums to 42.5/50, which corresponds to 100% if perfect.
                         EOD
