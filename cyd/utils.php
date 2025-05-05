@@ -16,8 +16,7 @@ function callOpenAI($userInput, $expected)
     ];
 
     $postData = json_encode([
-        "model" => "gpt-4.1",
-        "temperature" => 0,
+        "model" => "o4-mini",
         "messages" => [
             [
                 "role" => "system",
@@ -49,7 +48,57 @@ function callOpenAI($userInput, $expected)
                         ],
                         "feedback" => [
                             "type" => "string",
-                            "description" => "Provide feedback for the user based on specified criteria, formatted in an GetBootstrap HTML table. Each row should include the specific basis, explanation, and score for that criterion. Score sum should equal to total score \n\n# Criteria\n\n- **Conclusion**: Evaluate the response's conclusion. If the student's conclusion differs from the predetermined one but is considered correct by the teacher, full credit should be awarded.\n- **Legal Basis**: Analyze the statement of doctrine (law, jurisprudence, or both). Ensure the necessary legal elements are determined for completeness before evaluation.\n- **Logic**: Connect doctrines to facts in the question, ensuring the logical flow. Relevant facts must be identified and linked appropriately by the teacher.\n- **Grammar & Composition**: Assess grammatical accuracy and composition.\n\nEnsure the total score aligns with a pre-defined scale.\n\n# Additional Insights\n\nInclude any suggestions or observations not covered by the primary criteria. These should be conveyed as additional insights or improvements without a numeric score.\n\n# Output Format\n\nThe feedback must be formatted as an HTML table, with each row including:\n- **Basis**: The criterion being evaluated.\n- **Explanation**: A detailed explanation of the evaluation.\n- **Score**: The numerical score assigned.\n\nThe table should be structured like:\n\n<table class='table'>\n    <tr>\n        <th>Basis</th>\n        <th>Explanation</th>\n        <th>Score</th>\n    </tr>\n    <tr>\n        <td>[Basis]</td>\n        <td>[Explanation]</td>\n        <td>[Score]</td>\n    </tr>\n    [Additional Rows for Each Criterion]\n</table>\n\nAfter the table, add a section called 'Additional Insights' as plain text (no numeric score). Share helpful feedback or tips there. But if the user scored perfectly, just congratulate them instead."
+                            "description" => <<<EOD
+                        Provide feedback for the user based on specified criteria, formatted in a GetBootstrap HTML table. Each row should include the specific basis, explanation, and score for that criterion. Scores should reflect the new weighted system, and the total should add up to the maximum possible score defined by the criteria.
+                        
+                        # Criteria
+                        
+                        - **Conclusion**: Evaluate the response's conclusion. If the student's conclusion differs from the predetermined one but is considered correct by the teacher, full credit should be awarded.
+                        - **Legal Basis**: Analyze the statement of doctrine (law, jurisprudence, or both). Ensure the necessary legal elements are determined for completeness before evaluation.
+                        - **Logic**: Connect doctrines to facts in the question, ensuring the logical flow. Relevant facts must be identified and linked appropriately by the teacher.
+                        - **Grammar & Composition**: Assess grammatical accuracy and composition.
+                        
+                        Ensure the total score aligns with the new weighted scale.
+                        
+                        # Additional Insights
+                        
+                        Include any suggestions or observations not covered by the primary criteria. These should be conveyed as additional insights or improvements without a numeric score.
+                        
+                        # Output Format
+                        
+                        The feedback must be formatted as an HTML table, with each row including:
+                        - **Basis**: The criterion being evaluated.
+                        - **Explanation**: A detailed explanation of the evaluation.
+                        - **Score**: The numerical score assigned.
+                        
+                        The table should be structured like:
+                        
+                        <table class='table'>
+                            <tr>
+                                <th>Basis</th>
+                                <th>Explanation</th>
+                                <th>Score</th>
+                            </tr>
+                            <tr>
+                                <td>[Basis]</td>
+                                <td>[Explanation]</td>
+                                <td>[Score]</td>
+                            </tr>
+                            [Additional Rows for Each Criterion]
+                        </table>
+                        
+                        After the table, add a section called 'Additional Insights' as plain text (no numeric score). Share helpful feedback or tips there. But if the user scored perfectly, just congratulate them instead.
+                        
+                        # Scoring
+                        
+                        Each criterion has an assigned weight:
+                        - Conclusion: 4.25/5
+                        - Legal Basis: 8.5/10
+                        - Logic: 12.75/15
+                        - Grammar & Composition: 17/20
+                        
+                        Ensure the total score sums to 42.5/50, which corresponds to 100% if perfect.
+                        EOD
                         ]
                     ],
                     "required" => ["score", "feedback"]
@@ -88,7 +137,8 @@ function calculateAverageScore($answers, $totalQuestions)
     return $count > 0 ? $totalScore / $count : 0;
 }
 
-function summarizeFeedback($answers) {
+function summarizeFeedback($answers)
+{
     $apiKey = OPEN_AI;
     $url = 'https://api.openai.com/v1/chat/completions';
 
@@ -127,7 +177,8 @@ function summarizeFeedback($answers) {
     return $response['choices'][0]['message']['content'];
 }
 
-function ai_email_diagnose($answers, $fullname) {
+function ai_email_diagnose($answers, $fullname)
+{
     $apiKey = OPEN_AI;
     $url = 'https://api.openai.com/v1/chat/completions';
 
@@ -136,7 +187,7 @@ function ai_email_diagnose($answers, $fullname) {
         'Authorization: Bearer ' . $apiKey
     ];
 
-    $messages = [["role" => "system", "content" => "Provide a student (name:".$fullname.") an assessment email (just the body of the email in HTML format) content based on the following feedback and scores, but do not follow the feedback format, this needs to convince the student to use our online course 'TopBar Asssist PH'. note: the result will be emailed dirrectly to do not put variable or text thats needed to be changed"]];
+    $messages = [["role" => "system", "content" => "Provide a student (name:" . $fullname . ") an assessment email (just the body of the email in HTML format) content based on the following feedback and scores, but do not follow the feedback format, this needs to convince the student to use our online course 'TopBar Asssist PH'. note: the result will be emailed dirrectly to do not put variable or text thats needed to be changed"]];
 
     foreach ($answers as $answer) {
         $messages[] = [
@@ -166,51 +217,55 @@ function ai_email_diagnose($answers, $fullname) {
     return $response['choices'][0]['message']['content'];
 }
 
-function processResponse($pdo, $userId, $questionId, $userInput, $courseId, $response, $is_practice, &$score, &$feedback) {
-	$choice = $response['choices'][0]['message']['function_call'];
-	$decodedParams = json_decode($choice['arguments'], true);
-	$score = $decodedParams['score'];
-	$feedback = $decodedParams['feedback'];
-	if (!$is_practice) {
-		insertAnswer($pdo, $userId, $questionId, $userInput, $courseId, $score, $feedback);
-	}
+function processResponse($pdo, $userId, $questionId, $userInput, $courseId, $response, $is_practice, &$score, &$feedback)
+{
+    $choice = $response['choices'][0]['message']['function_call'];
+    $decodedParams = json_decode($choice['arguments'], true);
+    $score = $decodedParams['score'];
+    $feedback = $decodedParams['feedback'];
+    if (!$is_practice) {
+        insertAnswer($pdo, $userId, $questionId, $userInput, $courseId, $score, $feedback);
+    }
 }
 
-function manageTimer($pdo, $userId, $courseId, $is_practice, $totalQuestions, $timer_minutes) {
-	if ($is_practice) {
-		return 9999;
-	} elseif (isset($_POST['remaining-seconds'])) {
-		$remainingSeconds = $_POST['remaining-seconds'];
-		updateRemainingSeconds($pdo, $userId, $remainingSeconds, $courseId);
-		return $remainingSeconds;
-	} else {
-		$existingData = getRemainingSeconds($pdo, $userId, $courseId);
-		if ($existingData) {
-			return $existingData['remaining_seconds'];
-		} else {
-			createUserCourse($pdo, $userId, $courseId, $totalQuestions, $timer_minutes);
-			return ($timer_minutes * 60) * $totalQuestions;
-		}
-	}
+function manageTimer($pdo, $userId, $courseId, $is_practice, $totalQuestions, $timer_minutes)
+{
+    if ($is_practice) {
+        return 9999;
+    } elseif (isset($_POST['remaining-seconds'])) {
+        $remainingSeconds = $_POST['remaining-seconds'];
+        updateRemainingSeconds($pdo, $userId, $remainingSeconds, $courseId);
+        return $remainingSeconds;
+    } else {
+        $existingData = getRemainingSeconds($pdo, $userId, $courseId);
+        if ($existingData) {
+            return $existingData['remaining_seconds'];
+        } else {
+            createUserCourse($pdo, $userId, $courseId, $totalQuestions, $timer_minutes);
+            return ($timer_minutes * 60) * $totalQuestions;
+        }
+    }
 }
 
-function calculateProgress($pdo, $userId, $courseId, $is_practice, $remainingSeconds, $totalQuestions, &$answerCount) {
-	if ($is_practice) {
-		return 0;
-	} else {
-		$answerCount = countUserAnswers($pdo, $userId, $courseId);
-		return $remainingSeconds === 0 ? 100 : ($answerCount / $totalQuestions) * 100;
-	}
+function calculateProgress($pdo, $userId, $courseId, $is_practice, $remainingSeconds, $totalQuestions, &$answerCount)
+{
+    if ($is_practice) {
+        return 0;
+    } else {
+        $answerCount = countUserAnswers($pdo, $userId, $courseId);
+        return $remainingSeconds === 0 ? 100 : ($answerCount / $totalQuestions) * 100;
+    }
 }
 
-function finalizeAssessment($pdo, $userId, $courseId, $totalQuestions, &$answers, &$averageScore) {
-	$answers = getAllUserAnswers($pdo, $userId, $courseId);
-	$averageScore = calculateAverageScore($answers, $totalQuestions);
-	if (!hasSummary($pdo, $userId, $courseId)) {
-		$summary = summarizeFeedback($answers);
-		updateSummary($pdo, $userId, $courseId, $averageScore, $summary);
+function finalizeAssessment($pdo, $userId, $courseId, $totalQuestions, &$answers, &$averageScore)
+{
+    $answers = getAllUserAnswers($pdo, $userId, $courseId);
+    $averageScore = calculateAverageScore($answers, $totalQuestions);
+    if (!hasSummary($pdo, $userId, $courseId)) {
+        $summary = summarizeFeedback($answers);
+        updateSummary($pdo, $userId, $courseId, $averageScore, $summary);
         $user = getCurrentUser($pdo, $userId);
-		$ai_email_diagnose = ai_email_diagnose($answers, $user['first_name'] . " " . $user['last_name']);
+        $ai_email_diagnose = ai_email_diagnose($answers, $user['first_name'] . " " . $user['last_name']);
         send_email_with_phpmailer($pdo, $user['email'], 'Diagnostic Exam', $ai_email_diagnose, 'ehajjonlinephilippines@gmail.com');
-	}
+    }
 }

@@ -124,7 +124,8 @@ try {
                 <?php if ($isPostRequest && isset($_POST['userInput']) && $progressPercentage !== 100 && !isset($_POST['skip'])): ?>
                 <!-- Result Page -->
                 <div class="alert alert-secondary p-3">
-                    <p><strong>Score:</strong> <?= htmlspecialchars($score); ?></p>
+                    <p><strong>Score:</strong> <?= htmlspecialchars($score); ?>%</p>
+                    <p><strong>Your Answer:</strong> <?= $userInput; ?></p>
                     <p><strong>Feedback:</strong> <?= $feedback; ?></p>
                     <form method="post" action="">
                         <input type="hidden" name="userId" id="userIdInput">
@@ -187,7 +188,7 @@ try {
                             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                                 data-bs-target="#collapse-<?= $index; ?>" aria-expanded="false"
                                 aria-controls="collapse-<?= $index; ?>">
-                                Score: <?= $answer['score']; ?>
+                                Score: <?= $answer['score']; ?>%
                             </button>
                         </h2>
                         <div id="collapse-<?= $index; ?>" class="accordion-collapse collapse"
