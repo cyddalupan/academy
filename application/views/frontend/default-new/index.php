@@ -13,6 +13,7 @@ if($language_dirs){
 <!DOCTYPE html>
 <html lang="<?php echo getIsoCode('english'); ?>" dir="<?php echo $language_dir; ?>">
 <head>
+    <link rel="stylesheet" href="<?= base_url('widget/styles.css') ?>">
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5.0, minimum-scale=0.86">
@@ -75,9 +76,8 @@ if($language_dirs){
 	?>
 
 	<?php echo get_frontend_settings('embed_code'); ?>
-
 	<!-- Chatbox -->
-	 
+	<!-- 
     <style>
         .chatbox-container {
             position: fixed;
@@ -117,12 +117,16 @@ if($language_dirs){
 		<div class="chatbox-header" onclick="toggleChatbox()">💬LawGPT</div>
 		<iframe src="https://academy.reviewcenterphil.com/cyd/chat/chat.php" height="300px" width="100%" title="Chat"></iframe>
 	</div>
+    -->
 
+    <script src="<?= base_url('widget/runtime.js') ?>"></script>
+    <script src="<?= base_url('widget/polyfills.js') ?>"></script>
+    <script type="module" src="<?= base_url('widget/main.js') ?>"></script>
 	<script>
-		function toggleChatbox() {
-			const chatbox = document.getElementById('chatboxContainer');
-			chatbox.style.display = chatbox.style.display === 'block' ? 'none' : 'block';
-		}
+		//function toggleChatbox() {
+	//		const chatbox = document.getElementById('chatboxContainer');
+	//		chatbox.style.display = chatbox.style.display === 'block' ? 'none' : 'block';
+	//	}
 	</script>
 
 </body>
