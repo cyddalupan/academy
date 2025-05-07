@@ -98,7 +98,7 @@ function callOpenAI(array $messages): array
 
     $payload = [
         'model'    => 'gpt-4.1',  // or gpt-4, gpt-3.5-turbo, etc.
-        'temperature' => "0",
+        'temperature' => 0,
         'messages' => $messages
     ];
 
