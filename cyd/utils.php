@@ -21,7 +21,33 @@ function callOpenAI($userInput, $expected)
         "messages" => [
             [
                 "role" => "system",
-                "content" => "Trigger the score_answer function 100% no need for reply. Compare user_answer to expected_answer and provide a score (100 for close answers and 0 for unrelated answers) and feedback based on Conclusion, Legal Basis, Logic, and Grammar & Composition. Include Other Suggestions without points for any additional recommendations not covered above."
+                "content" => <<<EOD
+                Compare the `user_answer` to `expected_answer` and provide an accurate score and detailed feedback.
+
+                - **Scoring Criteria:**
+                - **Full Alignment:** Provide a score of 100 for answers that fully convey the same content and logical value, even if wording differs.
+                - **Strong Similarity:** Use a scale of 70-95 for answers that closely align in content and value but have minor differences.
+                - **Mismatch:** For unrelated answers, provide a score of 0-30.
+                
+                - Base the score on the following dimensions:
+                - **Conclusion Accuracy**
+                - **Legal Basis**
+                - **Logic**
+                - **Grammar & Composition**
+
+                - **Feedback:**
+                - For each dimension, provide feedback that analyzes strengths and areas for improvement.
+                - Include additional recommendations as "Other Suggestions" without points.
+
+                # Output Format
+
+                Provide the score as an integer and detailed feedback separated by dimensions. Use bullet points for feedback under each dimension.
+
+                # Notes
+
+                - Ensure no dimension guarantees a perfect score without thorough evaluation.
+                - Adjust the scale to reflect nuanced differences in content and logical alignment rather than exact wording.
+                EOD
             ],
             [
                 "role" => "system",
@@ -99,7 +125,7 @@ function callOpenAI($userInput, $expected)
                         - Grammar & Composition: <score>/20
                         - give total but should match the percentage
                         
-                        Ensure the total score sums to 42.5/50, which corresponds to 100% if perfect.
+                        Ensure the total score sums to <total>/50, which corresponds to 100% if perfect.
                         EOD
                         ]
                     ],
