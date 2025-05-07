@@ -97,7 +97,8 @@ function callOpenAI(array $messages): array
     $url    = 'https://api.openai.com/v1/chat/completions';
 
     $payload = [
-        'model'    => 'o4-mini',  // or gpt-4, gpt-3.5-turbo, etc.
+        'model'    => 'gpt-4.1',  // or gpt-4, gpt-3.5-turbo, etc.
+        'temperature' => "0",
         'messages' => $messages
     ];
 
