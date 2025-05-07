@@ -48,7 +48,9 @@ try {
             $userInput = $_POST['userInput'];
             $questionId = $_POST['questionId'];
     
-            $expected = getExpectedAnswer($pdo, $questionId);
+            $quiz_result = getExpectedAnswer($pdo, $questionId);
+            $expected = $quiz_result['q_answer'];
+            $question = $quiz_result['q_question'];
     
             $response = callOpenAI($userInput, $expected);
     
@@ -125,6 +127,7 @@ try {
                 <!-- Result Page -->
                 <div class="alert alert-secondary p-3">
                     <p><strong>Score:</strong> <?= htmlspecialchars($score); ?>%</p>
+                    <p><strong>Question:</strong> <?= htmlspecialchars($question); ?>%</p>
                     <p><strong>Your Answer:</strong> <?= $userInput; ?></p>
                     <p><strong>Feedback:</strong> <?= $feedback; ?></p>
                     <form method="post" action="">

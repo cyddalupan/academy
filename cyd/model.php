@@ -38,11 +38,11 @@ function fetchRandomQuestion($pdo, $userId, $courseId, $is_practice = false)
 
 function getExpectedAnswer($pdo, $questionId)
 {
-    $query = "SELECT q_answer FROM quiz_new WHERE q_id = :questionId";
+    $query = "SELECT q_answer, q_question FROM quiz_new WHERE q_id = :questionId";
     $stmt = $pdo->prepare($query);
     $stmt->bindParam(':questionId', $questionId, PDO::PARAM_INT);
     $stmt->execute();
-    return $stmt->fetchColumn();
+    return $stmt->fetch(PDO::FETCH_ASSOC); // fetch as array
 }
 
 function insertAnswer($pdo, $userId, $questionId, $userInput, $course_id, $score, $feedback)
