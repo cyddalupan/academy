@@ -30,10 +30,10 @@ function callOpenAI($userInput, $expected)
                 - **Mismatch:** For unrelated answers, provide a score of 0-30.
                 
                 - Base the score on the following dimensions:
-                - **Conclusion Accuracy**
+                - **Answer**
                 - **Legal Basis**
-                - **Logic**
-                - **Grammar & Composition**
+                - **Application**
+                - **Conclusion and grammar** 
 
                 - **Feedback:**
                 - For each dimension, provide feedback that analyzes strengths and areas for improvement.
@@ -68,64 +68,53 @@ function callOpenAI($userInput, $expected)
                 "description" => "Always Trigger this to score how close user answer to expected answer",
                 "parameters" => [
                     "type" => "object",
-                    "properties" => [
-                        "score" => [
-                            "type" => "integer",
-                            "description" => "Score of the user on how close the answer to expected from 1 to 100. 100 is perfect."
-                        ],
-                        "feedback" => [
-                            "type" => "string",
-                            "description" => <<<EOD
-                        Provide feedback for the user based on specified criteria, formatted in a GetBootstrap HTML table. Each row should include the specific basis, explanation, and score for that criterion. Scores should reflect the new weighted system, and the total should add up to the maximum possible score defined by the criteria.
-                        
+                "properties" => [
+                    "score" => [
+                        "type" => "integer",
+                "description" => "Score of the user on how close the answer to expected from 1 to 100. 100 is perfect."
+                    ],
+                    "feedback" => [
+                        "type" => "string",
+                        "description" => <<<EOD
+                        Provide feedback for the user based on specified criteria, formatted in a GetBootstrap HTML table. Each row should include the specific basis, explanation, and score for that criterion. All scores should be 5/5 for each criterion.
+
                         # Criteria
-                        
-                        - **Conclusion**: Evaluate the response's conclusion. If the student's conclusion differs from the predetermined one but is considered correct by the teacher, full credit should be awarded.
+
+                        - **Answer**: Evaluate the response's ability to answer the question posed. Full credit if the answer fully addresses the question.
                         - **Legal Basis**: Analyze the statement of doctrine (law, jurisprudence, or both). Ensure the necessary legal elements are determined for completeness before evaluation.
-                        - **Logic**: Connect doctrines to facts in the question, ensuring the logical flow. Relevant facts must be identified and linked appropriately by the teacher.
-                        - **Grammar & Composition**: Assess grammatical accuracy and composition.
-                        
-                        Ensure the total score aligns with the new weighted scale.
-                        
+                        - **Application**: Assess how doctrines are applied to the facts in the question. Identify and link relevant facts appropriately.
+                        - **Conclusion & Grammar**: Evaluate the response's conclusion. If the student’s conclusion differs from the predetermined one but is considered correct, full credit should be awarded.  Assess grammatical accuracy.
+
+                        Ensure each score is 5/5 with a total score of 25, corresponding to 100% if perfect.
+
                         # Additional Insights
-                        
-                        Include any suggestions or observations not covered by the primary criteria. These should be conveyed as additional insights or improvements without a numeric score.
-                        
+
+                        Include any suggestions or observations not covered by the primary criteria. These should be conveyed as additional insights or improvements without a numeric score. If the user scored perfectly, just congratulate them instead.
+
                         # Output Format
-                        
+
                         The feedback must be formatted as an HTML table, with each row including:
                         - **Basis**: The criterion being evaluated.
                         - **Explanation**: A detailed explanation of the evaluation.
                         - **Score**: The numerical score assigned.
-                        
+
                         The table should be structured like:
-                        
+
                         <table class='table'>
-                            <tr>
-                                <th>Basis</th>
-                                <th>Explanation</th>
-                                <th>Score</th>
-                            </tr>
-                            <tr>
-                                <td>[Basis]</td>
-                                <td>[Explanation]</td>
-                                <td>[Score]</td>
-                            </tr>
-                            [Additional Rows for Each Criterion]
+                        <tr>
+                        <th>Basis</th>
+                        <th>Explanation</th>
+                        <th>Score</th>
+                        </tr>
+                        <tr>
+                        <td>[Basis]</td>
+                        <td>[Explanation]</td>
+                        <td>[Score]</td>
+                        </tr>
+                        [Additional Rows for Each Criterion]
                         </table>
-                        
+
                         After the table, add a section called 'Additional Insights' as plain text (no numeric score). Share helpful feedback or tips there. But if the user scored perfectly, just congratulate them instead.
-                        
-                        # Scoring
-                        
-                        Each criterion has an assigned weight:
-                        - Conclusion: <score>/5
-                        - Legal Basis: <score>/10
-                        - Logic: <score>/15
-                        - Grammar & Composition: <score>/20
-                        - give total but should match the percentage
-                        
-                        Ensure the total score sums to <total>/50, which corresponds to 100% if perfect.
                         EOD
                         ]
                     ],

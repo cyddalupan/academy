@@ -1,1 +1,13 @@
 [04-May-2025 11:23:38 America/Chicago] PHP Warning:  Array to string conversion in /home1/ztbsytte/public_html/academy/cyd/api/lawgpt.php on line 35
+[06-Jun-2025 12:29:20 America/Chicago] PHP Warning:  require(../models.php): Failed to open stream: No such file or directory in /home1/ztbsytte/public_html/academy/cyd/api/exam.php on line 7
+[06-Jun-2025 12:29:20 America/Chicago] PHP Fatal error:  Uncaught Error: Failed opening required '../models.php' (include_path='.:/opt/cpanel/ea-php82/root/usr/share/pear') in /home1/ztbsytte/public_html/academy/cyd/api/exam.php:7
+Stack trace:
+#0 {main}
+  thrown in /home1/ztbsytte/public_html/academy/cyd/api/exam.php on line 7
+[06-Jun-2025 12:32:36 America/Chicago] PHP Warning:  require(../../config.php): Failed to open stream: No such file or directory in /home1/ztbsytte/public_html/academy/cyd/api/exam.php on line 5
+[06-Jun-2025 12:32:36 America/Chicago] PHP Fatal error:  Uncaught Error: Failed opening required '../../config.php' (include_path='.:/opt/cpanel/ea-php82/root/usr/share/pear') in /home1/ztbsytte/public_html/academy/cyd/api/exam.php:5
+Stack trace:
+#0 {main}
+  thrown in /home1/ztbsytte/public_html/academy/cyd/api/exam.php on line 5
+[06-Jun-2025 21:46:37 America/Chicago] PHP Parse error:  Invalid body indentation level (expecting an indentation level of at least 24) in /home1/ztbsytte/public_html/academy/cyd/utils.php on line 81
+[06-Jun-2025 21:50:56 America/Chicago] PHP Parse error:  Invalid body indentation level (expecting an indentation level of at least 24) in /home1/ztbsytte/public_html/academy/cyd/utils.php on line 81

@@ -119,9 +119,6 @@ if($language_dirs){
 	</div>
     -->
 
-    <script src="<?= base_url('widget/runtime.js') ?>"></script>
-    <script src="<?= base_url('widget/polyfills.js') ?>"></script>
-    <script type="module" src="<?= base_url('widget/main.js') ?>"></script>
 	<script>
 		//function toggleChatbox() {
 	//		const chatbox = document.getElementById('chatboxContainer');
