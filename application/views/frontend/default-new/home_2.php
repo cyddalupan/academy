@@ -46,8 +46,8 @@
                        
                     <div class="col-lg-6 col-md-6 col-sm-6 col-6" style="margin-top:-50px">
                         <div class="image-1 image-bottom">
-                           <a href="https://academy.reviewcenterphil.com/page/diagnostic">
-                           <img loading="lazy" src="https://reviewcenterphil.com/WhatsApp Image 2025-04-02 at 2.23.34 PM.jpeg" alt="" style="">
+                           <a href="https://topbarassist.reviewcenterphil.com/page/diagnostic">
+                           <img loading="lazy" src="https://reviewcenterphil.com/diag1.png" alt="" style="">
                            </a>
                            
                            
@@ -56,8 +56,8 @@
                     
                     <div class="col-lg-6 col-md-6 col-sm-6 col-6">
                         <div class="image-1">
-                             <a href="https://academy.reviewcenterphil.com/home/courses">
-                            <img loading="lazy" src="https://reviewcenterphil.com/WhatsApp Image 2025-04-02 at 2.23.34 PM (1).jpeg" alt="" style="">
+                             <a href="https://topbarassist.reviewcenterphil.com/page/lawgpt">
+                            <img loading="lazy" src="https://reviewcenterphil.com/gpt1.png" alt="" style="">
                                </a>
                                
                                
@@ -85,7 +85,7 @@
                 
                 <div class="col-lg-12">
                  
-                      <img  src="https://reviewcenterphil.com/score.png" alt="" style="border:5px solid #021487">
+                      <img  src="https://reviewcenterphil.com/score.png" alt="" style="border:5px solid #021487;border:0px solid red;width:90%">
                     
                    
                 </div>
@@ -150,7 +150,7 @@
 <section class="courses h-2-courses pb-2 pt-2">
         <div class="row">
             <div class="col-lg-8" style="margin:0 auto ">
-            <img  src="https://reviewcenterphil.com/WhatsApp Image 2025-04-02 at 3.14.11 PM.jpeg" alt="" style="border:0px solid #021487;width:800px;margin:20px">
+            <img  src="https://reviewcenterphil.com/WhatsApp Image 2025-04-02 at 3.14.11 PM.jpeg" alt="" style="border:0px solid #021487;margin:20px;border:0px solid red;width:50%">
          </div>  
         </div>           
     
