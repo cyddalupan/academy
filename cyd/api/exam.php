@@ -7,7 +7,7 @@ require '../utils.php';    // callOpenAI(), processResponse(), etc.
 require '../model.php';   // fetchRandomQuestion(), getExpectedAnswer(), insertAnswer(), etc.
 
 define('EXAM_TIMER_MINUTES', 12);
-define('EXAM_MAX_QUESTIONS', 6);
+define('EXAM_MAX_QUESTIONS', 15);
 define('DIAG_MAX_QUESTIONS', 8);
 
 try {
