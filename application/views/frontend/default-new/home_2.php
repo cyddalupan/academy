@@ -150,8 +150,7 @@
 <section class="courses h-2-courses pb-2 pt-2">
         <div class="row">
             <div class="col-lg-8" style="margin:0 auto ">
-            <img  src="https://reviewcenterphil.com/WhatsApp Image 2025-04-02 at 3.14.11 PM.jpeg" alt="" style="border:0px solid #021487;margin:20px;border:0px solid red;width:50%">
-         </div>  
+       </div>  
         </div>           
     
    
