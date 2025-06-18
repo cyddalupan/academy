@@ -22,7 +22,7 @@ $cart_items = $this->session->userdata('cart_items');
               </li>
               <div class="vartical"></div>
               <li class="nav-item px-2">
-                <a href="mailto:<?php echo get_settings('system_email'); ?>"><i class="fas fa-envelope"></i> <?php echo get_settings('system_email'); ?></a>z
+                <a href="mailto:<?php echo get_settings('system_email'); ?>"><i class="fas fa-envelope"></i> <?php echo get_settings('system_email'); ?></a>
               </li>
             </ul>
           </div>

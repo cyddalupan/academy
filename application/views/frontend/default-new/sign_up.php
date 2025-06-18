@@ -44,21 +44,24 @@
                                 <input class="form-control" id="password" type="password" name="password" placeholder="<?php echo get_phrase('Enter your valid password'); ?>" required>
                             </div>
                         </div>
-
-                        <?php if(get_settings('allow_instructor')): ?>
-                            <div class="mb-4">
-                                <input id="instructor" type="checkbox" onchange="$('#become-instructor-fields').toggle()" name="instructor" value="yes" <?php echo isset($_GET['instructor']) ? 'checked':''; ?>>
-                                <label for="instructor"><?php echo get_phrase('Apply to Become an instructor'); ?></label>
-                            </div>
-
-                            <div id="become-instructor-fields" class="<?php echo isset($_GET['instructor']) ?  '':'d-hidden'; ?>">
-                                <div class="mb-4">
+                        
+                        
+                        <div class="mb-4">
                                     <h5><?php echo get_phrase('Phone'); ?></h5>
                                     <div class="position-relative">
                                         <i class="fas fa-phone"></i>
-                                        <input class="form-control" id="phone" type="phone" name="phone" placeholder="<?php echo get_phrase('Enter your phone number'); ?>">
+                                        <input class="form-control" id="phone" type="phone" name="phone" placeholder="<?php echo get_phrase('Enter your phone number'); ?>" required>
                                     </div>
                                 </div>
+
+                        <?php if(get_settings('allow_instructor')): ?>
+                            <div class="mb-4">
+                                <input id="instructor" type="hidden" onchange="$('#become-instructor-fields').toggle()" name="instructor" value="yes" <?php echo isset($_GET['instructor']) ? 'checked':''; ?>>
+                      
+                            </div>
+
+                            <div id="become-instructor-fields" class="<?php echo isset($_GET['instructor']) ?  '':'d-hidden'; ?>">
+                                
                                 <div class="mb-4">
                                     <h5><?php echo get_phrase('Document'); ?> <small>(doc, docs, pdf, txt, png, jpg, jpeg)</small></h5>
                                     <div class="position-relative">
