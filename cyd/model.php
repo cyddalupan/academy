@@ -163,3 +163,4 @@ function getCurrentUser($pdo, $user_id) {
     $stmt->execute(['id' => $user_id]);
     return $stmt->fetch(PDO::FETCH_ASSOC);
 }
+

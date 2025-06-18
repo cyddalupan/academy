@@ -5,6 +5,7 @@ header('Content-Type: application/json');
 require '../config.php';   // defines $dsn, $username, $password, ENV, OPEN_AI, etc.
 require '../utils.php';    // callOpenAI(), processResponse(), etc.
 require '../model.php';   // fetchRandomQuestion(), getExpectedAnswer(), insertAnswer(), etc.
+require '../mail.php';
 
 define('EXAM_TIMER_MINUTES', 12);
 define('EXAM_MAX_QUESTIONS', 15);
@@ -147,7 +148,6 @@ try {
                 'remainingTimeSeconds' => $remaining
             ]);
             break;
-
         case 'answer':
             $questionId = isset($input['questionId']) ? (int)$input['questionId'] : 0;
             $answerContent = $input['answerContent'] ?? '';
@@ -160,6 +160,7 @@ try {
                 exit;
             }
 
+            // update timer
             $stmt = $pdo->prepare("UPDATE custom_users_course SET remaining_seconds = :remaining WHERE user_id = :userId AND course_id = :examId");
             $stmt->execute([
                 'remaining' => $remainingTime,
@@ -167,21 +168,62 @@ try {
                 'examId' => $examId
             ]);
 
+            // process the answer
             $exp = getExpectedAnswer($pdo, $questionId);
             $expected = $exp['q_answer'] ?? '';
-
             $response = callOpenAI($answerContent, $expected);
 
             $score = 0;
             $feedback = '';
             processResponse($pdo, $userId, $questionId, $answerContent, $examId, $response, false, $score, $feedback);
 
+            // ---- FINALIZE LOGIC ----
+            // Determine how many questions should be answered for this exam
+            $isDiagnostic = ($examId == 0);
+            $maxQuestions = $isDiagnostic ? DIAG_MAX_QUESTIONS : EXAM_MAX_QUESTIONS;
+
+            // Count answers for this user (with matching batch/exam) in diag_ans
+            if ($isDiagnostic) {
+                $stmt = $pdo->prepare("SELECT COUNT(*) FROM diag_ans WHERE user_id = :userId AND batch_id = 0");
+                $stmt->execute(['userId' => $userId]);
+            } else {
+                $stmt = $pdo->prepare("SELECT COUNT(*) FROM diag_ans WHERE user_id = :userId AND batch_id = :examId");
+                $stmt->execute(['userId' => $userId, 'examId' => $examId]);
+            }
+            $answeredCount = (int)$stmt->fetchColumn();
+
+            // If all questions are answered, finalize
+            if ($answeredCount >= $maxQuestions) {
+                // fetch all answers and scores
+                if ($isDiagnostic) {
+                    $stmt = $pdo->prepare("SELECT question_id, answer, score FROM diag_ans WHERE user_id = :userId AND batch_id = 0");
+                    $stmt->execute(['userId' => $userId]);
+                } else {
+                    $stmt = $pdo->prepare("SELECT question_id, answer, score FROM diag_ans WHERE user_id = :userId AND batch_id = :examId");
+                    $stmt->execute(['userId' => $userId, 'examId' => $examId]);
+                }
+                $answers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+                // compute average score (excluding null scores)
+                $totalScore = 0;
+                $scoredCount = 0;
+                foreach ($answers as $a) {
+                    if ($a['score'] !== null) {
+                        $totalScore += (int)$a['score'];
+                        $scoredCount++;
+                    }
+                }
+                $averageScore = $scoredCount ? ($totalScore / $scoredCount) : 0;
+
+                // Finalize!
+                finalizeAssessment($pdo, $userId, $examId, $answeredCount, $answers, $averageScore);
+            }
+
             echo json_encode([
                 'feedback' => $feedback,
                 'score' => $score
             ]);
             break;
-
         default:
             http_response_code(400);
             echo json_encode(['error' => 'Unknown action']);

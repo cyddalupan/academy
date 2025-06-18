@@ -19,7 +19,7 @@ $totalQuestions = 6;
 $answers = [];
 $averageScore = 0;
 $timer_minutes = 12;
-$score = 0;
+$score = 100;
 $feedback = "";
 $remainingSeconds = 9999;
 
