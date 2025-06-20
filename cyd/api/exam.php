@@ -8,7 +8,7 @@ require '../model.php';   // fetchRandomQuestion(), getExpectedAnswer(), insertA
 require '../mail.php';
 
 define('EXAM_TIMER_MINUTES', 12);
-define('EXAM_MAX_QUESTIONS', 15);
+define('EXAM_MAX_QUESTIONS', 999);
 define('DIAG_MAX_QUESTIONS', 8);
 
 try {
