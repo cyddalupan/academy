@@ -55,9 +55,9 @@
                                 </div>
 
                         <?php if(get_settings('allow_instructor')): ?>
-                            <div class="mb-4">
-                                <input id="instructor" type="hidden" onchange="$('#become-instructor-fields').toggle()" name="instructor" value="yes" <?php echo isset($_GET['instructor']) ? 'checked':''; ?>>
-                      
+                             <div class="mb-4">
+                                <input id="instructor" type="checkbox" onchange="$('#become-instructor-fields').toggle()" name="instructor" value="yes" <?php echo isset($_GET['instructor']) ? 'checked':''; ?>>
+                                <label for="instructor"><?php echo get_phrase('Apply to Become an instructor'); ?></label>
                             </div>
 
                             <div id="become-instructor-fields" class="<?php echo isset($_GET['instructor']) ?  '':'d-hidden'; ?>">
