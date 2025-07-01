@@ -16,6 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 try {
     $pdo = new PDO($dsn, $username, $password, [
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC, // Good practice for consistent fetching
     ]);
 } catch (PDOException $e) {
     http_response_code(500);
@@ -32,16 +33,34 @@ if (!$user_id) {
 }
 
 // Check for paid record in offline_payment
+// Let's simplify the conditions for amount and rely on SQL's implicit type conversion
+// Also, fetch the amount for debugging purposes if needed.
 $stmt = $pdo->prepare(
-    "SELECT 1
+    "SELECT amount
      FROM offline_payment
      WHERE user_id = :user_id
        AND amount IS NOT NULL
-       AND TRIM(amount) <> ''
-       AND CAST(amount AS DECIMAL(20,2)) > 0
+       AND amount > 0
      LIMIT 1"
 );
-$stmt->execute(['user_id' => $user_id]);
-$hasPaid = $stmt->fetch(PDO::FETCH_ASSOC) ? true : false;
 
-echo json_encode(['paid' => $hasPaid]);
+try {
+    $stmt->execute(['user_id' => $user_id]);
+    $result = $stmt->fetch();
+
+    // Debugging: uncomment the next two lines to see what was fetched
+    // error_log("SQL Result for user_id $user_id: " . print_r($result, true));
+
+    $hasPaid = $result ? true : false;
+
+    echo json_encode(['paid' => $hasPaid]);
+
+} catch (PDOException $e) {
+    http_response_code(500);
+    echo json_encode(['error' => 'Database query failed: ' . $e->getMessage()]);
+    // Log the error for server-side debugging
+    error_log("Error executing payment status query: " . $e->getMessage());
+    exit;
+}
+
+?>
