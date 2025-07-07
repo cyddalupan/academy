@@ -9,7 +9,7 @@ header('Access-Control-Allow-Methods: POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
 header('Content-Type: application/json; charset=utf-8');
 
-require '../config.php';  // defines OPEN_AI, $dsn, $username, $password
+require '../config.php';  // defines X_AI, $dsn, $username, $password
 
 // Handle preflight OPTIONS request
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
@@ -42,6 +42,7 @@ if (!$thread_id || !$user_id || !$conversation) {
 
 // Build messages array and store user messages in database
 $messages = [];
+$recap_messages = [];
 foreach ($conversation as $m) {
     $from = strtolower(trim($m['from'] ?? 'user'));
     $text = $m['text'] ?? '';
@@ -74,27 +75,33 @@ foreach ($conversation as $m) {
         'role' => $role,
         'content' => $text
     ];
+    
+    // Collect messages for recap
+    if ($role !== 'system') {
+        $recap_messages[] = [
+            'role' => $role,
+            'content' => $text
+        ];
+    }
 }
 
 // Prepend system prompt
 array_unshift($messages, [
     'role' => 'system',
-    'content' => <<<'EOT'
-Ensure all responses contain only the content that would reside within the body of an HTML Bootstrap structure formatted using Font Awesome for icons, and relate solely to Philippine law. Redirect off-topic questions back to relevant subjects and verify compliance with the article number.
+    'content' => 'Ensure all responses are formatted in HTML using Bootstrap 5 classes and Font Awesome icons, containing only content that would reside within a <div> tag, excluding <html> or <body> tags. Focus solely on Philippine law, redirecting off-topic questions to relevant legal subjects and verifying compliance with the provided article number. Activate web search when needed to fetch the latest data on Philippine laws to ensure accuracy.
 
-- Fully understand the user's request and prioritize the latest created law before giving a detailed answer.
+- Fully understand the user\'s request and prioritize the latest created law before providing a detailed answer.
 - Collect all necessary information or clarify questions.
 - Provide detailed answers with basis, examples, and all relevant information, beginning with a conclusion summary or key finding.
-- Include a suggestion for a related or potentially needed next topic at the bottom of each response.
-- Keep all content focused on relevant Philippine law topics only.
+- Include a suggestion for a related or potentially needed next topic at the bottom of each response in a Bootstrap alert.
+- At the end of each response, include a recap section in a Bootstrap card that summarizes the key points of the conversation so far in a productive way to maintain context for future replies. The recap should be concise, relevant to Philippine law, and formatted in HTML with Bootstrap 5 and Font Awesome icons.
 
-# Output Format
-All outputs must consist only of content typically found inside the body of HTML Bootstrap and Font Awesome, excluding the actual `<html>` or `<body>` tags. No content should be outside a Bootstrap structure. There should be no use of markdown or code block indicators. Ensure the article number provided is accurate.
+Output Format:
+All outputs must use Bootstrap 5 components and Font Awesome icons, starting with a <div> tag. No markdown or line breaks outside HTML structure. Ensure the article number provided is accurate.
 
-# Notes
-- Ensure that all references to articles are correct and precise.
-- Maintain strict topic relevance to specified Philippine law topics.
-EOT
+Notes:
+- Ensure all references to articles are correct and precise.
+- Maintain strict topic relevance to specified Philippine law topics.'
 ]);
 
 // Get today's message count for the user
@@ -114,9 +121,9 @@ try {
     exit;
 }
 
-// Call OpenAI
+// Call xAI
 try {
-    $ai = callOpenAI($messages);
+    $ai = callXAI($messages);
     $reply = $ai['choices'][0]['message']['content'] ?? '';
     
     // Store AI response in database
@@ -153,15 +160,16 @@ try {
 /**
  * Fire off a chat-completions request
  */
-function callOpenAI(array $messages): array
+function callXAI(array $messages): array
 {
-    $apiKey = OPEN_AI;
-    $url = 'https://api.openai.com/v1/chat/completions';
+    $apiKey = X_AI;
+    $url = 'https://api.x.ai/v1/chat/completions';
 
     $payload = [
-        'model' => 'gpt-4.1',
+        'model' => 'grok-3',
         'temperature' => 0,
-        'messages' => $messages
+        'messages' => $messages,
+        'enable_search' => true // Enable web search for latest data
     ];
 
     $ch = curl_init($url);
@@ -183,7 +191,7 @@ function callOpenAI(array $messages): array
 
     $decoded = json_decode($resp, true);
     if (isset($decoded['error'])) {
-        throw new Exception('OpenAI API Error: ' . json_encode($decoded['error']));
+        throw new Exception('xAI API Error: ' . json_encode($decoded['error']));
     }
     return $decoded;
 }
