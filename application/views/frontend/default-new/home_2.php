@@ -46,7 +46,7 @@
 
                     <div class="col-lg-6 col-md-6 col-sm-6 col-6" style="margin-top:-50px">
                         <div class="image-1 image-bottom">
-                           <a href="https://topbarassist.reviewcenterphil.com/page/diagnostic">
+                           <a href="https://academy.reviewcenterphil.com/page/diagnostic">
                            <img loading="lazy" src="https://reviewcenterphil.com/WhatsApp Image 2025-04-02 at 2.23.34 PM.jpeg" alt="" style="">
                            </a>
 
@@ -56,7 +56,7 @@
 
                     <div class="col-lg-6 col-md-6 col-sm-6 col-6">
                         <div class="image-1">
-                             <a href="https://topbarassist.reviewcenterphil.com/page/lawgpt">
+                             <a href="https://academy.reviewcenterphil.com/page/lawgpt">
                             <img loading="lazy" src="https://reviewcenterphil.com/gpt1.png" alt="" style="">
                                </a>
 
