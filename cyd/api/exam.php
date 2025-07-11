@@ -1,6 +1,16 @@
 <?php
 // exam.php
+// Set CORS headers
+header('Access-Control-Allow-Origin: *'); // Replace '*' with specific origin in production (e.g., 'http://your-angular-app.com')
+header('Access-Control-Allow-Methods: POST, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type, X-Requested-With, Authorization');
 header('Content-Type: application/json');
+
+// Handle preflight OPTIONS requests
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(204);
+    exit;
+}
 
 // Ensure the request method is POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
