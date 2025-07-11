@@ -38,13 +38,18 @@
   $(document).ready(function () {
      var table = $('#server_side_users_data').DataTable({
       responsive: true,
-      "processing": true,
-      "serverSide": true,
+      "processing": false,
+      "serverSide": false,
+      "paging": false,
+      "lengthChange": false,
+      "info": false,
       "ajax":{
         "url": "<?php echo base_url('admin/server_side_users_data') ?>",
         "dataType": "json",
         "type": "POST",
-        "data":{  '<?php echo $this->security->get_csrf_token_name(); ?>' : '<?php echo $this->security->get_csrf_hash(); ?>' }
+        "data":{  
+          '<?php echo $this->security->get_csrf_token_name(); ?>' : '<?php echo $this->security->get_csrf_hash(); ?>' 
+        }
       },
       "columns": [
         { "data": "key" },
@@ -55,17 +60,17 @@
         { "data": "enrolled_courses" },
         { "data": "action" }
       ],
-      dom: 'Bfrtip',  // This positions the buttons
+      dom: 'Bfrtip',
       buttons: [
         {
             extend: 'csv',
             text: 'Export as CSV',
             filename: function () {
-                var currentTime = new Date().toISOString().slice(0, 19).replace(/[-T:]/g, '_');  // Get current time and format it
-                return 'students-' + currentTime;  // File name will be "users-YYYY_MM_DD_HH_MM_SS"
+                var currentTime = new Date().toISOString().slice(0, 19).replace(/[-T:]/g, '_');
+                return 'students-' + currentTime;
             },
             exportOptions: {
-              columns: ':not(:last-child):not(:nth-child(2))'  // Exclude the last column ("action") and the second column ("photo")
+              columns: ':not(:last-child):not(:nth-child(2))'
             }
         }
       ] 

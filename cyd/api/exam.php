@@ -2,6 +2,44 @@
 // exam.php
 header('Content-Type: application/json');
 
+// Ensure the request method is POST
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    http_response_code(405);
+    echo json_encode(['error' => 'Method not allowed; use POST']);
+    exit;
+}
+
+// Read the raw input
+$rawInput = file_get_contents('php://input');
+
+// Decode the JSON input
+$input = json_decode($rawInput, true);
+
+// Check if JSON decoding was successful
+if (json_last_error() !== JSON_ERROR_NONE || !is_array($input)) {
+    http_response_code(400);
+    echo json_encode(['error' => 'Invalid or missing JSON payload']);
+    exit;
+}
+
+// Extract action and userId
+$action = $input['action'] ?? '';
+$userId = isset($input['userId']) ? (int)$input['userId'] : 0;
+
+// Validate action and userId
+if (empty($action) || $userId <= 0) {
+    http_response_code(400);
+    echo json_encode([
+        'error' => 'Invalid request',
+        'details' => "action='" . $action . "', userId=" . $userId
+    ]);
+    exit;
+}
+
+// Log the request for debugging
+//error_log("Received request - IP: " . ($_SERVER['REMOTE_ADDR'] ?? 'unknown') . " - Payload: " . $rawInput);
+
+// Include necessary files
 require '../config.php';   // defines $dsn, $username, $password, ENV, OPEN_AI, etc.
 require '../utils.php';    // callOpenAI(), processResponse(), etc.
 require '../model.php';   // fetchRandomQuestion(), getExpectedAnswer(), insertAnswer(), etc.
@@ -12,16 +50,7 @@ define('EXAM_MAX_QUESTIONS', 999);
 define('DIAG_MAX_QUESTIONS', 8);
 
 try {
-    $input = json_decode(file_get_contents('php://input'), true);
-    $action = $input['action'] ?? '';
-    $userId = isset($input['userId']) ? (int)$input['userId'] : 0;
     $examId = isset($input['examId']) ? (int)$input['examId'] : 0;
-
-    if (!$action || !$userId) {
-        http_response_code(400);
-        echo json_encode(['error' => 'Missing action or userId']);
-        exit;
-    }
 
     $pdo = new PDO($dsn, $username, $password);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -33,7 +62,7 @@ try {
             $totalTime = 0;
 
             if ($examId == 0) {
-                // 1. Get all answered questions for this user (batch_id=0)
+                // Get all answered questions for this user (batch_id=0)
                 $stmt = $pdo->prepare("
                     SELECT da.question_id, da.answer, da.feedback, da.score, q.q_question
                     FROM diag_ans da
@@ -54,7 +83,7 @@ try {
                     $answeredIds[] = (int)$row['question_id'];
                 }
 
-                // 2. For remaining slots, pick random unanswered questions from any course
+                // For remaining slots, pick random unanswered questions from any course
                 $slotsLeft = DIAG_MAX_QUESTIONS - count($answered);
                 if ($slotsLeft > 0) {
                     $q = $pdo->prepare("
@@ -78,7 +107,7 @@ try {
                 $totalQuestions = count($questions);
                 $totalTime = EXAM_TIMER_MINUTES * 60 * $totalQuestions;
             } else {
-                // 1. Get all answered questions for this user/exam
+                // Get all answered questions for this user/exam
                 $stmt = $pdo->prepare("
                     SELECT da.question_id, da.answer, da.feedback, da.score, q.q_question
                     FROM diag_ans da
@@ -99,7 +128,7 @@ try {
                     $answeredIds[] = (int)$row['question_id'];
                 }
 
-                // 2. For remaining slots, pick random unanswered questions from that course
+                // For remaining slots, pick random unanswered questions from that course
                 $slotsLeft = EXAM_MAX_QUESTIONS - count($answered);
                 if ($slotsLeft > 0) {
                     $q = $pdo->prepare("
@@ -160,7 +189,7 @@ try {
                 exit;
             }
 
-            // update timer
+            // Update timer
             $stmt = $pdo->prepare("UPDATE custom_users_course SET remaining_seconds = :remaining WHERE user_id = :userId AND course_id = :examId");
             $stmt->execute([
                 'remaining' => $remainingTime,
@@ -168,7 +197,7 @@ try {
                 'examId' => $examId
             ]);
 
-            // process the answer
+            // Process the answer
             $exp = getExpectedAnswer($pdo, $questionId);
             $expected = $exp['q_answer'] ?? '';
             $response = callOpenAI($answerContent, $expected);
@@ -177,12 +206,11 @@ try {
             $feedback = '';
             processResponse($pdo, $userId, $questionId, $answerContent, $examId, $response, false, $score, $feedback);
 
-            // ---- FINALIZE LOGIC ----
-            // Determine how many questions should be answered for this exam
+            // Finalize logic
             $isDiagnostic = ($examId == 0);
             $maxQuestions = $isDiagnostic ? DIAG_MAX_QUESTIONS : EXAM_MAX_QUESTIONS;
 
-            // Count answers for this user (with matching batch/exam) in diag_ans
+            // Count answers for this user
             if ($isDiagnostic) {
                 $stmt = $pdo->prepare("SELECT COUNT(*) FROM diag_ans WHERE user_id = :userId AND batch_id = 0");
                 $stmt->execute(['userId' => $userId]);
@@ -194,7 +222,7 @@ try {
 
             // If all questions are answered, finalize
             if ($answeredCount >= $maxQuestions) {
-                // fetch all answers and scores
+                // Fetch all answers and scores
                 if ($isDiagnostic) {
                     $stmt = $pdo->prepare("SELECT question_id, answer, score FROM diag_ans WHERE user_id = :userId AND batch_id = 0");
                     $stmt->execute(['userId' => $userId]);
@@ -204,7 +232,7 @@ try {
                 }
                 $answers = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-                // compute average score (excluding null scores)
+                // Compute average score (excluding null scores)
                 $totalScore = 0;
                 $scoredCount = 0;
                 foreach ($answers as $a) {
@@ -215,7 +243,7 @@ try {
                 }
                 $averageScore = $scoredCount ? ($totalScore / $scoredCount) : 0;
 
-                // Finalize!
+                // Finalize assessment
                 finalizeAssessment($pdo, $userId, $examId, $answeredCount, $answers, $averageScore);
             }
 
@@ -238,3 +266,4 @@ try {
     echo json_encode(['error' => 'Server error: ' . $e->getMessage()]);
     exit;
 }
+?>
