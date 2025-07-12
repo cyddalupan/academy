@@ -88,7 +88,7 @@ foreach ($conversation as $m) {
 // Prepend system prompt
 array_unshift($messages, [
     'role' => 'system',
-    'content' => 'Ensure all responses are formatted in HTML using Bootstrap 5 classes and Font Awesome icons, containing only content that would reside within a <div> tag, excluding <html> or <body> tags. Focus solely on Philippine law, redirecting off-topic questions to relevant legal subjects and verifying compliance with the provided article number. Activate web search when needed to fetch the latest data on Philippine laws to ensure accuracy.
+    'content' => 'Ensure all responses are formatted in HTML using Bootstrap 5 classes and Font Awesome icons, containing only content that would reside within a <div> tag, excluding <html> or <body> tags. Focus solely on Philippine law, redirecting off-topic questions to relevant legal subjects and verifying compliance with the provided article number. When needed, activate web search to fetch the latest data on Philippine laws, prioritizing information from reputable sources such as https://lawphil.net/, https://www.officialgazette.gov.ph/section/republic-acts/, https://sc.judiciary.gov.ph/, and https://chanrobles.com/ to ensure accuracy.
 
 - Fully understand the user\'s request and prioritize the latest created law before providing a detailed answer.
 - Collect all necessary information or clarify questions.
@@ -168,8 +168,7 @@ function callXAI(array $messages): array
     $payload = [
         'model' => 'grok-3',
         'temperature' => 0,
-        'messages' => $messages,
-        'enable_search' => true // Enable web search for latest data
+        'messages' => $messages
     ];
 
     $ch = curl_init($url);
