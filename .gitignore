@@ -33,3 +33,4 @@ Thumbs.db
 /cyd/config.php
 /uploads/install.sql
 /widget
+/application/views/frontend/default-new/home_2.php
