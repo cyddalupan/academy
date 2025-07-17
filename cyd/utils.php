@@ -6,23 +6,21 @@ if (ENV == "dev") {
 }
 
 function logMessage($message) {
-    $logDir = __DIR__ . '/../logs'; // Resolves to /home1/ztbsytte/public_html/topbarassist/logs
+    $logDir = __DIR__ . '/../logs';
     $logFile = $logDir . '/api.log';
     
-    // Create the logs directory if it doesn't exist
     if (!is_dir($logDir)) {
-        mkdir($logDir, 0755, true); // 0755 permissions, recursive creation
+        mkdir($logDir, 0755, true);
     }
     
-    // Write the message to the log file with a timestamp
     $timestamp = date('Y-m-d H:i:s');
     file_put_contents($logFile, "[$timestamp] $message\n", FILE_APPEND | LOCK_EX);
 }
 
-function callOpenAI($userInput, $expected)
+function callGrokAI($userInput, $expected)
 {
-    $apiKey = OPEN_AI;
-    $url = 'https://api.openai.com/v1/chat/completions';
+    $apiKey = X_AI;
+    $url = 'https://api.x.ai/v1/chat/completions';
     $maxRetries = 3;
     $attempt = 0;
 
@@ -34,7 +32,7 @@ function callOpenAI($userInput, $expected)
             ];
 
             $postData = json_encode([
-                "model" => "gpt-4.1",
+                "model" => "grok-3-mini",
                 "temperature" => 0,
                 "messages" => [
                     [
@@ -80,67 +78,70 @@ function callOpenAI($userInput, $expected)
                         "content" => "Trigger the score_answer function"
                     ],
                 ],
-                "functions" => [
+                "tools" => [
                     [
-                        "name" => "score_answer",
-                        "description" => "Always Trigger this to score how close user answer to expected answer",
-                        "parameters" => [
-                            "type" => "object",
-                            "properties" => [
-                                "score" => [
-                                    "type" => "integer",
-                                    "description" => "Score of the user on how close the answer to expected from 1 to 100. 100 is perfect."
+                        "type" => "function",
+                        "function" => [
+                            "name" => "score_answer",
+                            "description" => "Always Trigger this to score how close user answer to expected answer",
+                            "parameters" => [
+                                "type" => "object",
+                                "properties" => [
+                                    "score" => [
+                                        "type" => "integer",
+                                        "description" => "Score of the user on how close the answer to expected from 1 to 100. 100 is perfect."
+                                    ],
+                                    "feedback" => [
+                                        "type" => "string",
+                                        "description" => <<<EOD
+                                        Provide feedback for the user based on specified criteria, formatted in a GetBootstrap HTML table. Each row should include the specific basis, explanation, and score for that criterion. All scores should be 5/5 for each criterion.
+
+                                        # Criteria
+
+                                        - **Answer**: Evaluate the response's ability to answer the question posed. Full credit if the answer fully addresses the question.
+                                        - **Legal Basis**: Analyze the statement of doctrine (law, jurisprudence, or both). Ensure the necessary legal elements are determined for completeness before evaluation.
+                                        - **Application**: Assess how doctrines are applied to the facts in the question. Identify and link relevant facts appropriately.
+                                        - **Conclusion & Grammar**: Evaluate the response's conclusion. If the student’s conclusion differs from the predetermined one but is considered correct, full credit should be awarded.  Assess grammatical accuracy.
+
+                                        Ensure each score is 5/5 with a total score of 25, corresponding to 100% if perfect.
+
+                                        # Additional Insights
+
+                                        Include any suggestions or observations not covered by the primary criteria. These should be conveyed as additional insights or improvements without a numeric score. If the user scored perfectly, just congratulate them instead.
+
+                                        # Output Format
+
+                                        The feedback must be formatted as an HTML table, with each row including:
+                                        - **Basis**: The criterion being evaluated.
+                                        - **Explanation**: A detailed explanation of the evaluation.
+                                        - **Score**: The numerical score assigned.
+
+                                        The table should be structured like:
+
+                                        <table class='table'>
+                                        <tr>
+                                        <th>Basis</th>
+                                        <th>Explanation</th>
+                                        <th>Score</th>
+                                        </tr>
+                                        <tr>
+                                        <td>[Basis]</td>
+                                        <td>[Explanation]</td>
+                                        <td>[Score]</td>
+                                        </tr>
+                                        [Additional Rows for Each Criterion]
+                                        </table>
+
+                                        After the table, add a section called 'Additional Insights' as plain text (no numeric score). Share helpful feedback or tips there. But if the user scored perfectly, just congratulate them instead.
+                                        EOD
+                                    ]
                                 ],
-                                "feedback" => [
-                                    "type" => "string",
-                                    "description" => <<<EOD
-                                    Provide feedback for the user based on specified criteria, formatted in a GetBootstrap HTML table. Each row should include the specific basis, explanation, and score for that criterion. All scores should be 5/5 for each criterion.
-
-                                    # Criteria
-
-                                    - **Answer**: Evaluate the response's ability to answer the question posed. Full credit if the answer fully addresses the question.
-                                    - **Legal Basis**: Analyze the statement of doctrine (law, jurisprudence, or both). Ensure the necessary legal elements are determined for completeness before evaluation.
-                                    - **Application**: Assess how doctrines are applied to the facts in the question. Identify and link relevant facts appropriately.
-                                    - **Conclusion & Grammar**: Evaluate the response's conclusion. If the student’s conclusion differs from the predetermined one but is considered correct, full credit should be awarded.  Assess grammatical accuracy.
-
-                                    Ensure each score is 5/5 with a total score of 25, corresponding to 100% if perfect.
-
-                                    # Additional Insights
-
-                                    Include any suggestions or observations not covered by the primary criteria. These should be conveyed as additional insights or improvements without a numeric score. If the user scored perfectly, just congratulate them instead.
-
-                                    # Output Format
-
-                                    The feedback must be formatted as an HTML table, with each row including:
-                                    - **Basis**: The criterion being evaluated.
-                                    - **Explanation**: A detailed explanation of the evaluation.
-                                    - **Score**: The numerical score assigned.
-
-                                    The table should be structured like:
-
-                                    <table class='table'>
-                                    <tr>
-                                    <th>Basis</th>
-                                    <th>Explanation</th>
-                                    <th>Score</th>
-                                    </tr>
-                                    <tr>
-                                    <td>[Basis]</td>
-                                    <td>[Explanation]</td>
-                                    <td>[Score]</td>
-                                    </tr>
-                                    [Additional Rows for Each Criterion]
-                                    </table>
-
-                                    After the table, add a section called 'Additional Insights' as plain text (no numeric score). Share helpful feedback or tips there. But if the user scored perfectly, just congratulate them instead.
-                                    EOD
-                                ]
-                            ],
-                            "required" => ["score", "feedback"]
+                                "required" => ["score", "feedback"]
+                            ]
                         ]
                     ]
                 ],
-                "function_call" => "auto"
+                "tool_choice" => "required"
             ]);
 
             $ch = curl_init($url);
@@ -156,8 +157,8 @@ function callOpenAI($userInput, $expected)
             }
 
             $data = json_decode($response, true);
-            if (!$data || !isset($data['choices'][0]['message']['function_call'])) {
-                throw new Exception('Invalid OpenAI response');
+            if (!$data || !isset($data['choices'][0]['message']['tool_calls'])) {
+                throw new Exception('Invalid Grok-3-mini response or missing tool_calls');
             }
 
             curl_close($ch);
@@ -165,9 +166,9 @@ function callOpenAI($userInput, $expected)
         } catch (Exception $e) {
             $attempt++;
             curl_close($ch);
-            logMessage("OpenAI call attempt $attempt failed: " . $e->getMessage());
+            logMessage("Grok-3-mini call attempt $attempt failed: " . $e->getMessage());
             if ($attempt >= $maxRetries) {
-                throw new Exception('OpenAI API call failed after retries');
+                throw new Exception('Grok-3-mini API call failed after retries: ' . $e->getMessage());
             }
             sleep(1);
         }
@@ -190,8 +191,8 @@ function calculateAverageScore($answers, $totalQuestions)
 
 function summarizeFeedback($answers)
 {
-    $apiKey = OPEN_AI;
-    $url = 'https://api.openai.com/v1/chat/completions';
+    $apiKey = X_AI;
+    $url = 'https://api.x.ai/v1/chat/completions';
 
     try {
         $headers = [
@@ -209,7 +210,7 @@ function summarizeFeedback($answers)
         }
 
         $postData = json_encode([
-            "model" => "gpt-4o",
+            "model" => "grok-3-mini",
             "messages" => $messages,
         ]);
 
@@ -235,8 +236,8 @@ function summarizeFeedback($answers)
 
 function ai_email_diagnose($answers, $fullname)
 {
-    $apiKey = OPEN_AI;
-    $url = 'https://api.openai.com/v1/chat/completions';
+    $apiKey = X_AI;
+    $url = 'https://api.x.ai/v1/chat/completions';
 
     try {
         $headers = [
@@ -254,7 +255,7 @@ function ai_email_diagnose($answers, $fullname)
         }
 
         $postData = json_encode([
-            "model" => "gpt-4o",
+            "model" => "grok-3-mini",
             "messages" => $messages,
         ]);
 
@@ -281,12 +282,17 @@ function ai_email_diagnose($answers, $fullname)
 function processResponse($pdo, $userId, $questionId, $userInput, $courseId, $response, $is_practice, &$score, &$feedback)
 {
     try {
-        $choice = $response['choices'][0]['message']['function_call'];
-        $decodedParams = json_decode($choice['arguments'], true);
-        $score = $decodedParams['score'] ?? 0;
-        $feedback = $decodedParams['feedback'] ?? 'No feedback provided';
-        if (!$is_practice) {
-            insertAnswer($pdo, $userId, $questionId, $userInput, $courseId, $score, $feedback);
+        $toolCalls = $response['choices'][0]['message']['tool_calls'];
+        if (isset($toolCalls[0]['function']['arguments'])) {
+            $arguments = $toolCalls[0]['function']['arguments'];
+            $decodedParams = json_decode($arguments, true);
+            $score = $decodedParams['score'] ?? 0;
+            $feedback = $decodedParams['feedback'] ?? 'No feedback provided';
+            if (!$is_practice) {
+                insertAnswer($pdo, $userId, $questionId, $userInput, $courseId, $score, $feedback);
+            }
+        } else {
+            throw new Exception('No tool call found in response');
         }
     } catch (Exception $e) {
         logMessage("processResponse error for userId=$userId, questionId=$questionId: " . $e->getMessage());

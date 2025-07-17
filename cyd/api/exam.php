@@ -50,8 +50,8 @@ if (empty($action) || $userId <= 0) {
 //error_log("Received request - IP: " . ($_SERVER['REMOTE_ADDR'] ?? 'unknown') . " - Payload: " . $rawInput);
 
 // Include necessary files
-require '../config.php';   // defines $dsn, $username, $password, ENV, OPEN_AI, etc.
-require '../utils.php';    // callOpenAI(), processResponse(), etc.
+require '../config.php';   // defines $dsn, $username, $password, ENV, X_AI, etc.
+require '../utils.php';    // callGrokAI(), processResponse(), etc.
 require '../model.php';   // fetchRandomQuestion(), getExpectedAnswer(), insertAnswer(), etc.
 require '../mail.php';
 
@@ -210,7 +210,7 @@ try {
             // Process the answer
             $exp = getExpectedAnswer($pdo, $questionId);
             $expected = $exp['q_answer'] ?? '';
-            $response = callOpenAI($answerContent, $expected);
+            $response = callGrokAI($answerContent, $expected);
 
             $score = 0;
             $feedback = '';

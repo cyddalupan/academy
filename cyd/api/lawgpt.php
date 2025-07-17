@@ -101,7 +101,8 @@ All outputs must use Bootstrap 5 components and Font Awesome icons, starting wit
 
 Notes:
 - Ensure all references to articles are correct and precise.
-- Maintain strict topic relevance to specified Philippine law topics.'
+- Maintain strict topic relevance to specified Philippine law topics.
+- Ensure the HTML format inside <div> and no markdown or backslash formats.'
 ]);
 
 // Get today's message count for the user
@@ -166,7 +167,7 @@ function callXAI(array $messages): array
     $url = 'https://api.x.ai/v1/chat/completions';
 
     $payload = [
-        'model' => 'grok-3',
+        'model' => 'grok-4',
         'temperature' => 0,
         'messages' => $messages
     ];
