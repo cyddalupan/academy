@@ -55,7 +55,7 @@ if (!in_array($file_type, $allowed_types) || $file_size > 5 * 1024 * 1024) {
 }
 
 // Define upload directory (create if not exists)
-$upload_dir = '../../uploads/receipts/';
+$upload_dir = '../uploads/receipts/';
 if (!is_dir($upload_dir)) {
     mkdir($upload_dir, 0755, true);
 }
@@ -88,6 +88,18 @@ try {
     http_response_code(500);
     echo json_encode(['error' => 'Failed to save payment record: ' . $e->getMessage()]);
     exit;
+}
+
+// Grant 1-day premium access immediately
+try {
+    $stmt = $pdo->prepare("
+        INSERT INTO gpt_premium (user_id, expiration_date, created_at, updated_at)
+        VALUES (:user_id, DATE_ADD(CURDATE(), INTERVAL 1 DAY), NOW(), NOW())
+        ON DUPLICATE KEY UPDATE expiration_date = DATE_ADD(CURDATE(), INTERVAL 1 DAY), updated_at = NOW()
+    ");
+    $stmt->execute(['user_id' => $user_id]);
+} catch (PDOException $e) {
+    // Optional: Log error, but don't fail the response
 }
 
 // Success response
