@@ -9,6 +9,9 @@
                 <i class="mdi mdi-comment-account-outline"></i>
             </div>
         <?php endif; ?>
+        
+        
+      
         <p class="notify-details">
             <?php echo $notification['title']; ?>
             <small class="text-muted"><?php echo get_past_time($notification['created_at']); ?></small>
@@ -29,3 +32,4 @@
         </div>
     </div>
 <?php endif; ?>
+  test

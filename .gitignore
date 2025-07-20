@@ -34,3 +34,5 @@ Thumbs.db
 /uploads/install.sql
 /widget
 /application/views/frontend/default-new/home_2.php
+/application/views/backend/header.php
+
