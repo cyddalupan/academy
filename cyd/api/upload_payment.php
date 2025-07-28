@@ -54,10 +54,14 @@ if (!in_array($file_type, $allowed_types) || $file_size > 5 * 1024 * 1024) {
     exit;
 }
 
-// Define upload directory (create if not exists)
-$upload_dir = '../uploads/receipts/';
+// Define upload directory (grandparent level, lowercase)
+$upload_dir = '../../uploads/receipts/';
 if (!is_dir($upload_dir)) {
-    mkdir($upload_dir, 0755, true);
+    if (!mkdir($upload_dir, 0755, true)) {
+        http_response_code(500);
+        echo json_encode(['error' => 'Failed to create upload directory']);
+        exit;
+    }
 }
 
 // Generate unique filename
@@ -106,6 +110,6 @@ try {
 echo json_encode([
     'success' => true,
     'payment_id' => $insert_id,
-    'receipt_path' => '/uploads/receipts/' . $filename
+    'receipt_path' => '/Uploads/receipts/' . $filename
 ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 ?>
