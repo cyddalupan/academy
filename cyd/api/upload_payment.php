@@ -34,8 +34,9 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-// Get user_id from POST (assuming sent as form data)
+// Get user_id and remarks from POST
 $user_id = isset($_POST['user_id']) ? (int)$_POST['user_id'] : 0;
+$remarks = isset($_POST['remarks']) ? trim($_POST['remarks']) : '';
 
 // Validate file upload and user_id
 if ($user_id <= 0 || !isset($_FILES['receipt']) || $_FILES['receipt']['error'] !== UPLOAD_ERR_OK) {
@@ -54,14 +55,10 @@ if (!in_array($file_type, $allowed_types) || $file_size > 5 * 1024 * 1024) {
     exit;
 }
 
-// Define upload directory (grandparent level, lowercase)
+// Define upload directory (create if not exists)
 $upload_dir = '../../uploads/receipts/';
 if (!is_dir($upload_dir)) {
-    if (!mkdir($upload_dir, 0755, true)) {
-        http_response_code(500);
-        echo json_encode(['error' => 'Failed to create upload directory']);
-        exit;
-    }
+    mkdir($upload_dir, 0755, true);
 }
 
 // Generate unique filename
@@ -75,15 +72,16 @@ if (!move_uploaded_file($_FILES['receipt']['tmp_name'], $target_path)) {
     exit;
 }
 
-// Insert into database
+// Insert into database (now with remarks)
 try {
     $stmt = $pdo->prepare("
-        INSERT INTO gpt_payments (user_id, receipt_image, status, created_at)
-        VALUES (:user_id, :receipt_image, 'pending', NOW())
+        INSERT INTO gpt_payments (user_id, receipt_image, remarks, status, created_at)
+        VALUES (:user_id, :receipt_image, :remarks, 'pending', NOW())
     ");
     $stmt->execute([
         'user_id' => $user_id,
-        'receipt_image' => '/uploads/receipts/' . $filename  // Store relative path for easy frontend access
+        'receipt_image' => '/uploads/receipts/' . $filename,
+        'remarks' => $remarks
     ]);
     $insert_id = $pdo->lastInsertId();
 } catch (PDOException $e) {
@@ -110,6 +108,6 @@ try {
 echo json_encode([
     'success' => true,
     'payment_id' => $insert_id,
-    'receipt_path' => '/Uploads/receipts/' . $filename
+    'receipt_path' => '/uploads/receipts/' . $filename
 ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 ?>

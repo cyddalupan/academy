@@ -1,28 +1,16 @@
 <?php
-if (ENV == "dev") {
-    header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
-    header("Cache-Control: post-check=0, pre-check=0", false);
-    header("Pragma: no-cache");
+if (ENV == "dev") {    header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+    header("Cache-Control: post-check=0, pre-check=0", false);    header("Pragma: no-cache");
 }
-
-function logMessage($message) {
-    $logDir = __DIR__ . '/../logs';
-    $logFile = $logDir . '/api.log';
-    
-    if (!is_dir($logDir)) {
-        mkdir($logDir, 0755, true);
-    }
-    
-    $timestamp = date('Y-m-d H:i:s');
-    file_put_contents($logFile, "[$timestamp] $message\n", FILE_APPEND | LOCK_EX);
+function logMessage($message) {    $logDir = __DIR__ . '/../logs';
+    $logFile = $logDir . '/api.log';    
+    if (!is_dir($logDir)) {        mkdir($logDir, 0755, true);
+    }    
+    $timestamp = date('Y-m-d H:i:s');    file_put_contents($logFile, "[$timestamp] $message\n", FILE_APPEND | LOCK_EX);
 }
-
-function callGrokAI($userInput, $expected)
-{
-    $apiKey = X_AI;
-    $url = 'https://api.x.ai/v1/chat/completions';
-    $maxRetries = 3;
-    $attempt = 0;
+function callGrokAI($userInput, $expected){
+    $apiKey = X_AI;    $url = 'https://api.x.ai/v1/chat/completions';
+    $maxRetries = 3;    $attempt = 0;
 
     while ($attempt < $maxRetries) {
         try {
@@ -32,11 +20,11 @@ function callGrokAI($userInput, $expected)
             ];
 
             $postData = json_encode([
-                "model" => "grok-3-mini",
+                "model" => "grok-4",
                 "temperature" => 0,
                 "messages" => [
                     [
-                        "role" => "system",
+                       "role" => "system",
                         "content" => <<<EOD
                         Compare the `user_answer` to `expected_answer` and provide an accurate score and detailed feedback.
 
@@ -55,93 +43,41 @@ function callGrokAI($userInput, $expected)
                         - For each dimension, provide feedback that analyzes strengths and areas for improvement.
                         - Include additional recommendations as "Other Suggestions" without points.
 
-                        # Output Format
-
-                        Provide the score as an integer and detailed feedback separated by dimensions. Use bullet points for feedback under each dimension.
-
                         # Notes
 
                         - Ensure no dimension guarantees a perfect score without thorough evaluation.
                         - Adjust the scale to reflect nuanced differences in content and logical alignment rather than exact wording.
-                        EOD
+
+Provide feedback for the user based on specified criteria, formatted in a GetBootstrap HTML table. Each row should include the specific basis, explanation, and score for that criterion. All scores should be 5/5 for each criterion.
+
+# Criteria
+
+- **Answer**: Evaluate the response's ability to answer the question posed. Full credit if the answer fully addresses the question.
+- **Legal Basis**: Analyze the statement of doctrine (law, jurisprudence, or both). Ensure the necessary legal elements are determined for completeness before evaluation.
+- **Application**: Assess how doctrines are applied to the facts in the question. Identify and link relevant facts appropriately.
+- **Conclusion & Grammar**: Evaluate the response's conclusion. If the student’s conclusion differs from the predetermined one but is considered correct, full credit should be awarded.  Assess grammatical accuracy.
+
+Ensure each score is 5/5 with a total score of 25, corresponding to 100% if perfect.
+
+# Additional Insights
+
+Include any suggestions or observations not covered by the primary criteria. These should be conveyed as additional insights or improvements without a numeric score. If the user scored perfectly, just congratulate them instead.
+
+# Output Format
+
+Output only a valid JSON object with keys "score" (integer from 1 to 100) and "feedback" (string with the HTML table and Additional Insights as described).
+EOD
                     ],
                     [
                         "role" => "system",
                         "content" => "expected_answer: $expected"
                     ],
-                    [
+                   [
                         "role" => "user",
                         "content" => "user_answer: $userInput"
-                    ],
-                    [
-                        "role" => "system",
-                        "content" => "Trigger the score_answer function"
-                    ],
-                ],
-                "tools" => [
-                    [
-                        "type" => "function",
-                        "function" => [
-                            "name" => "score_answer",
-                            "description" => "Always Trigger this to score how close user answer to expected answer",
-                            "parameters" => [
-                                "type" => "object",
-                                "properties" => [
-                                    "score" => [
-                                        "type" => "integer",
-                                        "description" => "Score of the user on how close the answer to expected from 1 to 100. 100 is perfect."
-                                    ],
-                                    "feedback" => [
-                                        "type" => "string",
-                                        "description" => <<<EOD
-                                        Provide feedback for the user based on specified criteria, formatted in a GetBootstrap HTML table. Each row should include the specific basis, explanation, and score for that criterion. All scores should be 5/5 for each criterion.
-
-                                        # Criteria
-
-                                        - **Answer**: Evaluate the response's ability to answer the question posed. Full credit if the answer fully addresses the question.
-                                        - **Legal Basis**: Analyze the statement of doctrine (law, jurisprudence, or both). Ensure the necessary legal elements are determined for completeness before evaluation.
-                                        - **Application**: Assess how doctrines are applied to the facts in the question. Identify and link relevant facts appropriately.
-                                        - **Conclusion & Grammar**: Evaluate the response's conclusion. If the student’s conclusion differs from the predetermined one but is considered correct, full credit should be awarded.  Assess grammatical accuracy.
-
-                                        Ensure each score is 5/5 with a total score of 25, corresponding to 100% if perfect.
-
-                                        # Additional Insights
-
-                                        Include any suggestions or observations not covered by the primary criteria. These should be conveyed as additional insights or improvements without a numeric score. If the user scored perfectly, just congratulate them instead.
-
-                                        # Output Format
-
-                                        The feedback must be formatted as an HTML table, with each row including:
-                                        - **Basis**: The criterion being evaluated.
-                                        - **Explanation**: A detailed explanation of the evaluation.
-                                        - **Score**: The numerical score assigned.
-
-                                        The table should be structured like:
-
-                                        <table class='table'>
-                                        <tr>
-                                        <th>Basis</th>
-                                        <th>Explanation</th>
-                                        <th>Score</th>
-                                        </tr>
-                                        <tr>
-                                        <td>[Basis]</td>
-                                        <td>[Explanation]</td>
-                                        <td>[Score]</td>
-                                        </tr>
-                                        [Additional Rows for Each Criterion]
-                                        </table>
-
-                                        After the table, add a section called 'Additional Insights' as plain text (no numeric score). Share helpful feedback or tips there. But if the user scored perfectly, just congratulate them instead.
-                                        EOD
-                                    ]
-                                ],
-                                "required" => ["score", "feedback"]
-                            ]
-                        ]
                     ]
                 ],
-                "tool_choice" => "required"
+                "response_format" => ["type" => "json_object"]
             ]);
 
             $ch = curl_init($url);
@@ -149,7 +85,7 @@ function callGrokAI($userInput, $expected)
             curl_setopt($ch, CURLOPT_POST, true);
             curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
             curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
-            curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 120);
 
             $response = curl_exec($ch);
             if ($response === false) {
@@ -157,8 +93,8 @@ function callGrokAI($userInput, $expected)
             }
 
             $data = json_decode($response, true);
-            if (!$data || !isset($data['choices'][0]['message']['tool_calls'])) {
-                throw new Exception('Invalid Grok-3-mini response or missing tool_calls');
+            if (!$data || !isset($data['choices'][0]['message']['content'])) {
+                throw new Exception('Invalid Grok-4 response or missing content');
             }
 
             curl_close($ch);
@@ -166,15 +102,14 @@ function callGrokAI($userInput, $expected)
         } catch (Exception $e) {
             $attempt++;
             curl_close($ch);
-            logMessage("Grok-3-mini call attempt $attempt failed: " . $e->getMessage());
+            logMessage("Grok-4 call attempt $attempt failed: " . $e->getMessage());
             if ($attempt >= $maxRetries) {
-                throw new Exception('Grok-3-mini API call failed after retries: ' . $e->getMessage());
+                throw new Exception('Grok-4 API call failed after retries: ' . $e->getMessage());
             }
             sleep(1);
         }
     }
 }
-
 function calculateAverageScore($answers, $totalQuestions)
 {
     $totalScore = 0;
@@ -210,15 +145,15 @@ function summarizeFeedback($answers)
         }
 
         $postData = json_encode([
-            "model" => "grok-3-mini",
+            "model" => "grok-4",
             "messages" => $messages,
         ]);
-
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 60);
 
         $response = curl_exec($ch);
         if ($response === false) {
@@ -255,7 +190,7 @@ function ai_email_diagnose($answers, $fullname)
         }
 
         $postData = json_encode([
-            "model" => "grok-3-mini",
+            "model" => "grok-4",
             "messages" => $messages,
         ]);
 
@@ -264,6 +199,7 @@ function ai_email_diagnose($answers, $fullname)
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 60);
 
         $response = curl_exec($ch);
         if ($response === false) {
@@ -282,17 +218,12 @@ function ai_email_diagnose($answers, $fullname)
 function processResponse($pdo, $userId, $questionId, $userInput, $courseId, $response, $is_practice, &$score, &$feedback)
 {
     try {
-        $toolCalls = $response['choices'][0]['message']['tool_calls'];
-        if (isset($toolCalls[0]['function']['arguments'])) {
-            $arguments = $toolCalls[0]['function']['arguments'];
-            $decodedParams = json_decode($arguments, true);
-            $score = $decodedParams['score'] ?? 0;
-            $feedback = $decodedParams['feedback'] ?? 'No feedback provided';
-            if (!$is_practice) {
-                insertAnswer($pdo, $userId, $questionId, $userInput, $courseId, $score, $feedback);
-            }
-        } else {
-            throw new Exception('No tool call found in response');
+        $arguments = $response['choices'][0]['message']['content'];
+        $decodedParams = json_decode($arguments, true);
+        $score = $decodedParams['score'] ?? 0;
+        $feedback = $decodedParams['feedback'] ?? 'No feedback provided';
+        if (!$is_practice) {
+            insertAnswer($pdo, $userId, $questionId, $userInput, $courseId, $score, $feedback);
         }
     } catch (Exception $e) {
         logMessage("processResponse error for userId=$userId, questionId=$questionId: " . $e->getMessage());
@@ -329,7 +260,7 @@ function calculateProgress($pdo, $userId, $courseId, $is_practice, $remainingSec
 {
     try {
         if ($is_practice) {
-            return 0;
+           return 0;
         } else {
             $answerCount = countUserAnswers($pdo, $userId, $courseId);
             return $remainingSeconds === 0 ? 100 : ($answerCount / $totalQuestions) * 100;
@@ -361,3 +292,4 @@ function finalizeAssessment($pdo, $userId, $courseId, $totalQuestions, &$answers
         logMessage("finalizeAssessment error for userId=$userId, courseId=$courseId: " . $e->getMessage());
     }
 }
+?>
