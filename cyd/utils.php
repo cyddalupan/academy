@@ -24,60 +24,22 @@ function callGrokAI($userInput, $expected){
                 "temperature" => 0,
                 "messages" => [
                     [
-                       "role" => "system",
+                        "role" => "system",
                         "content" => <<<EOD
-                        Compare the `user_answer` to `expected_answer` and provide an accurate score and detailed feedback.
-
-                        - **Scoring Criteria:**
-                        - **Full Alignment:** Provide a score of 100 for answers that fully convey the same content and logical value, even if wording differs.
-                        - **Strong Similarity:** Use a scale of 70-95 for answers that closely align in content and value but have minor differences.
-                        - **Mismatch:** For unrelated answers, provide a score of 0-30.
-                        
-                        - Base the score on the following dimensions:
-                        - **Answer**
-                        - **Legal Basis**
-                        - **Application**
-                        - **Conclusion and grammar** 
-
-                        - **Feedback:**
-                        - For each dimension, provide feedback that analyzes strengths and areas for improvement.
-                        - Include additional recommendations as "Other Suggestions" without points.
-
-                        # Notes
-
-                        - Ensure no dimension guarantees a perfect score without thorough evaluation.
-                        - Adjust the scale to reflect nuanced differences in content and logical alignment rather than exact wording.
-
-Provide feedback for the user based on specified criteria, formatted in a GetBootstrap HTML table. Each row should include the specific basis, explanation, and score for that criterion. All scores should be 5/5 for each criterion.
-
-# Criteria
-
-- **Answer**: Evaluate the response's ability to answer the question posed. Full credit if the answer fully addresses the question.
-- **Legal Basis**: Analyze the statement of doctrine (law, jurisprudence, or both). Ensure the necessary legal elements are determined for completeness before evaluation.
-- **Application**: Assess how doctrines are applied to the facts in the question. Identify and link relevant facts appropriately.
-- **Conclusion & Grammar**: Evaluate the response's conclusion. If the student’s conclusion differs from the predetermined one but is considered correct, full credit should be awarded.  Assess grammatical accuracy.
-
-Ensure each score is 5/5 with a total score of 25, corresponding to 100% if perfect.
-
-# Additional Insights
-
-Include any suggestions or observations not covered by the primary criteria. These should be conveyed as additional insights or improvements without a numeric score. If the user scored perfectly, just congratulate them instead.
-
-# Output Format
-
-Output only a valid JSON object with keys "score" (integer from 1 to 100) and "feedback" (string with the HTML table and Additional Insights as described).
+Compare the user_answer to expected_answer and output only a valid JSON object with:
+- "score": integer (1-100, 100 for full match, 70-95 for close match, 0-30 for mismatch).
+- "feedback": Bootstrap HTML table for Answer, Legal Basis, Application, Conclusion & Grammar (each 5/5 if perfect, total 25 for 100%) plus 'Additional Insights' plain text (congratulate if perfect).
 EOD
                     ],
                     [
                         "role" => "system",
                         "content" => "expected_answer: $expected"
                     ],
-                   [
+                    [
                         "role" => "user",
                         "content" => "user_answer: $userInput"
                     ]
-                ],
-                "response_format" => ["type" => "json_object"]
+                ]
             ]);
 
             $ch = curl_init($url);
@@ -92,8 +54,27 @@ EOD
                 throw new Exception('cURL Error: ' . curl_error($ch));
             }
 
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            logMessage("API HTTP status: " . $httpCode . " for callGrokAI");
+            if ($httpCode !== 200) {
+                logMessage("Raw API response on non-200: " . $response);
+                throw new Exception('HTTP error: ' . $httpCode);
+            }
+
             $data = json_decode($response, true);
-            if (!$data || !isset($data['choices'][0]['message']['content'])) {
+            if ($data === null) {
+                logMessage("JSON decode error: " . json_last_error_msg());
+                logMessage("Raw API response: " . $response);
+                throw new Exception('Invalid JSON response');
+            }
+
+            logMessage("Decoded API response: " . json_encode($data, JSON_PRETTY_PRINT));
+
+            if (isset($data['error'])) {
+                throw new Exception('xAI API Error: ' . json_encode($data['error']));
+            }
+
+            if (!isset($data['choices'][0]['message']['content'])) {
                 throw new Exception('Invalid Grok-4 response or missing content');
             }
 
@@ -160,9 +141,28 @@ function summarizeFeedback($answers)
             throw new Exception('cURL Error: ' . curl_error($ch));
         }
 
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        logMessage("API HTTP status: " . $httpCode . " for summarizeFeedback");
+        if ($httpCode !== 200) {
+            logMessage("Raw API response on non-200: " . $response);
+            throw new Exception('HTTP error: ' . $httpCode);
+        }
+
+        $data = json_decode($response, true);
+        if ($data === null) {
+            logMessage("JSON decode error: " . json_last_error_msg());
+            logMessage("Raw API response: " . $response);
+            throw new Exception('Invalid JSON response');
+        }
+
+        logMessage("Decoded API response: " . json_encode($data, JSON_PRETTY_PRINT));
+
+        if (isset($data['error'])) {
+            throw new Exception('xAI API Error: ' . json_encode($data['error']));
+        }
+
         curl_close($ch);
-        $response = json_decode($response, true);
-        return $response['choices'][0]['message']['content'] ?? 'No summary available';
+        return $data['choices'][0]['message']['content'] ?? 'No summary available';
     } catch (Exception $e) {
         logMessage("summarizeFeedback error: " . $e->getMessage());
         return 'Error generating summary';
@@ -206,9 +206,28 @@ function ai_email_diagnose($answers, $fullname)
             throw new Exception('cURL Error: ' . curl_error($ch));
         }
 
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        logMessage("API HTTP status: " . $httpCode . " for ai_email_diagnose");
+        if ($httpCode !== 200) {
+            logMessage("Raw API response on non-200: " . $response);
+            throw new Exception('HTTP error: ' . $httpCode);
+        }
+
+        $data = json_decode($response, true);
+        if ($data === null) {
+            logMessage("JSON decode error: " . json_last_error_msg());
+            logMessage("Raw API response: " . $response);
+            throw new Exception('Invalid JSON response');
+        }
+
+        logMessage("Decoded API response: " . json_encode($data, JSON_PRETTY_PRINT));
+
+        if (isset($data['error'])) {
+            throw new Exception('xAI API Error: ' . json_encode($data['error']));
+        }
+
         curl_close($ch);
-        $response = json_decode($response, true);
-        return $response['choices'][0]['message']['content'] ?? '<p>Error generating email content</p>';
+        return $data['choices'][0]['message']['content'] ?? '<p>Error generating email content</p>';
     } catch (Exception $e) {
         logMessage("ai_email_diagnose error: " . $e->getMessage());
         return '<p>Unable to generate assessment email at this time.</p>';
@@ -218,10 +237,21 @@ function ai_email_diagnose($answers, $fullname)
 function processResponse($pdo, $userId, $questionId, $userInput, $courseId, $response, $is_practice, &$score, &$feedback)
 {
     try {
-        $arguments = $response['choices'][0]['message']['content'];
-        $decodedParams = json_decode($arguments, true);
-        $score = $decodedParams['score'] ?? 0;
-        $feedback = $decodedParams['feedback'] ?? 'No feedback provided';
+        $content = $response['choices'][0]['message']['content'];
+        logMessage("Response content for userId=$userId, questionId=$questionId: " . $content);
+        if (empty($content)) {
+            throw new Exception('Empty response content from Grok-4');
+        }
+        $decodedParams = json_decode($content, true);
+        if ($decodedParams === null) {
+            logMessage("JSON decode error in processResponse: " . json_last_error_msg());
+            throw new Exception('Invalid JSON in response content');
+        }
+        if (!isset($decodedParams['score']) || !isset($decodedParams['feedback'])) {
+            throw new Exception('Missing score or feedback in JSON');
+        }
+        $score = (int)$decodedParams['score'];
+        $feedback = $decodedParams['feedback'];
         if (!$is_practice) {
             insertAnswer($pdo, $userId, $questionId, $userInput, $courseId, $score, $feedback);
         }

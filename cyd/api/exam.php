@@ -1,5 +1,22 @@
 <?php
 // exam.php
+// Ensure config is loaded
+if (!file_exists('../config.php')) {
+    error_log("Config file not found at ../config.php");
+    http_response_code(500);
+    echo json_encode(['error' => 'Server configuration error']);
+    exit;
+}
+require '../config.php'; // defines $dsn, $username, $password, ENV, X_AI, etc.
+
+// Verify ENV is defined
+if (!defined('ENV')) {
+    error_log("ENV constant not defined after including config.php");
+    http_response_code(500);
+    echo json_encode(['error' => 'Server configuration error']);
+    exit;
+}
+
 // Set CORS headers
 header('Access-Control-Allow-Origin: *'); // Replace '*' with specific origin in production (e.g., 'http://your-angular-app.com')
 header('Access-Control-Allow-Methods: POST, OPTIONS');
@@ -50,7 +67,6 @@ if (empty($action) || $userId <= 0) {
 //error_log("Received request - IP: " . ($_SERVER['REMOTE_ADDR'] ?? 'unknown') . " - Payload: " . $rawInput);
 
 // Include necessary files
-require '../config.php';   // defines $dsn, $username, $password, ENV, X_AI, etc.
 require '../utils.php';    // callGrokAI(), processResponse(), etc.
 require '../model.php';   // fetchRandomQuestion(), getExpectedAnswer(), insertAnswer(), etc.
 require '../mail.php';
@@ -73,7 +89,7 @@ try {
 
             if ($examId == 0) {
                 // Get all answered questions for this user (batch_id=0)
-                $stmt = $pdo->prepare("
+               $stmt = $pdo->prepare("
                     SELECT da.question_id, da.answer, da.feedback, da.score, q.q_question
                     FROM diag_ans da
                     JOIN quiz_new q ON da.question_id = q.q_id
@@ -110,7 +126,7 @@ try {
                             'answer' => '',
                             'feedback' => null,
                             'score' => null
-                        ];
+                       ];
                     }
                 }
                 $questions = $answered;
@@ -147,7 +163,7 @@ try {
                         " . (count($answeredIds) ? "AND q_id NOT IN (" . implode(',', array_map('intval', $answeredIds)) . ")" : "") . "
                         ORDER BY RAND() LIMIT :maxq
                     ");
-                    $q->bindValue(':examId', $examId, PDO::PARAM_INT);
+                   $q->bindValue(':examId', $examId, PDO::PARAM_INT);
                     $q->bindValue(':maxq', $slotsLeft, PDO::PARAM_INT);
                     $q->execute();
                     while ($row = $q->fetch(PDO::FETCH_ASSOC)) {
@@ -183,7 +199,7 @@ try {
 
             echo json_encode([
                 'questions' => $questions,
-                'totalExamTimeSeconds' => $totalTime,
+               'totalExamTimeSeconds' => $totalTime,
                 'remainingTimeSeconds' => $remaining
             ]);
             break;
