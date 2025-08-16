@@ -15,7 +15,26 @@
             <div class="card-body">
               <h4 class="mb-3 header-title"><?php echo get_phrase('offline_payments'); ?></h4>
               <div class="table-responsive-sm mt-4">
-                <table id="basic-datatable" class="table table-striped table-centered mb-0">
+                  
+                  
+                  
+<script>
+function exportF(elem) {
+  var table = document.getElementById("customers");
+  var html = table.outerHTML;
+  var url = 'data:application/vnd.ms-excel,' + escape(html); // Set your html table into url 
+  elem.setAttribute("href", url);
+  elem.setAttribute("download", "export.xls"); // Choose the file name
+  return false;
+}
+</script>
+
+
+<a id="downloadLink" onclick="exportF(this)" style="color:Red">EXPORT EXCEL</a>
+
+                  
+                  
+                <table id="customers" class="table table-striped table-centered mb-0">
                   <thead>
                     <tr>
                       <th>#</th>
@@ -38,7 +57,7 @@
                               <p><small><?php echo $user_data['email']; ?></small></p>
                             </td>
                             <td>
-                              <span class="badge badge-dark-lighten badge-pill"><?php echo currency($offline_payment['amount']); ?></span>
+                              <span class="badge badge-dark-lighten badge-pill"><?php echo $offline_payment['amount']; ?></span>
                             </td>
                             <td>
                               <h5><?php echo get_phrase($offline_payment['item_type']); ?>: </h5>

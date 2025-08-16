@@ -2,6 +2,10 @@
 
 This document outlines the process for setting up a Test-Driven Development (TDD) environment using PHPUnit for the custom PHP code within the `/cyd` directory.
 
+## Branching Strategy
+
+**All new development and testing for the `cyd` directory should be done on the `beta` branch.**
+
 ## 1. Introduction
 
 The `cyd` directory contains custom PHP scripts that operate independently of the main CodeIgniter application. To ensure code quality and facilitate TDD, we will use PHPUnit, the standard testing framework for PHP.
