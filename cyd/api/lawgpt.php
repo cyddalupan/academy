@@ -169,7 +169,10 @@ function callXAI(array $messages): array
     $payload = [
         'model' => 'grok-4',
         'temperature' => 0,
-        'messages' => $messages
+        'messages' => $messages,
+        'search_parameters' => [
+            'mode' => 'auto'
+        ]
     ];
 
     $ch = curl_init($url);
