@@ -1,5 +1,5 @@
 <?php
-// upload_payment.php - Handles payment proof uploads and grants 1-day premium access.
+// upload_payment.php - Handles payment proof uploads.
 
 // Turn off PHP warnings in output
 ini_set('display_errors', 0);
@@ -94,18 +94,7 @@ try {
     exit;
 }
 
-// Grant 1-day premium access immediately, using ON DUPLICATE KEY UPDATE
-try {
-    $stmt = $pdo->prepare("
-            INSERT INTO gpt_premium (user_id, expiration_date, created_at, updated_at, remarks)
-            VALUES (:user_id, DATE_ADD(CURDATE(), INTERVAL 1 DAY), NOW(), NOW(), :remarks)
-            ON DUPLICATE KEY UPDATE expiration_date = DATE_ADD(CURDATE(), INTERVAL 1 DAY), updated_at = NOW(), remarks = :remarks
-            ");
-    $stmt->execute(['user_id' => $user_id, 'remarks' => $remarks]);
-} catch (PDOException $e) {
-    // Log the error so we know if the query fails
-    error_log("Error granting 1-day premium: " . $e->getMessage());
-}
+
 
 // Success response
 echo json_encode([
