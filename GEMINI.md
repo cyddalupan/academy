@@ -10,6 +10,8 @@ This document outlines the process for setting up a Test-Driven Development (TDD
 
 The `cyd` directory contains custom PHP scripts that operate independently of the main CodeIgniter application. To ensure code quality and facilitate TDD, we will use PHPUnit, the standard testing framework for PHP.
 
+See `DATABASE.md` for the database format.
+
 This setup will allow you to run tests from the terminal to verify the functionality of the scripts inside `cyd`.
 
 ## 2. Setup Instructions
