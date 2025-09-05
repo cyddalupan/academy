@@ -226,6 +226,7 @@ class User_model extends CI_Model
 
     public function register_user($data)
     {
+        $data['phone'] = $_POST['phone'];
         $this->db->insert('users', $data);
         $user_id = $this->db->insert_id();
        // $this->user_model->update_unique_identifier($user_id);

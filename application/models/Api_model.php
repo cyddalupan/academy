@@ -477,6 +477,7 @@ class Api_model extends CI_Model
 		$data['first_name'] = $_POST['first_name'];
 		$data['last_name'] = $_POST['last_name'];
 	    $data['email'] = $_POST['email'];
+	    $data['phone'] = $_POST['phone'];
 	    $data['password'] = sha1($_POST['password']);
 	    $verification_code = rand(100000, 999999);
 	    $data['verification_code'] = $verification_code;

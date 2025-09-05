@@ -19,7 +19,7 @@ $totalQuestions = 6;
 $answers = [];
 $averageScore = 0;
 $timer_minutes = 12;
-$score = 0;
+$score = 100;
 $feedback = "";
 $remainingSeconds = 9999;
 
@@ -48,7 +48,9 @@ try {
             $userInput = $_POST['userInput'];
             $questionId = $_POST['questionId'];
     
-            $expected = getExpectedAnswer($pdo, $questionId);
+            $quiz_result = getExpectedAnswer($pdo, $questionId);
+            $expected = $quiz_result['q_answer'];
+            $question = $quiz_result['q_question'];
     
             $response = callOpenAI($userInput, $expected);
     
@@ -124,8 +126,10 @@ try {
                 <?php if ($isPostRequest && isset($_POST['userInput']) && $progressPercentage !== 100 && !isset($_POST['skip'])): ?>
                 <!-- Result Page -->
                 <div class="alert alert-secondary p-3">
-                    <p><strong>Score:</strong> <?= htmlspecialchars($score); ?></p>
-                    <p><strong>Feedback:</strong> <?= nl2br($feedback); ?></p>
+                    <p><strong>Score:</strong> <?= htmlspecialchars($score); ?>%</p>
+                    <p><strong>Question:</strong> <?= htmlspecialchars($question); ?>%</p>
+                    <p><strong>Your Answer:</strong> <?= $userInput; ?></p>
+                    <p><strong>Feedback:</strong> <?= $feedback; ?></p>
                     <form method="post" action="">
                         <input type="hidden" name="userId" id="userIdInput">
                         <input type="hidden" name="courseId" id="courseIdInput">
@@ -167,7 +171,7 @@ try {
                     <input type="hidden" id="remaining-seconds" name="remaining-seconds">
                     <div class="form-group mb-3">
                         <p><?= htmlspecialchars($question); ?></p>
-                        <textarea name="userInput" class="form-control bg-light border" rows="4" placeholder="Your answer here..."></textarea>
+                        <textarea name="userInput" class="form-control bg-light border" rows="8" placeholder="Your answer here..."></textarea>
                     </div>
                     <button id="submitButton" type="submit" class="btn btn-primary">Submit Answer</button>
                     <button id="skipButton" skip="submitButton" type="submit" name="skip" class="btn btn-secondary ms-2">Skip</button>
@@ -187,7 +191,7 @@ try {
                             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                                 data-bs-target="#collapse-<?= $index; ?>" aria-expanded="false"
                                 aria-controls="collapse-<?= $index; ?>">
-                                Score: <?= $answer['score']; ?>
+                                Score: <?= $answer['score']; ?>%
                             </button>
                         </h2>
                         <div id="collapse-<?= $index; ?>" class="accordion-collapse collapse"
@@ -197,7 +201,7 @@ try {
                                 <hr>
                                 <p><strong>Answer:</strong> <?= htmlspecialchars($answer['answer']); ?></p>
                                 <hr>
-                                <p><strong>Feedback:</strong> <?= nl2br($answer['feedback']); ?></p>
+                                <p><strong>Feedback:</strong> <?= $answer['feedback']; ?></p>
                             </div>
                         </div>
                     </div>

@@ -27,12 +27,15 @@
                         <h3><?php echo get_phrase($course['level']); ?></h3>
                     </div>
                 </div>
+                
+                
+                
                 <div class="courses-text w-100">
                     <div class="courses-d-flex-text">
                         <h5><?php echo $course['title']; ?></h5>
-                        <span class="compare-img checkPropagation" onclick="redirectTo('<?php echo base_url('home/compare?course-1=' . slugify($course['title']) . '&course-id-1=' . $course['id']); ?>');">
+                        <span class="compare-img checkPropagation">
                             <img loading="lazy" src="<?php echo base_url('assets/frontend/default-new/image/compare.png') ?>">
-                            <?php echo get_phrase('Compare'); ?>
+                            <?php echo get_phrase('Buy Now'); ?>
                         </span>
                     </div>
                     <div class="review-icon">

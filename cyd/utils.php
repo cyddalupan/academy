@@ -1,78 +1,96 @@
 <?php
-if (ENV == "dev") {
-    header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
-    header("Cache-Control: post-check=0, pre-check=0", false);
-    header("Pragma: no-cache");
+if (ENV == "dev") {    header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+    header("Cache-Control: post-check=0, pre-check=0", false);    header("Pragma: no-cache");
 }
+function logMessage($message) {    $logDir = __DIR__ . '/../logs';
+    $logFile = $logDir . '/api.log';    
+    if (!is_dir($logDir)) {        mkdir($logDir, 0755, true);
+    }    
+    $timestamp = date('Y-m-d H:i:s');    file_put_contents($logFile, "[$timestamp] $message\n", FILE_APPEND | LOCK_EX);
+}
+function callGrokAI($userInput, $expected){
+    $apiKey = X_AI;    $url = 'https://api.x.ai/v1/chat/completions';
+    $maxRetries = 3;    $attempt = 0;
 
-function callOpenAI($userInput, $expected)
-{
-    $apiKey = OPEN_AI;
-    $url = 'https://api.openai.com/v1/chat/completions';
+    while ($attempt < $maxRetries) {
+        try {
+            $headers = [
+                'Content-Type: application/json',
+                'Authorization: Bearer ' . $apiKey
+            ];
 
-    $headers = [
-        'Content-Type: application/json',
-        'Authorization: Bearer ' . $apiKey
-    ];
-
-    $postData = json_encode([
-        "model" => "gpt-4o",
-        "messages" => [
-            [
-                "role" => "system",
-                "content" => "Trigger the score_answer function 100% no need for reply. You compare user_answer to expected_answer you give score (100 if they are really close) and feedback (base feedback on answer, legal basis, application, conclusion and grammar)"
-            ],
-            [
-                "role" => "system",
-                "content" => "expected_answer: $expected"
-            ],
-            [
-                "role" => "user",
-                "content" => "user_answer: $userInput"
-            ],
-            [
-                "role" => "system",
-                "content" => "Trigger the score_answer function"
-            ],
-        ],
-        "functions" => [
-            [
-                "name" => "score_answer",
-                "description" => "Always Trigger this to score how close user answer to expected answer",
-                "parameters" => [
-                    "type" => "object",
-                    "properties" => [
-                        "score" => [
-                            "type" => "integer",
-                            "description" => "Score of the user on how close the answer to expected from 1 to 100. 100 is perfect."
-                        ],
-                        "feedback" => [
-                            "type" => "string",
-                            "description" => "Feedback to user. base feedback on answer, legal basis, application, grammar and conclusion. use html instead of markdown."
-                        ]
+            $postData = json_encode([
+                "model" => "grok-4",
+                "temperature" => 0,
+                "messages" => [
+                    [
+                        "role" => "system",
+                        "content" => <<<EOD
+Compare the user_answer to expected_answer and output only a valid JSON object with:
+- "score": integer (1-100, 100 for full match, 70-95 for close match, 0-30 for mismatch).
+- "feedback": Bootstrap HTML table for Answer, Legal Basis, Application, Conclusion & Grammar (each 5/5 if perfect, total 25 for 100%) plus 'Additional Insights' plain text (congratulate if perfect).
+EOD
                     ],
-                    "required" => ["score", "feedback"]
+                    [
+                        "role" => "system",
+                        "content" => "expected_answer: $expected"
+                    ],
+                    [
+                        "role" => "user",
+                        "content" => "user_answer: $userInput"
+                    ]
                 ]
-            ]
-        ],
-        "function_call" => "auto"
-    ]);
+            ]);
 
-    $ch = curl_init($url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
+            $ch = curl_init($url);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 120);
 
-    $response = curl_exec($ch);
-    if ($response === false) {
-        throw new Exception('cURL Error: ' . curl_error($ch));
+            $response = curl_exec($ch);
+            if ($response === false) {
+                throw new Exception('cURL Error: ' . curl_error($ch));
+            }
+
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            logMessage("API HTTP status: " . $httpCode . " for callGrokAI");
+            if ($httpCode !== 200) {
+                logMessage("Raw API response on non-200: " . $response);
+                throw new Exception('HTTP error: ' . $httpCode);
+            }
+
+            $data = json_decode($response, true);
+            if ($data === null) {
+                logMessage("JSON decode error: " . json_last_error_msg());
+                logMessage("Raw API response: " . $response);
+                throw new Exception('Invalid JSON response');
+            }
+
+            logMessage("Decoded API response: " . json_encode($data, JSON_PRETTY_PRINT));
+
+            if (isset($data['error'])) {
+                throw new Exception('xAI API Error: ' . json_encode($data['error']));
+            }
+
+            if (!isset($data['choices'][0]['message']['content'])) {
+                throw new Exception('Invalid Grok-4 response or missing content');
+            }
+
+            curl_close($ch);
+            return $data;
+        } catch (Exception $e) {
+            $attempt++;
+            curl_close($ch);
+            logMessage("Grok-4 call attempt $attempt failed: " . $e->getMessage());
+            if ($attempt >= $maxRetries) {
+                throw new Exception('Grok-4 API call failed after retries: ' . $e->getMessage());
+            }
+            sleep(1);
+        }
     }
-
-    curl_close($ch);
-    return json_decode($response, true);
 }
-
 function calculateAverageScore($answers, $totalQuestions)
 {
     $totalScore = 0;
@@ -87,129 +105,221 @@ function calculateAverageScore($answers, $totalQuestions)
     return $count > 0 ? $totalScore / $count : 0;
 }
 
-function summarizeFeedback($answers) {
-    $apiKey = OPEN_AI;
-    $url = 'https://api.openai.com/v1/chat/completions';
+function summarizeFeedback($answers)
+{
+    $apiKey = X_AI;
+    $url = 'https://api.x.ai/v1/chat/completions';
 
-    $headers = [
-        'Content-Type: application/json',
-        'Authorization: Bearer ' . $apiKey
-    ];
-
-    $messages = [["role" => "system", "content" => "Provide a student summary based on the following feedback and scores. in less than 200 characters"]];
-
-    foreach ($answers as $answer) {
-        $messages[] = [
-            "role" => "user",
-            "content" => "Score: {$answer['score']}. Feedback: {$answer['feedback']}"
+    try {
+        $headers = [
+            'Content-Type: application/json',
+            'Authorization: Bearer ' . $apiKey
         ];
+
+        $messages = [["role" => "system", "content" => "Provide a student summary based on the following feedback and scores. in less than 200 characters"]];
+
+        foreach ($answers as $answer) {
+            $messages[] = [
+                "role" => "user",
+                "content" => "Score: {$answer['score']}. Feedback: {$answer['feedback']}"
+            ];
+        }
+
+        $postData = json_encode([
+            "model" => "grok-4",
+            "messages" => $messages,
+        ]);
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 60);
+
+        $response = curl_exec($ch);
+        if ($response === false) {
+            throw new Exception('cURL Error: ' . curl_error($ch));
+        }
+
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        logMessage("API HTTP status: " . $httpCode . " for summarizeFeedback");
+        if ($httpCode !== 200) {
+            logMessage("Raw API response on non-200: " . $response);
+            throw new Exception('HTTP error: ' . $httpCode);
+        }
+
+        $data = json_decode($response, true);
+        if ($data === null) {
+            logMessage("JSON decode error: " . json_last_error_msg());
+            logMessage("Raw API response: " . $response);
+            throw new Exception('Invalid JSON response');
+        }
+
+        logMessage("Decoded API response: " . json_encode($data, JSON_PRETTY_PRINT));
+
+        if (isset($data['error'])) {
+            throw new Exception('xAI API Error: ' . json_encode($data['error']));
+        }
+
+        curl_close($ch);
+        return $data['choices'][0]['message']['content'] ?? 'No summary available';
+    } catch (Exception $e) {
+        logMessage("summarizeFeedback error: " . $e->getMessage());
+        return 'Error generating summary';
     }
-
-    $postData = json_encode([
-        "model" => "gpt-4o",
-        "messages" => $messages,
-    ]);
-
-    $ch = curl_init($url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
-
-    $response = curl_exec($ch);
-    if ($response === false) {
-        throw new Exception('cURL Error: ' . curl_error($ch));
-    }
-
-    curl_close($ch);
-    $response = json_decode($response, true);
-    return $response['choices'][0]['message']['content'];
 }
 
-function ai_email_diagnose($answers, $fullname) {
-    $apiKey = OPEN_AI;
-    $url = 'https://api.openai.com/v1/chat/completions';
+function ai_email_diagnose($answers, $fullname)
+{
+    $apiKey = X_AI;
+    $url = 'https://api.x.ai/v1/chat/completions';
 
-    $headers = [
-        'Content-Type: application/json',
-        'Authorization: Bearer ' . $apiKey
-    ];
-
-    $messages = [["role" => "system", "content" => "Provide a student (name:".$fullname.") an assessment email (just the body of the email in HTML format) content based on the following feedback and scores, but do not follow the feedback format, this needs to convince the student to use our online course 'TopBar Asssist PH'. note: the result will be emailed dirrectly to do not put variable or text thats needed to be changed"]];
-
-    foreach ($answers as $answer) {
-        $messages[] = [
-            "role" => "user",
-            "content" => "Score: {$answer['score']}. Feedback: {$answer['feedback']}"
+    try {
+        $headers = [
+            'Content-Type: application/json',
+            'Authorization: Bearer ' . $apiKey
         ];
+
+        $messages = [["role" => "system", "content" => "Provide a student (name: $fullname) an assessment email (just the body of the email in HTML format) content based on the following feedback and scores, but do not follow the feedback format, this needs to convince the student to use our online course 'TopBar Asssist PH'. note: the result will be emailed directly to do not put variable or text thats needed to be changed"]];
+
+        foreach ($answers as $answer) {
+            $messages[] = [
+                "role" => "user",
+                "content" => "Score: {$answer['score']}. Feedback: {$answer['feedback']}"
+            ];
+        }
+
+        $postData = json_encode([
+            "model" => "grok-4",
+            "messages" => $messages,
+        ]);
+
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 60);
+
+        $response = curl_exec($ch);
+        if ($response === false) {
+            throw new Exception('cURL Error: ' . curl_error($ch));
+        }
+
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        logMessage("API HTTP status: " . $httpCode . " for ai_email_diagnose");
+        if ($httpCode !== 200) {
+            logMessage("Raw API response on non-200: " . $response);
+            throw new Exception('HTTP error: ' . $httpCode);
+        }
+
+        $data = json_decode($response, true);
+        if ($data === null) {
+            logMessage("JSON decode error: " . json_last_error_msg());
+            logMessage("Raw API response: " . $response);
+            throw new Exception('Invalid JSON response');
+        }
+
+        logMessage("Decoded API response: " . json_encode($data, JSON_PRETTY_PRINT));
+
+        if (isset($data['error'])) {
+            throw new Exception('xAI API Error: ' . json_encode($data['error']));
+        }
+
+        curl_close($ch);
+        return $data['choices'][0]['message']['content'] ?? '<p>Error generating email content</p>';
+    } catch (Exception $e) {
+        logMessage("ai_email_diagnose error: " . $e->getMessage());
+        return '<p>Unable to generate assessment email at this time.</p>';
     }
+}
 
-    $postData = json_encode([
-        "model" => "gpt-4o",
-        "messages" => $messages,
-    ]);
-
-    $ch = curl_init($url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
-
-    $response = curl_exec($ch);
-    if ($response === false) {
-        throw new Exception('cURL Error: ' . curl_error($ch));
+function processResponse($pdo, $userId, $questionId, $userInput, $courseId, $response, $is_practice, &$score, &$feedback)
+{
+    try {
+        $content = $response['choices'][0]['message']['content'];
+        logMessage("Response content for userId=$userId, questionId=$questionId: " . $content);
+        if (empty($content)) {
+            throw new Exception('Empty response content from Grok-4');
+        }
+        $decodedParams = json_decode($content, true);
+        if ($decodedParams === null) {
+            logMessage("JSON decode error in processResponse: " . json_last_error_msg());
+            throw new Exception('Invalid JSON in response content');
+        }
+        if (!isset($decodedParams['score']) || !isset($decodedParams['feedback'])) {
+            throw new Exception('Missing score or feedback in JSON');
+        }
+        $score = (int)$decodedParams['score'];
+        $feedback = $decodedParams['feedback'];
+        if (!$is_practice) {
+            insertAnswer($pdo, $userId, $questionId, $userInput, $courseId, $score, $feedback);
+        }
+    } catch (Exception $e) {
+        logMessage("processResponse error for userId=$userId, questionId=$questionId: " . $e->getMessage());
+        $score = 0;
+        $feedback = 'Error processing response';
     }
-
-    curl_close($ch);
-    $response = json_decode($response, true);
-    return $response['choices'][0]['message']['content'];
 }
 
-function processResponse($pdo, $userId, $questionId, $userInput, $courseId, $response, $is_practice, &$score, &$feedback) {
-	$choice = $response['choices'][0]['message']['function_call'];
-	$decodedParams = json_decode($choice['arguments'], true);
-	$score = $decodedParams['score'];
-	$feedback = $decodedParams['feedback'];
-	if (!$is_practice) {
-		insertAnswer($pdo, $userId, $questionId, $userInput, $courseId, $score, $feedback);
-	}
+function manageTimer($pdo, $userId, $courseId, $is_practice, $totalQuestions, $timer_minutes)
+{
+    try {
+        if ($is_practice) {
+            return 9999;
+        } elseif (isset($_POST['remaining-seconds'])) {
+            $remainingSeconds = max(0, (int)$_POST['remaining-seconds']);
+            updateRemainingSeconds($pdo, $userId, $remainingSeconds, $courseId);
+            return $remainingSeconds;
+        } else {
+            $existingData = getRemainingSeconds($pdo, $userId, $courseId);
+            if ($existingData && $existingData['remaining_seconds'] > 0) {
+                return $existingData['remaining_seconds'];
+            } else {
+                createUserCourse($pdo, $userId, $courseId, $totalQuestions, $timer_minutes);
+                return max(0, ($timer_minutes * 60) * $totalQuestions);
+            }
+        }
+    } catch (Exception $e) {
+        logMessage("manageTimer error for userId=$userId, courseId=$courseId: " . $e->getMessage());
+        return 0;
+    }
 }
 
-function manageTimer($pdo, $userId, $courseId, $is_practice, $totalQuestions, $timer_minutes) {
-	if ($is_practice) {
-		return 9999;
-	} elseif (isset($_POST['remaining-seconds'])) {
-		$remainingSeconds = $_POST['remaining-seconds'];
-		updateRemainingSeconds($pdo, $userId, $remainingSeconds, $courseId);
-		return $remainingSeconds;
-	} else {
-		$existingData = getRemainingSeconds($pdo, $userId, $courseId);
-		if ($existingData) {
-			return $existingData['remaining_seconds'];
-		} else {
-			createUserCourse($pdo, $userId, $courseId, $totalQuestions, $timer_minutes);
-			return ($timer_minutes * 60) * $totalQuestions;
-		}
-	}
+function calculateProgress($pdo, $userId, $courseId, $is_practice, $remainingSeconds, $totalQuestions, &$answerCount)
+{
+    try {
+        if ($is_practice) {
+           return 0;
+        } else {
+            $answerCount = countUserAnswers($pdo, $userId, $courseId);
+            return $remainingSeconds === 0 ? 100 : ($answerCount / $totalQuestions) * 100;
+        }
+    } catch (Exception $e) {
+        logMessage("calculateProgress error for userId=$userId, courseId=$courseId: " . $e->getMessage());
+        $answerCount = 0;
+        return 0;
+    }
 }
 
-function calculateProgress($pdo, $userId, $courseId, $is_practice, $remainingSeconds, $totalQuestions, &$answerCount) {
-	if ($is_practice) {
-		return 0;
-	} else {
-		$answerCount = countUserAnswers($pdo, $userId, $courseId);
-		return $remainingSeconds === 0 ? 100 : ($answerCount / $totalQuestions) * 100;
-	}
+function finalizeAssessment($pdo, $userId, $courseId, $totalQuestions, &$answers, &$averageScore)
+{
+    try {
+        $answers = getAllUserAnswers($pdo, $userId, $courseId);
+        $averageScore = calculateAverageScore($answers, $totalQuestions);
+        if (!hasSummary($pdo, $userId, $courseId)) {
+            $summary = summarizeFeedback($answers);
+            updateSummary($pdo, $userId, $courseId, $averageScore, $summary);
+            $user = getCurrentUser($pdo, $userId);
+            if ($user) {
+                $ai_email_diagnose = ai_email_diagnose($answers, $user['first_name'] . " " . $user['last_name']);
+                send_email_with_phpmailer($pdo, $user['email'], 'Diagnostic Exam', $ai_email_diagnose, 'ehajjonlinephilippines@gmail.com');
+            } else {
+                logMessage("User not found for userId=$userId during finalization");
+            }
+        }
+    } catch (Exception $e) {
+        logMessage("finalizeAssessment error for userId=$userId, courseId=$courseId: " . $e->getMessage());
+    }
 }
-
-function finalizeAssessment($pdo, $userId, $courseId, $totalQuestions, &$answers, &$averageScore) {
-	$answers = getAllUserAnswers($pdo, $userId, $courseId);
-	$averageScore = calculateAverageScore($answers, $totalQuestions);
-	if (!hasSummary($pdo, $userId, $courseId)) {
-		$summary = summarizeFeedback($answers);
-		updateSummary($pdo, $userId, $courseId, $averageScore, $summary);
-        $user = getCurrentUser($pdo, $userId);
-		$ai_email_diagnose = ai_email_diagnose($answers, $user['first_name'] . " " . $user['last_name']);
-        send_email_with_phpmailer($pdo, $user['email'], 'Diagnostic Exam', $ai_email_diagnose, 'ehajjonlinephilippines@gmail.com');
-	}
-}
+?>
