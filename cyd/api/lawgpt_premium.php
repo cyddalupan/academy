@@ -79,7 +79,7 @@ foreach ($conversation as $m) {
 // Prepend short system prompt for premium
 array_unshift($messages, [
     'role' => 'system',
-    'content' => 'You are an AI assistant specialized in Philippine law. Help the user with their query on Philippine law. Provide accurate, detailed responses. Format your responses in Markdown. Check latest data (web search) for accuracy on important prompts.'
+    'content' => 'Today\'s date is ' . date('F j, Y') . '. You are an AI assistant specialized in Philippine law. Help the user with their query on Philippine law. Provide accurate, detailed responses. Format your responses in Markdown. When the user asks for updates, recent events, or information related to specific dates (e.g., "in May 2025"), you MUST use web search to get the latest data for accuracy.'
 ]);
 
 // Get today's message count for the user
