@@ -1,12 +1,12 @@
 <?php
-require '../config.php';
-require 'model.php';
-require 'utils.php';
-
-$dsn = DSN_PATH;
+if (!defined('ENV') || ENV !== 'test') {
+    require '../config.php';
+}
+require_once 'model.php';
+require_once 'utils.php';
 
 try {
-	$pdo = new PDO($dsn, $username, $password);
+	$pdo = new PDO(DSN_PATH, USERNAME, PASSWORD);
 	$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 	$courses_results = getLast200CustomUsersCourses($pdo);
 	$score_counts = countScoreByGroup($courses_results);
@@ -25,7 +25,7 @@ try {
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
-	<?php require '../style-over.php'; ?>
+	<?php require __DIR__ . '/../style-over.php'; ?>
 	<title>Dashboard</title>
 </head>
 
@@ -133,7 +133,7 @@ try {
 		</table>
 	</div>
 
-	<?php require 'script.php'; ?><!-- Include Bootstrap JS -->
+	<?php require __DIR__ . '/script.php'; ?><!-- Include Bootstrap JS -->
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 	<script>

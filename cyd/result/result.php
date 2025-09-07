@@ -1,9 +1,9 @@
 <?php
-require '../config.php';
+require_once __DIR__ . '/../model.php';
+if (!defined('ENV') || ENV !== 'test') {
+    require '../config.php';
+}
 
-$dsn = DSN_PATH;
-
-// Model functions
 function getUserAnswers($pdo, $userId): mixed
 {
     $query = "
@@ -19,7 +19,7 @@ function getUserAnswers($pdo, $userId): mixed
 }
 
 try {
-    $pdo = new PDO($dsn, $username, $password);
+    $pdo = new PDO(DSN_PATH, USERNAME, PASSWORD);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     $userId = $_GET['id'];
     $answers = getUserAnswers($pdo, $userId);
@@ -35,7 +35,7 @@ try {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Result Data</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <?php require '../style-over.php'; ?>
+    <?php require __DIR__ . '/../style-over.php'; ?>
     <style>
         .collapse {
             display: none;

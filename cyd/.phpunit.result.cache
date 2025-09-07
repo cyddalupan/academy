@@ -1,0 +1,1 @@
+{"version":1,"defects":{"ChatTest::testFileIsReadableAndWithoutSyntaxErrors":4},"times":{"UtilsTest::testCountScoreByGroup":0.003000000000000000062450045135165055398829281330108642578125,"ChatTest::testFileIsReadableAndWithoutSyntaxErrors":0.003000000000000000062450045135165055398829281330108642578125}}

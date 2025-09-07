@@ -1,5 +1,7 @@
 <?php
-require '../config.php';
+if (!defined('ENV') || ENV !== 'test') {
+    require '../config.php';
+}
 
 if (ENV == "dev") {
 	header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
@@ -10,7 +12,7 @@ if (ENV == "dev") {
 $apiKey = OPEN_AI;
 
 try {
-    $pdo = new PDO($dsn, $username, $password);
+    $pdo = new PDO(DSN_PATH, USERNAME, PASSWORD);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
