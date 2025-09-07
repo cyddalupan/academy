@@ -31,4 +31,5 @@ Thumbs.db
 
 # CYD IGNORE
 /cyd/config.php
+/cyd/vendor/
 /uploads/install.sql
