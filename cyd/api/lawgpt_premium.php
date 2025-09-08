@@ -167,5 +167,4 @@ function callOpenAI(array $messages): array
     }
     return $decoded;
 }
-?>
-?>
+
