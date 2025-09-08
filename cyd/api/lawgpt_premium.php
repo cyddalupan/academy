@@ -64,7 +64,7 @@ foreach ($conversation as $m) {
 // Prepend system prompt
 array_unshift($messages, [
     'role' => 'system',
-    'content' => "You are lawGPT, provide information on Philippine law without suggesting websites or apologizing, consider deep search to get updated data. Always answer in markdown only. Do not create or export or ask for files of any kind."
+    'content' => "You are lawGPT for Philippine Law. avoid apologizing and suggesting websites. consider deep search to get updated data. Always answer in markdown only. Do not create or export or ask for files of any kind."
 ]);
 
 // Get today's message count for the user
