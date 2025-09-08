@@ -40,46 +40,64 @@ if (!$thread_id || !$user_id || !$conversation) {
     exit;
 }
 
-// Build messages array and store user messages in database
-$messages = [];
-foreach ($conversation as $m) {
-    $from = strtolower(trim($m['from'] ?? 'user'));
-    $text = $m['text'] ?? '';
-    $role = in_array($from, ['assistant', 'bot', 'ai']) ? 'assistant' : ($from === 'system' ? 'system' : 'user');
-    
-    if (!is_string($text)) {
-        $text = is_scalar($text) ? (string)$text : json_encode($text, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
-    }
-    
-    // Store user message
-    try {
-        $stmt = $pdo->prepare("
-            INSERT INTO chat_history (thread_id, user_id, `from`, `text`, `role`, created_at)
-            VALUES (:thread_id, :user_id, :from, :text, :role, NOW())
-        ");
-        $stmt->execute([
-            'thread_id' => $thread_id,
-            'user_id' => $user_id,
-            'from' => $from,
-            'text' => $text,
-            'role' => $role
-        ]);
-    } catch (PDOException $e) {
-        http_response_code(500);
-        echo json_encode(['error' => 'Failed to save message: ' . $e->getMessage()]);
-        exit;
-    }
-    
-    $messages[] = [
-        'role' => $role,
-        'content' => $text
-    ];
+// Get the last message from the conversation
+$last_message = end($conversation);
+$from = strtolower(trim($last_message['from'] ?? 'user'));
+$text = $last_message['text'] ?? '';
+$role = in_array($from, ['assistant', 'bot', 'ai']) ? 'assistant' : ($from === 'system' ? 'system' : 'user');
+
+if (!is_string($text)) {
+    $text = is_scalar($text) ? (string)$text : json_encode($text, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
 }
 
-// Prepend short system prompt for premium
+// Store only the last message
+try {
+    $stmt = $pdo->prepare("
+        INSERT INTO chat_history (thread_id, user_id, `from`, `text`, `role`, created_at)
+        VALUES (:thread_id, :user_id, :from, :text, :role, NOW())
+    ");
+    $stmt->execute([
+        'thread_id' => $thread_id,
+        'user_id' => $user_id,
+        'from' => $from,
+        'text' => $text,
+        'role' => $role
+    ]);
+} catch (PDOException $e) {
+    http_response_code(500);
+    echo json_encode(['error' => 'Failed to save message: ' . $e->getMessage()]);
+    exit;
+}
+
+// Fetch the last 6 messages (3 chat pairs) to build the history
+try {
+    $stmt = $pdo->prepare("
+        SELECT `role`, `text` as `content`
+        FROM chat_history
+        WHERE thread_id = :thread_id
+        ORDER BY created_at DESC
+        LIMIT 6
+    ");
+    $stmt->execute(['thread_id' => $thread_id]);
+    $messages = array_reverse($stmt->fetchAll(PDO::FETCH_ASSOC));
+} catch (PDOException $e) {
+    http_response_code(500);
+    echo json_encode(['error' => 'Failed to retrieve chat history: ' . $e->getMessage()]);
+    exit;
+}
+
+// Prepend system prompt
 array_unshift($messages, [
     'role' => 'system',
-    'content' => 'Today\'s date is ' . date('F j, Y') . '. You are an AI assistant specialized in Philippine law. Help the user with their query on Philippine law. Provide accurate, detailed responses. Format your responses in Markdown. When the user asks for updates, recent events, or information related to specific dates (e.g., "in May 2025"), you MUST use web search to get the latest data for accuracy.'
+    'content' => 'You are an AI assistant specializing in Philippine law. 
+First, ask clarifying questions to fully understand the user's request. 
+Only after gathering enough details, perform a deep search. 
+When searching, prioritize authoritative sources such as:
+- https://lawphil.net/
+- https://www.officialgazette.gov.ph/section/republic-acts/
+- https://sc.judiciary.gov.ph/
+but you may use other reliable sources when needed. 
+Provide accurate, detailed, and well-structured answers in Markdown.'
 ]);
 
 // Get today's message count for the user
