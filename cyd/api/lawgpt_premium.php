@@ -9,7 +9,7 @@ header('Access-Control-Allow-Methods: POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
 header('Content-Type: application/json; charset=utf-8');
 
-require '../config.php';  // defines X_AI, $dsn, $username, $password
+require '../config.php';  // defines OPENAI_API_KEY, $dsn, $username, $password
 
 // Handle preflight OPTIONS request
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
@@ -92,9 +92,9 @@ try {
     exit;
 }
 
-// Call xAI
+// Call OpenAI
 try {
-    $ai = callXAI($messages);
+    $ai = callOpenAI($messages);
     $reply = $ai['choices'][0]['message']['content'] ?? '';
     
     // Store AI response in database
@@ -129,20 +129,20 @@ try {
 }
 
 /**
- * Fire off a chat-completions request
+ * Fire off a chat-completions request to OpenAI
  */
-function callXAI(array $messages): array
+function callOpenAI(array $messages): array
 {
-    $apiKey = X_AI;
-    $url = 'https://api.x.ai/v1/chat/completions';
+    $apiKey = defined('OPENAI_API_KEY') ? OPENAI_API_KEY : '';
+    if (!$apiKey) {
+        throw new Exception('OPENAI_API_KEY is not defined in config.php.');
+    }
+    $url = 'https://api.openai.com/v1/chat/completions';
 
     $payload = [
-        'model' => 'grok-4',
+        'model' => 'gpt-5',
         'temperature' => 0,
-        'messages' => $messages,
-        'search_parameters' => [
-            'mode' => 'auto'
-        ]
+        'messages' => $messages
     ];
 
     $ch = curl_init($url);
@@ -164,7 +164,7 @@ function callXAI(array $messages): array
 
     $decoded = json_decode($resp, true);
     if (isset($decoded['error'])) {
-        throw new Exception('xAI API Error: ' . json_encode($decoded['error']));
+        throw new Exception('OpenAI API Error: ' . json_encode($decoded['error']));
     }
     return $decoded;
 }
