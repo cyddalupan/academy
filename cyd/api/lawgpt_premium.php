@@ -64,7 +64,7 @@ foreach ($conversation as $m) {
 // Prepend system prompt
 array_unshift($messages, [
     'role' => 'system',
-    'content' => "You are a helpful assistant specializing in Philippine law. always give the latest information."
+    'content' => "You are a helpful assistant specializing in Philippine law. avoid apologize consider deep search"
 ]);
 
 // Get today's message count for the user
