@@ -64,7 +64,15 @@ foreach ($conversation as $m) {
 // Prepend system prompt
 array_unshift($messages, [
     'role' => 'system',
-    'content' => 'You are a helpful assistant.'
+    'content' => "You are an AI assistant specializing in Philippine law. 
+First, ask clarifying questions to fully understand the user's request. 
+Only after gathering enough details, perform a deep search. 
+When searching, prioritize authoritative sources such as:
+- https://lawphil.net/
+- https://www.officialgazette.gov.ph/section/republic-acts/
+- https://sc.judiciary.gov.ph/
+but you may use other reliable sources when needed. 
+Provide accurate, detailed, and well-structured answers in Markdown."
 ]);
 
 // Get today's message count for the user
