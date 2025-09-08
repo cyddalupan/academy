@@ -40,64 +40,31 @@ if (!$thread_id || !$user_id || !$conversation) {
     exit;
 }
 
-// Get the last message from the conversation
-$last_message = end($conversation);
-$from = strtolower(trim($last_message['from'] ?? 'user'));
-$text = $last_message['text'] ?? '';
-$role = in_array($from, ['assistant', 'bot', 'ai']) ? 'assistant' : ($from === 'system' ? 'system' : 'user');
+// Build messages array
+$messages = [];
 
-if (!is_string($text)) {
-    $text = is_scalar($text) ? (string)$text : json_encode($text, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
-}
+// Take only the last 3 messages
+$conversation = array_slice($conversation, -3);
 
-// Store only the last message
-try {
-    $stmt = $pdo->prepare("
-        INSERT INTO chat_history (thread_id, user_id, `from`, `text`, `role`, created_at)
-        VALUES (:thread_id, :user_id, :from, :text, :role, NOW())
-    ");
-    $stmt->execute([
-        'thread_id' => $thread_id,
-        'user_id' => $user_id,
-        'from' => $from,
-        'text' => $text,
-        'role' => $role
-    ]);
-} catch (PDOException $e) {
-    http_response_code(500);
-    echo json_encode(['error' => 'Failed to save message: ' . $e->getMessage()]);
-    exit;
-}
+foreach ($conversation as $m) {
+    $from = strtolower(trim($m['from'] ?? 'user'));
+    $text = $m['text'] ?? '';
+    $role = in_array($from, ['assistant', 'bot', 'ai']) ? 'assistant' : ($from === 'system' ? 'system' : 'user');
 
-// Fetch the last 6 messages (3 chat pairs) to build the history
-try {
-    $stmt = $pdo->prepare("
-        SELECT `role`, `text` as `content`
-        FROM chat_history
-        WHERE thread_id = :thread_id
-        ORDER BY created_at DESC
-        LIMIT 6
-    ");
-    $stmt->execute(['thread_id' => $thread_id]);
-    $messages = array_reverse($stmt->fetchAll(PDO::FETCH_ASSOC));
-} catch (PDOException $e) {
-    http_response_code(500);
-    echo json_encode(['error' => 'Failed to retrieve chat history: ' . $e->getMessage()]);
-    exit;
+    if (!is_string($text)) {
+        $text = is_scalar($text) ? (string)$text : json_encode($text, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
+    }
+
+    $messages[] = [
+        'role' => $role,
+        'content' => $text
+    ];
 }
 
 // Prepend system prompt
 array_unshift($messages, [
     'role' => 'system',
-    'content' => 'You are an AI assistant specializing in Philippine law. 
-First, ask clarifying questions to fully understand the user's request. 
-Only after gathering enough details, perform a deep search. 
-When searching, prioritize authoritative sources such as:
-- https://lawphil.net/
-- https://www.officialgazette.gov.ph/section/republic-acts/
-- https://sc.judiciary.gov.ph/
-but you may use other reliable sources when needed. 
-Provide accurate, detailed, and well-structured answers in Markdown.'
+    'content' => 'You are a helpful assistant.'
 ]);
 
 // Get today's message count for the user
