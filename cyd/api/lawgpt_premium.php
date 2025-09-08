@@ -142,7 +142,6 @@ function callOpenAI(array $messages): array
 
     $payload = [
         'model' => 'gpt-5',
-        'temperature' => 0,
         'messages' => $messages
     ];
 
