@@ -124,6 +124,7 @@ try {
         JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES
     );
 } catch (Exception $e) {
+    error_log('Caught exception: ' . $e->getMessage());
     http_response_code(500);
     echo json_encode(['error' => $e->getMessage()]);
 }
@@ -168,4 +169,5 @@ function callOpenAI(array $messages): array
     }
     return $decoded;
 }
+?>
 ?>
