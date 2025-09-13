@@ -140,11 +140,11 @@ function callOpenAI(array $messages): array
         'messages' => $messages,
         'tools' => [
             [
-                'type' => 'web_search',
-                'web_search' => [
-                    'context_size' => 'high'
-                ]
+                'type' => 'web_search'
             ]
+        ],
+        'reasoning' => [
+            'effort' => 'high'
         ]
     ];
 
