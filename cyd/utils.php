@@ -1,12 +1,13 @@
 <?php
-if (ENV == "dev") {    header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+if (ENV == "dev" && php_sapi_name() !== 'cli') {    header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
     header("Cache-Control: post-check=0, pre-check=0", false);    header("Pragma: no-cache");
 }
 function logMessage($message) {    $logDir = __DIR__ . '/../logs';
     $logFile = $logDir . '/api.log';    
     if (!is_dir($logDir)) {        mkdir($logDir, 0755, true);
     }    
-    $timestamp = date('Y-m-d H:i:s');    file_put_contents($logFile, "[$timestamp] $message\n", FILE_APPEND | LOCK_EX);
+    $timestamp = date('Y-m-d H:i:s');    file_put_contents($logFile, "[$timestamp] $message
+", FILE_APPEND | LOCK_EX);
 }
 function callGrokAI($userInput, $expected){
     $apiKey = X_AI;    $url = 'https://api.x.ai/v1/chat/completions';
@@ -322,4 +323,45 @@ function finalizeAssessment($pdo, $userId, $courseId, $totalQuestions, &$answers
         logMessage("finalizeAssessment error for userId=$userId, courseId=$courseId: " . $e->getMessage());
     }
 }
-?>
+
+/**
+ * Fire off a chat-completions request to OpenAI
+ */
+function callOpenAI(array $messages): array
+{
+    $apiKey = defined('OPENAI_API_KEY') ? OPENAI_API_KEY : '';
+    if (!$apiKey) {
+        throw new Exception('OPENAI_API_KEY is not defined in config.php.');
+    }
+    $url = 'https://api.openai.com/v1/chat/completions';
+
+    $payload = [
+        'model' => 'gpt-5',
+        'messages' => $messages,
+        
+        
+    ];
+
+    $ch = curl_init($url);
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_POST => true,
+        CURLOPT_HTTPHEADER => [
+            'Content-Type: application/json',
+            'Authorization: Bearer ' . $apiKey
+        ],
+        CURLOPT_POSTFIELDS => json_encode($payload)
+    ]);
+
+    $resp = curl_exec($ch);
+    if ($resp === false) {
+        throw new Exception('cURL Error: ' . curl_error($ch));
+    }
+    curl_close($ch);
+
+    $decoded = json_decode($resp, true);
+    if (isset($decoded['error'])) {
+        throw new Exception('OpenAI API Error: ' . json_encode($decoded['error']));
+    }
+    return $decoded;
+}

@@ -10,6 +10,7 @@ header('Access-Control-Allow-Headers: Content-Type');
 header('Content-Type: application/json; charset=utf-8');
 
 require '../config.php';  // defines OPENAI_API_KEY, $dsn, $username, $password
+require_once '../utils.php';
 
 // Handle preflight OPTIONS request
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
@@ -64,11 +65,17 @@ foreach ($conversation as $m) {
 // Prepend system prompt
 array_unshift($messages, [
     'role' => 'system',
-    'content' => "You are GPT-5, an AI assistant specializing in Philippine law. 
-You must always perform a web search to ensure your information is up-to-date.\nFirst, ask clarifying questions to fully understand the user's request. 
-Only after gathering enough details, perform a deep search. 
-When searching, prioritize authoritative sources such as:\n- https://lawphil.net/\n- https://www.officialgazette.gov.ph/section/republic-acts/\n- https://sc.judiciary.gov.ph/\nbut you may use other reliable sources when needed. 
-Provide accurate, detailed, and well-structured answers in Markdown."
+    'content' => "You are GPT-5, an AI assistant specializing in Philippine law. Your goal is to provide high-reasoning, accurate, and up-to-date legal information.
+
+Follow these steps:
+1.  **Clarify:** First, ask clarifying questions to fully understand the user's request.
+2.  **Search:** After gathering enough details, perform a comprehensive web search. You must always perform a web search to ensure your information is current. Prioritize authoritative sources such as:
+    *   https://lawphil.net/
+    *   https://www.officialgazette.gov.ph/section/republic-acts/
+    *   https://sc.judiciary.gov.ph/
+    *   Use other reliable sources as needed.
+3.  **Synthesize & Reason:** Analyze the search results. Think step-by-step to construct a detailed and well-structured answer. Explain the legal concepts involved.
+4.  **Respond:** Provide the answer in Markdown format. The response should be clear, accurate, and address all parts of the user's query."
 ]);
 
 // Get today's message count for the user
@@ -124,50 +131,3 @@ try {
     echo json_encode(['error' => $e->getMessage()]);
 }
 
-/**
- * Fire off a chat-completions request to OpenAI
- */
-function callOpenAI(array $messages): array
-{
-    $apiKey = defined('OPENAI_API_KEY') ? OPENAI_API_KEY : '';
-    if (!$apiKey) {
-        throw new Exception('OPENAI_API_KEY is not defined in config.php.');
-    }
-    $url = 'https://api.openai.com/v1/chat/completions';
-
-    $payload = [
-        'model' => 'gpt-5',
-        'messages' => $messages,
-        'tools' => [
-            [
-                'type' => 'web_search'
-            ]
-        ],
-        'reasoning' => [
-            'effort' => 'high'
-        ]
-    ];
-
-    $ch = curl_init($url);
-    curl_setopt_array($ch, [
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_POST => true,
-        CURLOPT_HTTPHEADER => [
-            'Content-Type: application/json',
-            'Authorization: Bearer ' . $apiKey
-        ],
-        CURLOPT_POSTFIELDS => json_encode($payload)
-    ]);
-
-    $resp = curl_exec($ch);
-    if ($resp === false) {
-        throw new Exception('cURL Error: ' . curl_error($ch));
-    }
-    curl_close($ch);
-
-    $decoded = json_decode($resp, true);
-    if (isset($decoded['error'])) {
-        throw new Exception('OpenAI API Error: ' . json_encode($decoded['error']));
-    }
-    return $decoded;
-}
