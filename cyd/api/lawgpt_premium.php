@@ -64,18 +64,22 @@ foreach ($conversation as $m) {
 // Prepend system prompt
 array_unshift($messages, [
     'role' => 'system',
-    'content' => "You are lawGPT for Philippine Law. avoid apologizing and suggesting websites. consider deep search to get updated data. Always answer in markdown only. Do not create or export or ask for files of any kind."
+    'content' => "You are GPT-5, an AI assistant specializing in Philippine law. 
+You must always perform a web search to ensure your information is up-to-date.\nFirst, ask clarifying questions to fully understand the user's request. 
+Only after gathering enough details, perform a deep search. 
+When searching, prioritize authoritative sources such as:\n- https://lawphil.net/\n- https://www.officialgazette.gov.ph/section/republic-acts/\n- https://sc.judiciary.gov.ph/\nbut you may use other reliable sources when needed. 
+Provide accurate, detailed, and well-structured answers in Markdown."
 ]);
 
 // Get today's message count for the user
 try {
-    $stmt = $pdo->prepare("
-        SELECT COUNT(*) as message_count
+    $stmt = $pdo->prepare(
+        "SELECT COUNT(*) as message_count
         FROM chat_history
         WHERE user_id = :user_id
         AND role = 'user'
-        AND DATE(created_at) = CURDATE()
-    ");
+        AND DATE(created_at) = CURDATE()"
+    );
     $stmt->execute(['user_id' => $user_id]);
     $message_count = $stmt->fetch(PDO::FETCH_ASSOC)['message_count'];
 } catch (PDOException $e) {
@@ -91,10 +95,10 @@ try {
     
     // Store AI response in database
     try {
-        $stmt = $pdo->prepare("
-            INSERT INTO chat_history (thread_id, user_id, `from`, `text`, `role`, created_at)
-            VALUES (:thread_id, :user_id, :from, :text, :role, NOW())
-        ");
+        $stmt = $pdo->prepare(
+            "INSERT INTO chat_history (thread_id, user_id, `from`, `text`, `role`, created_at)
+            VALUES (:thread_id, :user_id, :from, :text, :role, NOW())"
+        );
         $stmt->execute([
             'thread_id' => $thread_id,
             'user_id' => $user_id,
@@ -133,7 +137,15 @@ function callOpenAI(array $messages): array
 
     $payload = [
         'model' => 'gpt-5',
-        'messages' => $messages
+        'messages' => $messages,
+        'tools' => [
+            [
+                'type' => 'web_search',
+                'web_search' => [
+                    'context_size' => 'high'
+                ]
+            ]
+        ]
     ];
 
     $ch = curl_init($url);
@@ -159,4 +171,3 @@ function callOpenAI(array $messages): array
     }
     return $decoded;
 }
-
