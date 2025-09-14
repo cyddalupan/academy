@@ -1,2 +1,0 @@
-[13-Sep-2025 15:31:47 UTC] PHP Fatal error:  Cannot redeclare callOpenAI() (previously declared in /root/academy/cyd/tests/LawGptPremiumApiTestV2.php:6) in /root/academy/cyd/utils.php on line 366
-[13-Sep-2025 15:32:52 UTC] PHP Fatal error:  Cannot redeclare callOpenAI() (previously declared in /root/academy/cyd/tests/LawGptPremiumApiTestV2.php:6) in /root/academy/cyd/utils.php on line 366
