@@ -32,7 +32,7 @@ Thumbs.db
 # CYD IGNORE
 /cyd/config.php
 /uploads/install.sql
-/widget
+/widget/config.json
 /application/views/frontend/default-new/home_2.php
 /application/views/backend/header.php
 /backup
