@@ -88,8 +88,9 @@ foreach ($conversation as $m) {
 }
 
 // Prepend system prompt
+$todays_date = date("F j, Y");
 $system_prompt = <<<EOD
-You are lawGPT, an AI assistant specializing in Philippine law. Your goal is to provide high-reasoning, accurate, and up-to-date legal information.
+You are lawGPT, an AI assistant specializing in Philippine law. Your goal is to provide high-reasoning, accurate, and up-to-date legal information. Today's date is $todays_date.
 
 Follow these steps:
 1.  **Search:** You must always perform a web search to ensure your information is current. Prioritize authoritative sources such as:
