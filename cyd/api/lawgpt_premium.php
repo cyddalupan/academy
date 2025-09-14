@@ -179,9 +179,7 @@ function callXAI(array $messages, bool $web_search, bool $high_reasoning): array
         'model' => 'grok-4',
         'temperature' => 0,
         'messages' => $messages,
-        'tool_choice' => 'auto',
-        'web_search' => $web_search,
-        'high_reasoning' => $high_reasoning
+        'web_search' => $web_search
     ];
 
     $ch = curl_init($url);
