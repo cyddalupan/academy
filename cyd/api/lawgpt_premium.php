@@ -176,15 +176,33 @@ function callXAI(array $messages, bool $web_search, bool $high_reasoning): array
     ]);
 
     $resp = curl_exec($ch);
+    $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
     if ($resp === false) {
-        throw new Exception('cURL Error: ' . curl_error($ch));
+        $error = curl_error($ch);
+        curl_close($ch);
+        throw new Exception('cURL Error: ' . $error);
     }
     curl_close($ch);
 
+    if ($http_code !== 200) {
+        throw new Exception("xAI API request failed with status $http_code: $resp");
+    }
+
     $decoded = json_decode($resp, true);
-    if (isset($decoded['error'])) {
+
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        throw new Exception('Failed to decode JSON response from xAI API: ' . json_last_error_msg() . ". Raw response: " . $resp);
+    }
+
+    if (!empty($decoded['error'])) {
         throw new Exception('xAI API Error: ' . json_encode($decoded['error']));
     }
+
+    if (empty($decoded['choices'])) {
+        throw new Exception('Invalid response from xAI API: "choices" key is missing or empty. Raw response: ' . $resp);
+    }
+
     return $decoded;
 }
 ?>
