@@ -1,7 +1,7 @@
 <?php
 use PHPUnit\Framework\TestCase;
 
-class LawgptPremiumTest extends TestCase
+class LawgptPremiumApiTest extends TestCase
 {
     /**
      * @runInSeparateProcess

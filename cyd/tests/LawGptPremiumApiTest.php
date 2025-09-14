@@ -1,7 +1,7 @@
 <?php
 use PHPUnit\Framework\TestCase;
 
-class LawGptPremiumApiTest extends TestCase
+class LawGptPremiumRootApiTest extends TestCase
 {
     private $original_dir;
 

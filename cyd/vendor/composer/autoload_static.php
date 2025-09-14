@@ -26,6 +26,10 @@ class ComposerStaticInit739835938d6f2eaa7299c49457ebd832
         array (
             'DeepCopy\\' => 9,
         ),
+        'C' => 
+        array (
+            'Curl\\' => 5,
+        ),
     );
 
     public static $prefixDirsPsr4 = array (
@@ -44,6 +48,10 @@ class ComposerStaticInit739835938d6f2eaa7299c49457ebd832
         'DeepCopy\\' => 
         array (
             0 => __DIR__ . '/..' . '/myclabs/deep-copy/src/DeepCopy',
+        ),
+        'Curl\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/php-curl-class/php-curl-class/src/Curl',
         ),
     );
 

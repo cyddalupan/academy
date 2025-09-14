@@ -104,4 +104,9 @@ class UtilsTest extends TestCase
         $this->assertTrue(true); // Placeholder assertion
     }
 }
+
+## Database Credentials
+
+- **Username:** root
+- **Password:** (empty)
 ```

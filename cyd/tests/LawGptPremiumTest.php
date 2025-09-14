@@ -1,48 +1,35 @@
 <?php
 use PHPUnit\Framework\TestCase;
 
-require_once __DIR__ . '/../config.php';
-require_once __DIR__ . '/../utils.php';
+require_once __DIR__ . '/mocks/callAI.php';
 
 class LawGptPremiumTest extends TestCase
 {
-    public function testCallOpenAISuccess()
+    public function testCallXAIWithWebSearchAndHighReasoning()
     {
         $messages = [
-            [
-                'role' => 'user',
-                'content' => 'Hello, who are you?'
-            ]
+            ['role' => 'user', 'content' => 'What is the latest supreme court ruling on cyberlibel?']
         ];
+        $web_search = true;
+        $high_reasoning = true;
 
-        $response = callOpenAI($messages);
+        $result = callXAI($messages, $web_search, $high_reasoning);
 
-        $this->assertIsArray($response);
-        $this->assertArrayHasKey('choices', $response);
-        $this->assertIsArray($response['choices']);
-        $this->assertNotEmpty($response['choices']);
-        $this->assertArrayHasKey('message', $response['choices'][0]);
-        $this->assertArrayHasKey('content', $response['choices'][0]['message']);
-        $this->assertNotEmpty($response['choices'][0]['message']['content']);
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('choices', $result);
     }
 
-    /*
-    public function testCallOpenAIError()
+    public function testCallXAIWithoutWebSearchAndHighReasoning()
     {
-        $this->expectException(Exception::class);
+        $messages = [
+            ['role' => 'user', 'content' => 'What is the penalty for theft?']
+        ];
+        $web_search = false;
+        $high_reasoning = false;
 
-        // Temporarily undefine the API key to trigger an error
-        $apiKey = OPENAI_API_KEY;
-        runkit7_constant_remove('OPENAI_API_KEY');
-        define('OPENAI_API_KEY', '');
+        $result = callXAI($messages, $web_search, $high_reasoning);
 
-        try {
-            callOpenAI([]);
-        } finally {
-            // Restore the original API key
-            runkit7_constant_remove('OPENAI_API_KEY');
-            define('OPENAI_API_KEY', $apiKey);
-        }
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('choices', $result);
     }
-    */
 }

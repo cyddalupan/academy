@@ -1,5 +1,7 @@
 # Database Schema
 
+> See `GEMINI.md` for database credentials.
+
 This document outlines the database schema for the application.
 
 ## `diag_ans`
