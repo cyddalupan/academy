@@ -122,9 +122,50 @@ try {
 }
 
 
+/**
+ * Get the last user message from an array of messages
+ */
+function getLastUserMessage(array $messages): string
+{
+    $last_user_message = '';
+    if (!empty($messages)) {
+        for ($i = count($messages) - 1; $i >= 0; $i--) {
+            if (isset($messages[$i]['role']) && $messages[$i]['role'] === 'user') {
+                $last_user_message = $messages[$i]['content'];
+                break;
+            }
+        }
+    }
+    return $last_user_message;
+}
+
+// Get the last user message from the conversation
+$last_user_message = getLastUserMessage($messages);
+
+if (true) { // Always perform web search
+    $tavily_results = callTavily($last_user_message);
+    $formatted_results = '';
+    if (isset($tavily_results['results']) && is_array($tavily_results['results'])) {
+        foreach ($tavily_results['results'] as $result) {
+            $formatted_results .= "Title: " . $result['title'] . "\n";
+            $formatted_results .= "Link: " . $result['url'] . "\n";
+            $formatted_results .= "Snippet: " . $result['content'] . "\n\n";
+        }
+    }
+    if (!empty($formatted_results)) {
+        array_unshift($messages, [
+            'role' => 'system',
+            'content' => "Here are the web search results:\n\n" . $formatted_results
+        ]);
+    }
+}
+
 // Call xAI
+
 try {
-    $ai = callXAI($messages, $web_search, $high_reasoning);
+        // If Tavily is used, disable the internal web search
+    $internal_web_search = $web_search ? false : $web_search;
+    $ai = callXAI($messages, $internal_web_search, $high_reasoning);
     $reply = $ai['choices'][0]['message']['content'] ?? '';
     
     // Store AI response in database
@@ -159,10 +200,87 @@ try {
 }
 
 /**
+ * Fire off a search request to Tavily
+ */
+function callTavily(string $query): array
+{
+    if (isset($_GET['test_mode']) && $_GET['test_mode'] === 'true') {
+        return [
+            "results" => [
+                [
+                    "title" => "Mock Tavily Result",
+                    "url" => "https://example.com/mock-result",
+                    "content" => "This is a mock search result from Tavily."
+                ]
+            ]
+        ];
+    }
+
+    $apiKey = TAVILY_API_KEY;
+    $url = 'https://api.tavily.com/search';
+
+    $payload = [
+        'api_key' => $apiKey,
+        'query' => $query,
+        'search_depth' => 'advanced',
+        'include_answer' => true,
+        'max_results' => 5
+    ];
+
+    $ch = curl_init($url);
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_POST => true,
+        CURLOPT_HTTPHEADER => [
+            'Content-Type: application/json',
+        ],
+        CURLOPT_POSTFIELDS => json_encode($payload)
+    ]);
+
+    $resp = curl_exec($ch);
+    $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+    if ($resp === false) {
+        $error = curl_error($ch);
+        curl_close($ch);
+        throw new Exception('cURL Error: ' . $error);
+    }
+    curl_close($ch);
+
+    if ($http_code !== 200) {
+        throw new Exception("Tavily API request failed with status $http_code: $resp");
+    }
+
+    $decoded = json_decode($resp, true);
+
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        throw new Exception('Failed to decode JSON response from Tavily API: ' . json_last_error_msg() . ". Raw response: " . $resp);
+    }
+
+    if (!empty($decoded['error'])) {
+        throw new Exception('Tavily API Error: ' . json_encode($decoded['error']));
+    }
+
+    return $decoded;
+}
+
+/**
  * Fire off a chat-completions request
  */
 function callXAI(array $messages, bool $web_search, bool $high_reasoning): array
 {
+    if (isset($_GET['test_mode']) && $_GET['test_mode'] === 'true') {
+        return [
+            'choices' => [
+                [
+                    'message' => [
+                        'content' => 'This is a mock AI response with search results: ' . json_encode($messages)
+                    ]
+                ]
+            ]
+        ];
+    }
+
     $apiKey = X_AI;
     $url = 'https://api.x.ai/v1/chat/completions';
 

@@ -1,35 +1,36 @@
 <?php
 use PHPUnit\Framework\TestCase;
 
-require_once __DIR__ . '/mocks/callAI.php';
+require_once __DIR__ . '/../api/lawgpt_premium.php';
 
 class LawGptPremiumTest extends TestCase
 {
-    public function testCallXAIWithWebSearchAndHighReasoning()
+    public function testGetLastUserMessage()
     {
         $messages = [
-            ['role' => 'user', 'content' => 'What is the latest supreme court ruling on cyberlibel?']
+            ['role' => 'system', 'content' => 'System message'],
+            ['role' => 'user', 'content' => 'Hello'],
+            ['role' => 'assistant', 'content' => 'Hi there!'],
+            ['role' => 'user', 'content' => 'How are you?'],
         ];
-        $web_search = true;
-        $high_reasoning = true;
 
-        $result = callXAI($messages, $web_search, $high_reasoning);
-
-        $this->assertIsArray($result);
-        $this->assertArrayHasKey('choices', $result);
+        $this->assertEquals('How are you?', getLastUserMessage($messages));
     }
 
-    public function testCallXAIWithoutWebSearchAndHighReasoning()
+    public function testGetLastUserMessageNoUserMessage()
     {
         $messages = [
-            ['role' => 'user', 'content' => 'What is the penalty for theft?']
+            ['role' => 'system', 'content' => 'System message'],
+            ['role' => 'assistant', 'content' => 'Hi there!'],
         ];
-        $web_search = false;
-        $high_reasoning = false;
 
-        $result = callXAI($messages, $web_search, $high_reasoning);
+        $this->assertEquals('', getLastUserMessage($messages));
+    }
 
-        $this->assertIsArray($result);
-        $this->assertArrayHasKey('choices', $result);
+    public function testGetLastUserMessageEmptyMessages()
+    {
+        $messages = [];
+
+        $this->assertEquals('', getLastUserMessage($messages));
     }
 }

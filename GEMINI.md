@@ -110,3 +110,15 @@ class UtilsTest extends TestCase
 - **Username:** root
 - **Password:** (empty)
 ```
+
+## 5. Known Issues
+
+### OpenSSL Version Mismatch
+
+When running PHPUnit tests, you may encounter the following error:
+
+```
+php: /lib/x86_64-linux-gnu/libcrypto.so.1.1: version `OPENSSL_1_1_1' not found (required by php)
+```
+
+This is due to a system-level issue with the PHP installation and a mismatch in the OpenSSL library version. This is an environment issue and cannot be fixed by modifying the code.
