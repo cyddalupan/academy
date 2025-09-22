@@ -93,10 +93,9 @@ $system_prompt = <<<EOD
 You are lawGPT, an AI assistant specializing in Philippine law. Your goal is to provide high-reasoning, accurate, and up-to-date legal information. Today's date is $todays_date.
 
 Follow these steps:
-1.  **Search:** You must always perform a web search to ensure your information is current.
-2.  **Synthesize & Reason:** Analyze the search results. Think step-by-step to construct a detailed and well-structured answer. Explain the legal concepts involved.
-3.  **Respond:** Provide the answer in Markdown format. The response should be clear, accurate, and address all parts of the user's query.
-4. Do not suggest websites or apologize. Do not create or export or ask for files of any kind.
+1.  **Synthesize & Reason:** Analyze the search results (if available). Think step-by-step to construct a detailed and well-structured answer. Explain the legal concepts involved.
+2.  **Respond:** Provide the answer in Markdown format. The response should be clear, accurate, and address all parts of the user's query.
+3. Do not suggest websites or apologize. Do not create or export or ask for files of any kind.
 EOD;
 
 array_unshift($messages, [
@@ -142,23 +141,74 @@ function getLastUserMessage(array $messages): string
 // Get the last user message from the conversation
 $last_user_message = getLastUserMessage($messages);
 
-if (true) { // Always perform web search
-    $tavily_results = callTavily($last_user_message);
-    $formatted_results = '';
-    if (isset($tavily_results['results']) && is_array($tavily_results['results'])) {
-        foreach ($tavily_results['results'] as $result) {
-            $formatted_results .= "Title: " . $result['title'] . "\n";
-            $formatted_results .= "Link: " . $result['url'] . "\n";
-            $formatted_results .= "Snippet: " . $result['content'] . "\n\n";
+if ($web_search === true) {
+    try {
+        $tavily_results = callTavily($last_user_message);
+        $formatted_results = '';
+        if (isset($tavily_results['results']) && is_array($tavily_results['results'])) {
+            $char_limit = 8000;
+            foreach ($tavily_results['results'] as $result) {
+                $next_result = "Title: " . $result['title'] . "\n";
+                $next_result .= "Link: " . $result['url'] . "\n";
+                $next_result .= "Snippet: " . $result['content'] . "\n\n";
+                if (strlen($formatted_results) + strlen($next_result) > $char_limit) {
+                    break;
+                }
+                $formatted_results .= $next_result;
+            }
         }
-    }
-    if (!empty($formatted_results)) {
-        array_unshift($messages, [
-            'role' => 'system',
-            'content' => "Here are the web search results:\n\n" . $formatted_results
-        ]);
+        if (!empty($formatted_results)) {
+            array_unshift($messages, [
+                'role' => 'system',
+                'content' => "Here are the web search results:\n\n" . $formatted_results
+            ]);
+        }
+    } catch (Exception $e) {
+        error_log("Tavily API call failed: " . $e->getMessage());
+        // Continue execution without search results
     }
 }
+
+// ===== Payload Truncation Logic =====
+$payload_limit = 32000;
+
+// Recalculate size before truncation loop
+$current_size = calculate_payload_size($messages);
+
+// 1. First, try to shorten the web search results content if it exists
+if ($current_size > $payload_limit) {
+    foreach ($messages as $index => &$message) {
+        // Identify the search results system message
+        if ($message['role'] === 'system' && strpos($message['content'], 'Here are the web search results:') === 0) {
+            $original_content_length = strlen($message['content']);
+            $excess = $current_size - $payload_limit;
+            
+            // Calculate how much to keep
+            $new_content_length = $original_content_length - $excess;
+            
+            if ($new_content_length > 0) {
+                $message['content'] = substr($message['content'], 0, $new_content_length);
+            } else {
+                // If the excess is more than the content, remove the message entirely
+                unset($messages[$index]);
+            }
+            
+            // Re-index the array and recalculate size
+            $messages = array_values($messages);
+            $current_size = calculate_payload_size($messages);
+            break; // Exit after dealing with search results
+        }
+    }
+    unset($message); // Unset reference
+}
+
+
+// 2. If still over the limit, remove oldest messages (skipping the main system prompt at index 0)
+while (calculate_payload_size($messages) > $payload_limit && count($messages) > 1) {
+    // Remove the oldest message after the system prompt
+    array_splice($messages, 1, 1);
+}
+// ===== End of Payload Truncation Logic =====
 
 // Call xAI
 
@@ -262,6 +312,20 @@ function callTavily(string $query): array
     }
 
     return $decoded;
+}
+
+/**
+ * Calculate the total character count of the 'content' fields in the messages array.
+ */
+function calculate_payload_size(array $messages): int
+{
+    $total_chars = 0;
+    foreach ($messages as $message) {
+        if (isset($message['content'])) {
+            $total_chars += strlen($message['content']);
+        }
+    }
+    return $total_chars;
 }
 
 /**
