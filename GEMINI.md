@@ -122,3 +122,34 @@ php: /lib/x86_64-linux-gnu/libcrypto.so.1.1: version `OPENSSL_1_1_1' not found (
 ```
 
 This is due to a system-level issue with the PHP installation and a mismatch in the OpenSSL library version. This is an environment issue and cannot be fixed by modifying the code.
+
+## Application Notes: `/cyd/api/lawgpt_premium.php`
+
+This section documents key operational details and refactoring work performed on the `lawgpt_premium.php` script.
+
+### Overview
+
+The `/cyd/api/lawgpt_premium.php` script serves as the backend for the "lawGPT" AI chat service. It receives conversation history from a client, orchestrates calls to external APIs for web search (Tavily) and AI chat completion (Grok-4), and streams the response back. It also logs the conversation to a database.
+
+### Key Challenges & Solutions Implemented
+
+The script was refactored to address several stability and performance issues:
+
+1.  **Payload Size Crashes (HTTP 500):**
+    *   **Problem:** Large conversation histories caused the script to crash when sending excessive data to the Grok-4 API.
+    *   **Solution:** A multi-step truncation strategy was implemented before the API call:
+        *   Web search results are capped at **8,000 characters**.
+        *   The total payload to the AI is capped at **32,000 characters**.
+        *   If the limit is exceeded, the script first shortens the web search results. If still over the limit, it removes the oldest messages from the conversation history.
+
+2.  **Script Timeouts (HTTP 503):**
+    *   **Problem:** Slow responses from the Grok-4 API caused the PHP script to hit its maximum execution time, resulting in a 503 error.
+    *   **Solution:** The script's `max_execution_time` was proactively increased to **300 seconds** (5 minutes) using `ini_set()`.
+
+3.  **Lack of Debugging:**
+    *   **Problem:** No straightforward way to view PHP error logs.
+    *   **Solution:** A new debugging utility was created at `/cyd/error_viewer.php`. It is secured with a token and can be accessed via `.../cyd/error_viewer.php?token=a3k9d2p5j8f1g7h4`.
+
+4.  **Unconditional Web Search:**
+    *   **Problem:** The script performed a web search on every request, regardless of need.
+    *   **Solution:** The web search call was made conditional, controlled by a `$web_search` boolean flag sent from the client.
