@@ -215,7 +215,12 @@ while (calculate_payload_size($messages) > $payload_limit && count($messages) > 
 try {
         // If Tavily is used, disable the internal web search
     $internal_web_search = $web_search ? false : $web_search;
+
+    $start_time = microtime(true);
     $ai = callXAI($messages, $internal_web_search, $high_reasoning);
+    $end_time = microtime(true);
+    $execution_time = $end_time - $start_time;
+    error_log("callXAI execution time: " . $execution_time . " seconds");
     $reply = $ai['choices'][0]['message']['content'] ?? '';
     
     // Store AI response in database
