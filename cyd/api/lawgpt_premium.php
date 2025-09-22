@@ -1,6 +1,7 @@
 <?php
 // Turn off PHP warnings in output
 ini_set('display_errors', 0);
+ini_set('max_execution_time', 300); // 5 minutes
 error_reporting(E_ALL & ~E_WARNING & ~E_NOTICE);
 
 // CORS & JSON headers
