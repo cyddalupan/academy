@@ -4,6 +4,8 @@ ini_set('display_errors', 0);
 ini_set('max_execution_time', 300); // 5 minutes
 error_reporting(E_ALL & ~E_WARNING & ~E_NOTICE);
 
+ini_set('error_log', __DIR__ . '/api/error_log');
+
 // CORS & JSON headers
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST, OPTIONS');
@@ -144,7 +146,9 @@ $last_user_message = getLastUserMessage($messages);
 
 if ($web_search === true) {
     try {
-        $tavily_results = callTavily($last_user_message);
+        // Truncate the user message to 390 characters for the Tavily API call
+        $truncated_message = substr($last_user_message, 0, 390);
+        $tavily_results = callTavily($truncated_message);
         $formatted_results = '';
         if (isset($tavily_results['results']) && is_array($tavily_results['results'])) {
             $char_limit = 8000;
@@ -251,6 +255,7 @@ try {
         JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES
     );
 } catch (Exception $e) {
+    error_log("xAI API call failed: " . $e->getMessage());
     http_response_code(500);
     echo json_encode(['error' => $e->getMessage()]);
 }

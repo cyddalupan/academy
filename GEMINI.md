@@ -1,24 +1,77 @@
-# Gemini TDD Environment for the `cyd` Directory
+# Gemini TDD Environment
 
-This document outlines the process for setting up a Test-Driven Development (TDD) environment using PHPUnit for the custom PHP code within the `/cyd` directory.
+This document outlines the process for setting up a Test-Driven Development (TDD) environment for this project. The project consists of two main parts: a CodeIgniter application and a custom API in the `cyd` directory. Each part has its own testing setup.
 
 ## Branching Strategy
 
-**All new development and testing for the `cyd` directory should be done on the `beta` branch.**
+**All new development and testing should be done on the `beta` branch.**
 
-## 1. Introduction
+---
 
-The `cyd` directory contains custom PHP scripts that operate independently of the main CodeIgniter application. To ensure code quality and facilitate TDD, we will use PHPUnit, the standard testing framework for PHP.
+## 1. Testing the CodeIgniter Application
 
-See `DATABASE.md` for the database format.
+The main application is built with CodeIgniter. We will use `codeigniter3-phpunit` to enable unit testing.
 
-This setup will allow you to run tests from the terminal to verify the functionality of the scripts inside `cyd`.
+### 1.1. Setup Instructions
 
-## 2. Setup Instructions
+#### Step 1.1.1: Install `codeigniter3-phpunit`
+
+We will add the testing library as a development dependency using Composer.
+
+```bash
+composer require --dev kenjis/codeigniter3-phpunit
+```
+
+#### Step 1.1.2: Run the Installation Script
+
+The library provides an installation script that creates the necessary directories and files for testing.
+
+```bash
+php vendor/kenjis/codeigniter3-phpunit/install.php
+```
+
+This will create a `tests` directory inside the `application` directory, along with some example tests.
+
+#### Step 1.1.3: Configure `phpunit.xml`
+
+The installation script will also create a `phpunit.xml.dist` file in the root of the project. You may need to edit this file to configure the test database connection.
+
+### 1.2. Running Tests
+
+To run the CodeIgniter tests, execute the PHPUnit binary from the root of the project:
+
+```bash
+./vendor/bin/phpunit
+```
+
+### 1.3. Writing Tests
+
+You can create new test files in the `application/tests` directory. Tests for controllers should go in `application/tests/controllers`, models in `application/tests/models`, and so on.
+
+**Example: `application/tests/controllers/Welcome_test.php`**
+```php
+<?php
+class Welcome_test extends TestCase
+{
+    public function test_index()
+    {
+        $output = $this->request('GET', 'welcome/index');
+        $this->assertStringContainsString('<title>Welcome to CodeIgniter</title>', $output);
+    }
+}
+```
+
+---
+
+## 2. Testing the `cyd` Directory
+
+The `cyd` directory contains custom PHP scripts that operate independently of the main CodeIgniter application. We use a separate PHPUnit setup to test this code.
+
+### 2.1. Setup Instructions
 
 All commands should be run from within the `cyd` directory.
 
-### Step 2.1: Install PHPUnit
+#### Step 2.1.1: Install PHPUnit
 
 We will add PHPUnit as a development dependency using Composer.
 
@@ -27,7 +80,7 @@ cd cyd
 composer require --dev phpunit/phpunit
 ```
 
-### Step 2.2: Create PHPUnit Configuration File
+#### Step 2.1.2: Create PHPUnit Configuration File
 
 Create a new file named `phpunit.xml.dist` in the `cyd` directory. This file tells PHPUnit where to find the tests.
 
@@ -46,7 +99,7 @@ Create a new file named `phpunit.xml.dist` in the `cyd` directory. This file tel
 </phpunit>
 ```
 
-### Step 2.3: Create a `tests` Directory
+#### Step 2.1.3: Create a `tests` Directory
 
 Create a directory to hold your test files.
 
@@ -54,64 +107,91 @@ Create a directory to hold your test files.
 mkdir tests
 ```
 
-### Step 2.4: Create an Example Test
+### 2.2. Running Tests
 
-To verify the setup, create a simple test file.
-
-**File: `/root/tdd/academy/cyd/tests/ExampleTest.php`**
-```php
-<?php
-use PHPUnit\Framework\TestCase;
-
-class ExampleTest extends TestCase
-{
-    public function testThatTestsAreWorking()
-    {
-        $this->assertTrue(true);
-    }
-}
-```
-
-## 3. Running Tests
-
-To run your tests, execute the PHPUnit binary from within the `cyd` directory:
+To run all tests in the `cyd` directory, execute the PHPUnit binary from within the `cyd` directory:
 
 ```bash
+cd cyd
 ./vendor/bin/phpunit
 ```
 
-You should see output indicating that 1 test passed.
+To run a specific test file, provide the path to the file:
 
-## 4. Next Steps
+```bash
+cd cyd
+./vendor/bin/phpunit tests/ErrorViewerTest.php
+```
 
-You can now create new test files in the `cyd/tests` directory. For example, to test the `utils.php` file, you could create a `UtilsTest.php` file. You would need to include the file you want to test at the top of your test file.
+### 2.3. Writing Tests
 
-**Example: `/root/tdd/academy/cyd/tests/UtilsTest.php`**
+You can create new test files in the `cyd/tests` directory. When testing scripts that have dependencies or security checks, you may need to take extra steps.
+
+**Example: `cyd/tests/ErrorViewerTest.php`**
+
+This test file demonstrates how to test the `error_viewer.php` script.
+
 ```php
 <?php
 use PHPUnit\Framework\TestCase;
 
-// Include the file to be tested
-require_once __DIR__ . '/../utils.php';
+// Set the security token to bypass the access control check
+$_GET['token'] = 'a3k9d2p5j8f1g7h4';
 
-class UtilsTest extends TestCase
+// Include the file to be tested
+require_once __DIR__ . '/../error_viewer.php';
+
+class ErrorViewerTest extends TestCase
 {
-    public function testSomethingInUtils()
+    private $test_log_file;
+
+    protected function setUp(): void
     {
-        // Assuming you have a function named 'my_function' in utils.php
-        // $result = my_function();
-        // $this->assertEquals('expected_value', $result);
-        $this->assertTrue(true); // Placeholder assertion
+        $this->test_log_file = __DIR__ . '/test_log.log';
+    }
+
+    protected function tearDown(): void
+    {
+        if (file_exists($this->test_log_file)) {
+            unlink($this->test_log_file);
+        }
+    }
+
+    public function testCleanLogFile()
+    {
+        $today = date('d-M-Y');
+        $yesterday = date('d-M-Y', strtotime('-1 day'));
+
+        $log_content = "[$today 10:00:00] Today\'s log entry\n";
+        $log_content .= "[$yesterday 12:00:00] Yesterday\'s log entry\n";
+
+        file_put_contents($this->test_log_file, $log_content);
+
+        clean_log_file($this->test_log_file);
+
+        $cleaned_content = file_get_contents($this->test_log_file);
+
+        $this->assertStringContainsString("[$today 10:00:00] Today\'s log entry", $cleaned_content);
+        $this->assertStringNotContainsString("[$yesterday 12:00:00] Yesterday\'s log entry", $cleaned_content);
+    }
+
+    public function testDisplayLog()
+    {
+        $log_content = "Test log entry";
+        file_put_contents($this->test_log_file, $log_content);
+
+        ob_start();
+        display_log($this->test_log_file);
+        $output = ob_get_clean();
+
+        $this->assertStringContainsString("Test log entry", $output);
     }
 }
-
-## Database Credentials
-
-- **Username:** root
-- **Password:** (empty)
 ```
 
-## 5. Known Issues
+---
+
+## 3. Known Issues
 
 ### OpenSSL Version Mismatch
 
@@ -123,7 +203,9 @@ php: /lib/x86_64-linux-gnu/libcrypto.so.1.1: version `OPENSSL_1_1_1' not found (
 
 This is due to a system-level issue with the PHP installation and a mismatch in the OpenSSL library version. This is an environment issue and cannot be fixed by modifying the code.
 
-## Application Notes: `/cyd/api/lawgpt_premium.php`
+---
+
+## 4. Application Notes: `/cyd/api/lawgpt_premium.php`
 
 This section documents key operational details and refactoring work performed on the `lawgpt_premium.php` script.
 
@@ -137,19 +219,16 @@ The script was refactored to address several stability and performance issues:
 
 1.  **Payload Size Crashes (HTTP 500):**
     *   **Problem:** Large conversation histories caused the script to crash when sending excessive data to the Grok-4 API.
-    *   **Solution:** A multi-step truncation strategy was implemented before the API call:
-        *   Web search results are capped at **8,000 characters**.
-        *   The total payload to the AI is capped at **32,000 characters**.
-        *   If the limit is exceeded, the script first shortens the web search results. If still over the limit, it removes the oldest messages from the conversation history.
+    *   **Solution:** A multi-step truncation strategy was implemented before the API call.
 
 2.  **Script Timeouts (HTTP 503):**
-    *   **Problem:** Slow responses from the Grok-4 API caused the PHP script to hit its maximum execution time, resulting in a 503 error.
-    *   **Solution:** The script's `max_execution_time` was proactively increased to **300 seconds** (5 minutes) using `ini_set()`.
+    *   **Problem:** Slow responses from the Grok-4 API caused the PHP script to hit its maximum execution time.
+    *   **Solution:** The script's `max_execution_time` was proactively increased to **300 seconds** (5 minutes).
 
 3.  **Lack of Debugging:**
     *   **Problem:** No straightforward way to view PHP error logs.
-    *   **Solution:** A new debugging utility was created at `/cyd/error_viewer.php`. It is secured with a token and can be accessed via `.../cyd/error_viewer.php?token=a3k9d2p5j8f1g7h4`.
+    *   **Solution:** A new debugging utility was created at `/cyd/error_viewer.php`.
 
 4.  **Unconditional Web Search:**
     *   **Problem:** The script performed a web search on every request, regardless of need.
-    *   **Solution:** The web search call was made conditional, controlled by a `$web_search` boolean flag sent from the client.
+    *   **Solution:** The web search call was made conditional.
