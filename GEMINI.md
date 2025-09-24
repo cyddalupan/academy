@@ -232,3 +232,9 @@ The script was refactored to address several stability and performance issues:
 4.  **Unconditional Web Search:**
     *   **Problem:** The script performed a web search on every request, regardless of need.
     *   **Solution:** The web search call was made conditional.
+
+## 5. Testing Challenges
+
+### Unit Test Environment
+
+It is important to note that this is a unit test environment only. Tests are run from the command line and do not have access to a web server. This means that tests that rely on web server functionality, such as `$_SERVER` variables, will not work as expected.
