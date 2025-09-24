@@ -1,10 +1,67 @@
 <?php
-// Turn off PHP warnings in output
+// ===== Global Error and Shutdown Handler =====
+error_reporting(E_ALL);
 ini_set('display_errors', 0);
-ini_set('max_execution_time', 300); // 5 minutes
-error_reporting(E_ALL & ~E_WARNING & ~E_NOTICE);
+ini_set('log_errors', 1);
+ini_set('error_log', __DIR__ . '/../error_log'); // Log to cyd/error_log
 
-ini_set('error_log', __DIR__ . '/api/error_log');
+// Catch fatal errors like memory limit exceeded
+register_shutdown_function(function () {
+    $error = error_get_last();
+    if ($error !== null && in_array($error['type'], [E_ERROR, E_CORE_ERROR, E_COMPILE_ERROR, E_USER_ERROR])) {
+        $message = "[FATAL] {$error['message']} in {$error['file']} on line {$error['line']}";
+        error_log($message);
+        // When a fatal error occurs, we can't send a normal JSON response
+        // because the script is already terminating.
+    }
+});
+
+// Catch non-fatal errors (warnings, notices)
+set_error_handler(function ($severity, $message, $file, $line) {
+    if (!(error_reporting() & $severity)) {
+        // This error code is not included in error_reporting
+        return;
+    }
+    $severity_str = match($severity) {
+        E_WARNING => 'Warning',
+        E_NOTICE => 'Notice',
+        E_USER_ERROR => 'User Error',
+        E_USER_WARNING => 'User Warning',
+        E_USER_NOTICE => 'User Notice',
+        E_STRICT => 'Strict',
+        E_DEPRECATED => 'Deprecated',
+        E_USER_DEPRECATED => 'User Deprecated',
+        default => 'Unknown Error',
+    };
+    $log_path = ini_get('error_log');
+    if ($log_path) {
+        error_log(
+            "[" . date("d-M-Y H:i:s") . "] [{$severity_str}] {$message} in {$file} on line {$line}" . PHP_EOL,
+            3, // Append to the specified file
+            $log_path
+        );
+    }
+    return true; // Don't execute the internal PHP error handler
+});
+
+// ===== Main Script =====
+ini_set('max_execution_time', 300); // 5 minutes
+
+define('MAX_PAYLOAD_CHARS', 100000);
+
+// Decode incoming JSON
+$raw_input = isset($GLOBALS['mock_file_get_contents']) ? $GLOBALS['mock_file_get_contents']('php://input') : file_get_contents('php://input');
+$input = json_decode($raw_input, true) ?: [];
+
+// Check payload size before processing
+if (strlen($raw_input) > MAX_PAYLOAD_CHARS) {
+    http_response_code(413); // Payload Too Large
+    echo json_encode(['error' => 'The input is too large to process. Please reduce the size of your message.']);
+    exit;
+}
+
+if (!defined('GEMINI_TEST_MODE')) {
+
 
 // CORS & JSON headers
 header('Access-Control-Allow-Origin: *');
@@ -12,7 +69,7 @@ header('Access-Control-Allow-Methods: POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
 header('Content-Type: application/json; charset=utf-8');
 
-require '../config.php';  // defines X_AI, $dsn, $username, $password
+require __DIR__ . '/../config.php';  // defines X_AI, $dsn, $username, $password
 
 // Handle preflight OPTIONS request
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
@@ -30,8 +87,6 @@ try {
     exit;
 }
 
-// Decode incoming JSON
-$input = json_decode(file_get_contents('php://input'), true) ?: [];
 $thread_id = $input['thread_id'] ?? '';
 $user_id = isset($input['user_id']) ? (int)$input['user_id'] : 0;
 $conversation = $input['conversation'] ?? [];
@@ -213,6 +268,36 @@ while (calculate_payload_size($messages) > $payload_limit && count($messages) > 
     // Remove the oldest message after the system prompt
     array_splice($messages, 1, 1);
 }
+
+// 3. Final safety net: If the last message is still too big, truncate it.
+$current_size = calculate_payload_size($messages);
+if ($current_size > $payload_limit) {
+    $last_message_index = count($messages) - 1;
+    
+    // Check if there's a message to truncate (other than the initial system prompt)
+    if (isset($messages[$last_message_index]) && $messages[$last_message_index]['role'] !== 'system' && $last_message_index > 0) {
+        $system_prompts_size = 0;
+        // Calculate size of all system prompts
+        for ($i = 0; $i < $last_message_index; $i++) {
+            if ($messages[$i]['role'] === 'system') {
+                $system_prompts_size += strlen($messages[$i]['content']);
+            }
+        }
+
+        // Leave a small buffer
+        $allowed_last_message_size = $payload_limit - $system_prompts_size - 500;
+
+        if ($allowed_last_message_size > 0) {
+            $messages[$last_message_index]['content'] = substr($messages[$last_message_index]['content'], 0, $allowed_last_message_size);
+        } else {
+            // This is an extreme case where system prompts alone exceed the limit.
+            error_log('[ERROR] Payload limit is too small for system prompts. Cannot process.');
+            http_response_code(400);
+            echo json_encode(['error' => 'Request payload is too large to process.']);
+            exit;
+        }
+    }
+}
 // ===== End of Payload Truncation Logic =====
 
 // Call xAI
@@ -259,6 +344,7 @@ try {
     http_response_code(500);
     echo json_encode(['error' => $e->getMessage()]);
 }
+} // End of GEMINI_TEST_MODE block
 
 /**
  * Fire off a search request to Tavily
