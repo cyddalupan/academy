@@ -72,7 +72,7 @@ header('Content-Type: application/json; charset=utf-8');
 require __DIR__ . '/../config.php';  // defines X_AI, $dsn, $username, $password
 
 // Handle preflight OPTIONS request
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit;
 }
@@ -154,6 +154,13 @@ Follow these steps:
 1.  **Synthesize & Reason:** Analyze the search results (if available). Think step-by-step to construct a detailed and well-structured answer. Explain the legal concepts involved.
 2.  **Respond:** Provide the answer in Markdown format only. never reply in other formats like html. The response should be clear, accurate, and address all parts of the user's query.
 3. Do not suggest websites or apologize. Do not create or export or ask for files of any kind.
+
+- When citing jurisprudence, always include:
+   • G.R. No.  
+   • Case caption (petitioner v. respondent)  
+   • Date of decision  
+   • Division/En Banc  
+   • Short syllabus or holding ;;
 EOD;
 
 array_unshift($messages, [
