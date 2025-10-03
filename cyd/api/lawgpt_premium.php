@@ -232,7 +232,11 @@ if ($web_search === true) {
         }
     } catch (Exception $e) {
         error_log("Tavily API call failed: " . $e->getMessage());
-        // Continue execution without search results
+        // Inform the AI that the web search failed so it can notify the user.
+        array_unshift($messages, [
+            'role' => 'system',
+            'content' => "Web search failed with the following error: " . $e->getMessage() . ". Inform the user that you were unable to perform a web search and are answering based on your existing knowledge. Do not show them the error message directly."
+        ]);
     }
 }
 
@@ -310,11 +314,12 @@ if ($current_size > $payload_limit) {
 // Call xAI
 
 try {
-        // If Tavily is used, disable the internal web search
-    $internal_web_search = $web_search ? false : $web_search;
+        // When using our custom Tavily search, we disable Grok's internal web search
+    // to prevent duplicate searches and to rely on our curated search results.
+    $grok_web_search = false;
 
     $start_time = microtime(true);
-    $ai = callXAI($messages, $internal_web_search, $high_reasoning);
+    $ai = callXAI($messages, $grok_web_search, $high_reasoning);
     $end_time = microtime(true);
     $execution_time = $end_time - $start_time;
     error_log("callXAI execution time: " . $execution_time . " seconds");
@@ -435,7 +440,7 @@ function calculate_payload_size(array $messages): int
 /**
  * Fire off a chat-completions request
  */
-function callXAI(array $messages, bool $web_search, bool $high_reasoning): array
+function callXAI(array $messages, bool $grok_web_search, bool $high_reasoning): array
 {
     if (isset($_GET['test_mode']) && $_GET['test_mode'] === 'true') {
         return [
@@ -456,7 +461,7 @@ function callXAI(array $messages, bool $web_search, bool $high_reasoning): array
         'model' => 'grok-4',
         'temperature' => 0,
         'messages' => $messages,
-        'web_search' => $web_search
+        'web_search' => $grok_web_search
     ];
 
     $ch = curl_init($url);
