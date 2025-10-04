@@ -92,6 +92,7 @@
       JSON.parse(response);
       var isValidJson = true;
     } catch (error) {
+      alert("JSON.parse error: " + error);
       var isValidJson = false;
     }
     if (isValidJson) {
