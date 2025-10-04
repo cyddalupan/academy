@@ -51,7 +51,8 @@ class Login extends CI_Controller
 
     public function validate_login($from = "")
     {
-        if ($this->crud_model->check_recaptcha() == false && (get_frontend_settings('recaptcha_status') == true || get_frontend_settings('recaptcha_status_v3') == true)) {
+        $is_iframe = $this->input->post('iframe');
+        if (empty($is_iframe) && $this->crud_model->check_recaptcha() == false && (get_frontend_settings('recaptcha_status') == true || get_frontend_settings('recaptcha_status_v3') == true)) {
             $this->session->set_flashdata('error_message', get_phrase('recaptcha_verification_failed'));
             redirect(site_url('login'), 'refresh');
         }
@@ -66,11 +67,14 @@ class Login extends CI_Controller
         if ($query->num_rows() > 0) {
             $row = $query->row();
             $this->user_model->new_device_login_tracker($row->id);
-            $is_iframe = $this->input->post('iframe');
             $this->user_model->set_login_userdata($row->id, $is_iframe);
         } else {
             $this->session->set_flashdata('error_message', get_phrase('invalid_login_credentials'));
-            redirect(site_url('login'), 'refresh');
+            if($is_iframe){
+                redirect(site_url('login?iframe=true'), 'refresh');
+            }else{
+                redirect(site_url('login'), 'refresh');
+            }
         }
     }
 

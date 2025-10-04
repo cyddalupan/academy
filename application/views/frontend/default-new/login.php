@@ -14,7 +14,7 @@
                     <h3><?php echo get_phrase('Log In'); ?><span>!</span></h3>
                     <p><?php echo get_phrase('Explore, learn, and grow with us. Enjoy a seamless and enriching educational journey. Lets begin!') ?></p>
 
-                    <form action="<?php echo site_url('login/validate_login') ?>" method="post" id="login-form" target="_top">
+                    <form action="<?php echo site_url('login/validate_login') ?>" method="post" id="login-form">
                         <?php if (isset($is_iframe) && $is_iframe): ?>
                             <input type="hidden" name="iframe" value="true">
                         <?php endif; ?>
@@ -39,7 +39,7 @@
                         <?php if(get_frontend_settings('recaptcha_status')): ?>
                             <div class="g-recaptcha" data-sitekey="<?php echo get_frontend_settings('recaptcha_sitekey'); ?>"></div>
                         <?php endif; ?>
-                        <?php if(get_frontend_settings('recaptcha_status_v3')): ?>
+                        <?php if(get_frontend_settings('recaptcha_status_v3') && empty($is_iframe)): ?>
                         <div class="log-in">
                             <button class="btn btn-primary g-recaptcha" data-sitekey="<?php echo get_frontend_settings('recaptcha_sitekey_v3'); ?>" data-callback='onLoginSubmit' data-action='submit'>
                                 <?php echo get_phrase('Log in'); ?>
