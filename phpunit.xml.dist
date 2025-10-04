@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit bootstrap="application/tests/bootstrap.php"
+         colors="true"
+         verbose="true"
+         stopOnFailure="false">
+    <testsuites>
+        <testsuite name="CodeIgniter Application Test Suite">
+            <directory>application/tests</directory>
+        </testsuite>
+    </testsuites>
+</phpunit>
