@@ -70,7 +70,7 @@ class Login extends CI_Controller
             $this->user_model->set_login_userdata($row->id, $is_iframe);
         } else {
             if($is_iframe){
-                echo json_encode(['error' => get_phrase('invalid_login_credentials')]);
+                echo json_encode(['error' => 'Invalid login credentials']);
                 exit;
             }else{
                 $this->session->set_flashdata('error_message', get_phrase('invalid_login_credentials'));
