@@ -69,10 +69,11 @@ class Login extends CI_Controller
             $this->user_model->new_device_login_tracker($row->id);
             $this->user_model->set_login_userdata($row->id, $is_iframe);
         } else {
-            $this->session->set_flashdata('error_message', get_phrase('invalid_login_credentials'));
             if($is_iframe){
-                redirect(site_url('login?iframe=true'), 'refresh');
+                echo json_encode(['error' => get_phrase('invalid_login_credentials')]);
+                exit;
             }else{
+                $this->session->set_flashdata('error_message', get_phrase('invalid_login_credentials'));
                 redirect(site_url('login'), 'refresh');
             }
         }
