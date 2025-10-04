@@ -82,21 +82,20 @@
     }
 
     function handleLogin() {
-      console.log("handleLogin called");
+      alert("handleLogin called");
       var form = $('#login-form');
-      console.log("Form data:", form.serialize());
+      alert("Form data: " + form.serialize());
       $.ajax({
         type: "POST",
         url: form.attr('action'),
         data: form.serialize(),
         success: function(response) {
-          console.log("AJAX success:", response);
+          alert("AJAX success. Response: " + response);
           distributeServerResponse(response);
         },
         error: function(xhr, status, error) {
-          console.error("AJAX error:", status, error);
-          console.error("Response text:", xhr.responseText);
-          alert("An error occurred during login. Please check the console for details.");
+          alert("AJAX error. Status: " + status + ". Error: " + error);
+          alert("Response text: " + xhr.responseText);
         }
       });
     }
