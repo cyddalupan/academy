@@ -87,6 +87,7 @@
 
   //Server response distribute
   function distributeServerResponse(response){
+    alert("distributeServerResponse called. Response: " + response);
     try {
       JSON.parse(response);
       var isValidJson = true;
@@ -137,6 +138,7 @@
 
       //For showing error message
       if(typeof response.error != "undefined" && response.error != 0){
+        alert("Error message found: " + response.error);
         toastr.error(response.error);
       }
       //For showing success message
