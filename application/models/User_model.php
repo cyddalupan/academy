@@ -692,7 +692,7 @@ class User_model extends CI_Model
         }
     }
 
-    function set_login_userdata($user_id = ""){
+    function set_login_userdata($user_id = "", $is_iframe = false){
         // Checking login credential for admin
         $query = $this->db->get_where('users', array('id' => $user_id));
 
@@ -711,6 +711,9 @@ class User_model extends CI_Model
                 redirect(site_url('admin/dashboard'), 'refresh');
             } else if ($row->role_id == 2) {
                 $this->session->set_userdata('user_login', '1');
+                if ($is_iframe) {
+                    redirect(site_url('mobilegpt'), 'refresh');
+                }
                 if($this->session->userdata('url_history')){
                     redirect($this->session->userdata('url_history'), 'refresh');
                 }

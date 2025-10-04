@@ -15,6 +15,9 @@
                     <p><?php echo get_phrase('Explore, learn, and grow with us. Enjoy a seamless and enriching educational journey. Lets begin!') ?></p>
 
                     <form action="<?php echo site_url('login/validate_login') ?>" method="post" id="login-form">
+                        <?php if (isset($is_iframe) && $is_iframe): ?>
+                            <input type="hidden" name="iframe" value="true">
+                        <?php endif; ?>
                         <div class="mb-4">
                             <h5><?php echo get_phrase('Your email'); ?></h5>
                             <div class="position-relative">

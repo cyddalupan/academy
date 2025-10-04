@@ -57,7 +57,9 @@ if($language_dirs){
 		include "go_back_to_mobile_app.php";
 	endif;
 	
-	include 'header.php';
+	if(!isset($is_iframe)){
+		include 'header.php';
+	}
 
 	if(get_frontend_settings('cookie_status') == 'active'):
     	include 'eu-cookie.php';
@@ -68,7 +70,9 @@ if($language_dirs){
   	}else{
 		include $page_name.'.php';
 	}
-	include 'footer.php';
+	if(!isset($is_iframe)){
+		include 'footer.php';
+	}
 	include 'includes_bottom.php';
 	include 'modal.php';
 	include 'common_scripts.php';

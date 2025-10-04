@@ -27,6 +27,10 @@ class Login extends CI_Controller
         //Check custom session data
         $this->user_model->check_session_data('login');
 
+        if($this->input->get('iframe') == true){
+            $page_data['is_iframe'] = true;
+        }
+
         $page_data['page_name'] = 'login';
         $page_data['page_title'] = site_phrase('login');
         $this->load->view('frontend/' . get_frontend_settings('theme') . '/index', $page_data);
@@ -62,7 +66,8 @@ class Login extends CI_Controller
         if ($query->num_rows() > 0) {
             $row = $query->row();
             $this->user_model->new_device_login_tracker($row->id);
-            $this->user_model->set_login_userdata($row->id);
+            $is_iframe = $this->input->post('iframe');
+            $this->user_model->set_login_userdata($row->id, $is_iframe);
         } else {
             $this->session->set_flashdata('error_message', get_phrase('invalid_login_credentials'));
             redirect(site_url('login'), 'refresh');
