@@ -8,7 +8,8 @@
             parent::__construct();
             $this->load->database();
             $this->load->library('session');
-            // $this->user_model->check_session_data();
+            $this->load->model('user_model');
+            $this->user_model->check_session_data();
         }
 
         public function index()

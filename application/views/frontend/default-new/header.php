@@ -3,6 +3,20 @@
 
 validate_cart_items();
 $cart_items = $this->session->userdata('cart_items'); 
+if (!is_array($cart_items)) {
+    $cart_items = array();
+}
+
+$my_wishlist_items = array();
+if ($this->session->userdata('user_id')) {
+    $wishlist = $this->user_model->get_all_user($this->session->userdata('user_id'))->row('wishlist');
+    if ($wishlist && $wishlist != 'null') {
+        $decoded_wishlist = json_decode($wishlist, true);
+        if (is_array($decoded_wishlist)) {
+            $my_wishlist_items = $decoded_wishlist;
+        }
+    }
+}
 
 ?>
 <?php $user_id = $this->session->userdata('user_id'); ?>
