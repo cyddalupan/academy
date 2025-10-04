@@ -9,7 +9,7 @@
             $this->load->database();
             $this->load->library('session');
             $this->load->model('user_model');
-            $this->user_model->check_session_data();
+            $this->user_model->check_session_data('user');
         }
 
         public function index()
