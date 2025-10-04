@@ -14,7 +14,7 @@
                     <h3><?php echo get_phrase('Log In'); ?><span>!</span></h3>
                     <p><?php echo get_phrase('Explore, learn, and grow with us. Enjoy a seamless and enriching educational journey. Lets begin!') ?></p>
 
-                    <form action="validate_login" method="post" id="login-form">
+                    <form action="<?php echo site_url('login/validate_login') ?>" method="post" id="login-form">
                         <?php if (isset($is_iframe) && $is_iframe): ?>
                             <input type="hidden" name="iframe" value="true">
                         <?php endif; ?>
@@ -47,9 +47,9 @@
                         </div>
                         <?php else: ?>
                         <div class="log-in">
-                            <a href="javascript:;" onclick="$('#login-form').submit();" class="btn btn-primary">
+                            <button type="submit" class="btn btn-primary">
                                 <?php echo get_phrase('Log in') ?>
-                            </a>
+                            </button>
                         </div>
                         <?php endif; ?>
                     </form>
@@ -80,10 +80,4 @@
     function onLoginSubmit(token) {
         document.getElementById("login-form").submit();
     }
-</script>
-
-<script type="text/javascript">
-  $(document).ready(function() {
-    $('#login-form').off('submit');
-  });
 </script>
