@@ -47,7 +47,7 @@
                         </div>
                         <?php else: ?>
                         <div class="log-in">
-                            <button type="button" class="btn btn-primary" onclick="handleLogin()">
+                            <button type="button" class="btn btn-primary" id="iframe-login-button">
                                 <?php echo get_phrase('Log in') ?>
                             </button>
                         </div>
@@ -99,4 +99,8 @@
         }
       });
     }
+
+    $(document).ready(function() {
+      $('#iframe-login-button').on('click', handleLogin);
+    });
 </script>
