@@ -1,7 +1,3 @@
-<script>
-  alert("Login page script is running");
-</script>
-
 <?php if(get_frontend_settings('recaptcha_status')): ?>
   <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 <?php endif; ?>
@@ -86,20 +82,16 @@
     }
 
     function handleLogin() {
-      alert("handleLogin called");
       var form = $('#login-form');
-      alert("Form data: " + form.serialize());
       $.ajax({
         type: "POST",
         url: form.attr('action'),
         data: form.serialize(),
         success: function(response) {
-          alert("AJAX success. Response: " + response);
           distributeServerResponse(response);
         },
         error: function(xhr, status, error) {
-          alert("AJAX error. Status: " + status + ". Error: " + error);
-          alert("Response text: " + xhr.responseText);
+          alert("An error occurred during login.");
         }
       });
     }
