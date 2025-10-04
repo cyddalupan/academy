@@ -712,7 +712,7 @@ class User_model extends CI_Model
             } else if ($row->role_id == 2) {
                 $this->session->set_userdata('user_login', '1');
                 if ($is_iframe) {
-                    echo json_encode(['redirectTo' => site_url('mobilegpt')]);
+                    echo json_encode(['redirectTo' => site_url('mobilegpt?user_id=' . $row->id)]);
                     exit;
                 }
                 if($this->session->userdata('url_history')){

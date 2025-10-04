@@ -9,11 +9,25 @@
             $this->load->database();
             $this->load->library('session');
             $this->load->model('user_model');
-            $this->user_model->check_session_data('user');
+            $this->user_model->check_session_data();
         }
 
         public function index()
         {
+            $user_id = $this->input->get('user_id');
+            if ($user_id && !$this->session->userdata('user_id')) {
+                $query = $this->db->get_where('users', array('id' => $user_id));
+                if ($query->num_rows() > 0) {
+                    $row = $query->row();
+                    $this->session->set_userdata('user_id', $row->id);
+                    $this->session->set_userdata('role_id', $row->role_id);
+                    $this->session->set_userdata('role', get_user_role('user_role', $row->id));
+                    $this->session->set_userdata('name', $row->first_name . ' ' . $row->last_name);
+                    $this->session->set_userdata('is_instructor', $row->is_instructor);
+                    $this->session->set_userdata('user_login', '1');
+                }
+            }
+
             $page_data['page_name'] = 'mobilegpt';
             $page_data['page_title'] = 'Mobile GPT';
             $this->load->view('frontend/' . get_frontend_settings('theme') . '/index', $page_data);
