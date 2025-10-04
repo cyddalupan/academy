@@ -139,7 +139,7 @@
       //For showing error message
       if(typeof response.error != "undefined" && response.error != 0){
         alert("Error message found: " + response.error);
-        toastr.error(response.error);
+        alert("Final error alert: " + response.error);
       }
       //For showing success message
       if(typeof response.success != "undefined" && response.success != 0){
