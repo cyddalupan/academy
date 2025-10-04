@@ -708,20 +708,21 @@ class User_model extends CI_Model
             $this->session->set_flashdata('flash_message', get_phrase('welcome') . ' ' . $row->first_name . ' ' . $row->last_name);
             if ($row->role_id == 1) {
                 $this->session->set_userdata('admin_login', '1');
-                redirect(site_url('admin/dashboard'), 'refresh');
+                redirect(site_url('admin/dashboard'));
             } else if ($row->role_id == 2) {
                 $this->session->set_userdata('user_login', '1');
                 if ($is_iframe) {
-                    redirect(site_url('mobilegpt'), 'refresh');
+                    echo '<script>parent.location.reload();</script>';
+                    exit;
                 }
                 if($this->session->userdata('url_history')){
-                    redirect($this->session->userdata('url_history'), 'refresh');
+                    redirect($this->session->userdata('url_history'));
                 }
-                redirect(site_url('home'), 'refresh');
+                redirect(site_url('home'));
             }
         } else {
             $this->session->set_flashdata('error_message', get_phrase('invalid_login_credentials'));
-            redirect(site_url('login'), 'refresh');
+            redirect(site_url('login'));
         }
     }
 
