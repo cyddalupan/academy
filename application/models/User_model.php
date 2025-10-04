@@ -737,6 +737,9 @@ class User_model extends CI_Model
             $this->session->set_userdata('language', get_settings('language'));
         }
 
+        $current_url = uri_string();
+        $is_iframe = ($current_url == 'mobilegpt');
+
         if($user_type == 'admin'){
             if($this->session->userdata('custom_session_limit') >= time()){
                 $this->session->set_userdata('custom_session_limit', (time()+864000));
@@ -753,15 +756,27 @@ class User_model extends CI_Model
                 $this->session->set_userdata('custom_session_limit', (time()+864000));
             }else{
                 $this->session_destroy();
-                redirect(site_url('login'), 'refresh');
+                if ($is_iframe) {
+                    redirect(site_url('login?iframe=true'), 'refresh');
+                } else {
+                    redirect(site_url('login'), 'refresh');
+                }
             }
 
             if ($this->session->userdata('user_login') != true) {
-                redirect(site_url('login'), 'refresh');
+                if ($is_iframe) {
+                    redirect(site_url('login?iframe=true'), 'refresh');
+                } else {
+                    redirect(site_url('login'), 'refresh');
+                }
             }else{
                 if($this->get_all_user($this->session->userdata('user_id'))->num_rows() == 0){
                     $this->session_destroy();
-                    redirect(site_url('login'), 'refresh');
+                    if ($is_iframe) {
+                        redirect(site_url('login?iframe=true'), 'refresh');
+                    } else {
+                        redirect(site_url('login'), 'refresh');
+                    }
                 }
             }
         }elseif($user_type == 'login'){
