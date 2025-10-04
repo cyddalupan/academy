@@ -28,6 +28,12 @@
                 }
             }
 
+            if (!$this->session->userdata('user_id')) {
+                $page_data['relogin_script'] = true;
+            } else {
+                $page_data['relogin_script'] = false;
+            }
+
             $page_data['page_name'] = 'mobilegpt';
             $page_data['page_title'] = 'Mobile GPT';
             $this->load->view('frontend/' . get_frontend_settings('theme') . '/index', $page_data);
