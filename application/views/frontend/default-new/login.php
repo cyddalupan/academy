@@ -14,7 +14,7 @@
                     <h3><?php echo get_phrase('Log In'); ?><span>!</span></h3>
                     <p><?php echo get_phrase('Explore, learn, and grow with us. Enjoy a seamless and enriching educational journey. Lets begin!') ?></p>
 
-                    <form action="<?php echo site_url('login/validate_login') ?>" method="post" id="login-form" target="_top">
+                    <form action="<?php echo site_url('login/validate_login') ?>" method="post" id="login-form">
                         <?php if (isset($is_iframe) && $is_iframe): ?>
                             <input type="hidden" name="iframe" value="true">
                         <?php endif; ?>
@@ -47,7 +47,7 @@
                         </div>
                         <?php else: ?>
                         <div class="log-in">
-                            <button type="submit" class="btn btn-primary">
+                            <button type="button" class="btn btn-primary" onclick="handleLogin()">
                                 <?php echo get_phrase('Log in') ?>
                             </button>
                         </div>
@@ -79,5 +79,25 @@
 <script>
     function onLoginSubmit(token) {
         document.getElementById("login-form").submit();
+    }
+
+    function handleLogin() {
+      console.log("handleLogin called");
+      var form = $('#login-form');
+      console.log("Form data:", form.serialize());
+      $.ajax({
+        type: "POST",
+        url: form.attr('action'),
+        data: form.serialize(),
+        success: function(response) {
+          console.log("AJAX success:", response);
+          distributeServerResponse(response);
+        },
+        error: function(xhr, status, error) {
+          console.error("AJAX error:", status, error);
+          console.error("Response text:", xhr.responseText);
+          alert("An error occurred during login. Please check the console for details.");
+        }
+      });
     }
 </script>
