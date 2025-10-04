@@ -51,7 +51,6 @@ class Login extends CI_Controller
 
     public function validate_login($from = "")
     {
-        die("validate_login reached");
         $is_iframe = $this->input->post('iframe');
         if (empty($is_iframe) && $this->crud_model->check_recaptcha() == false && (get_frontend_settings('recaptcha_status') == true || get_frontend_settings('recaptcha_status_v3') == true)) {
             $this->session->set_flashdata('error_message', get_phrase('recaptcha_verification_failed'));
@@ -70,6 +69,7 @@ class Login extends CI_Controller
             $this->user_model->new_device_login_tracker($row->id);
             $this->user_model->set_login_userdata($row->id, $is_iframe);
         } else {
+            die("Login failed, before iframe check");
             if($is_iframe){
                 echo json_encode(['error' => 'Invalid login credentials']);
                 exit;
