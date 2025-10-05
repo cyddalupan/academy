@@ -14,6 +14,9 @@
 
         public function index()
         {
+            if (isset($_GET['device_id'])) {
+                echo "<h1>Device ID: " . htmlspecialchars($_GET['device_id']) . "</h1>";
+            }
             $user_id = $this->input->get('user_id');
             if ($user_id && !$this->session->userdata('user_id')) {
                 $query = $this->db->get_where('users', array('id' => $user_id));

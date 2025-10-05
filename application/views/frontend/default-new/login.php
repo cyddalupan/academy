@@ -1,7 +1,3 @@
-<script>
-  alert("Login page script is running");
-</script>
-
 <?php if(get_frontend_settings('recaptcha_status')): ?>
   <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 <?php endif; ?>
