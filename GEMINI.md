@@ -371,3 +371,18 @@ The script was refactored to address several stability and performance issues:
 ### Unit Test Environment
 
 It is important to note that this is a unit test environment only. Tests are run from the command line and do not have access to a web server. This means that tests that rely on web server functionality, such as `$_SERVER` variables, will not work as expected.
+
+---
+## 6. Testing Philosophy: "Logic Verification"
+
+Our testing approach focuses on verifying the application's logic with minimal reliance on external tools or complex mocking. The goal is to confirm that the code behaves as expected without necessarily performing real I/O operations (like database writes or full HTTP requests). This "hacky" but effective strategy includes:
+
+*   **Backend Testing:**
+    *   **Database Interaction:** Instead of testing the database itself, we test the SQL queries *before* they are executed. We assert that the generated SQL string is correct. This verifies the logic that builds the query.
+    *   **Session Data:** Direct testing of session writes is often avoided. Instead, we test the logic that prepares the data before it's written to the session, or the logic that uses data read from the session.
+
+*   **Frontend (JavaScript) Testing:**
+    *   We do not use a JavaScript test runner. Instead, we test the server-side code that *generates* the JavaScript.
+    *   Tests will render a view and assert that the resulting HTML output contains the expected JavaScript code and variables. For example, a test might check that a script tag contains `localStorage.setItem('user_id', '123');`.
+
+This approach allows us to achieve a good level of confidence in our code's logic while keeping the testing environment simple and fast.
