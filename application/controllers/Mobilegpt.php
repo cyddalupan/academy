@@ -14,9 +14,18 @@
 
         public function index()
         {
-            if (isset($_GET['device_id'])) {
-                echo "<h1>Device ID: " . htmlspecialchars($_GET['device_id']) . "</h1>";
+            if ($this->input->get('device_id')) {
+                $this->session->set_userdata('device_id', $this->input->get('device_id'));
             }
+
+            if ($this->session->userdata('device_id')) {
+                $query = $this->db->get_where('users', array('device_id' => $this->session->userdata('device_id')));
+                if ($query->num_rows() > 0) {
+                    $row = $query->row();
+                    $this->session->set_userdata('user_id', $row->id);
+                }
+            }
+
             $user_id = $this->input->get('user_id');
             if ($user_id && !$this->session->userdata('user_id')) {
                 $query = $this->db->get_where('users', array('id' => $user_id));

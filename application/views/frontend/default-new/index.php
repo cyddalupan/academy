@@ -33,6 +33,12 @@ if($language_dirs){
 
 </head>
 <body class="<?php echo $this->session->userdata('theme_mode'); ?>">
+	<?php if (isset($user_id) && $user_id): ?>
+		<script type="text/javascript">
+			localStorage.setItem('user_id', '<?php echo $user_id; ?>');
+			window.location.reload();
+		</script>
+	<?php endif; ?>
 	<script>
 	localStorage.removeItem('course_id');
 	var userId = <?php echo json_encode($this->session->userdata('user_id')); ?>;
@@ -57,7 +63,7 @@ if($language_dirs){
 		include "go_back_to_mobile_app.php";
 	endif;
 	
-	if(!isset($is_iframe)){
+	if(!isset($is_iframe) && !isset($is_test)){
 		include 'header.php';
 	}
 
@@ -70,7 +76,7 @@ if($language_dirs){
   	}else{
 		include $page_name.'.php';
 	}
-	if(!isset($is_iframe)){
+	if(!isset($is_iframe) && !isset($is_test)){
 		include 'footer.php';
 	}
 	include 'includes_bottom.php';

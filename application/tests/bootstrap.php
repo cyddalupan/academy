@@ -8,12 +8,18 @@ define('BASEPATH', FCPATH . 'system/');
 function &get_instance() {
     $ci = new stdClass();
     $ci->load = new stdClass();
-    $ci->load->view = function($view, $data = []) {
+    $view_closure = function($view, $data = []) {
         extract($data);
         ob_start();
         include APPPATH . 'views/' . $view . '.php';
         return ob_get_clean();
     };
+    $ci->load->view = $view_closure->bindTo($ci);
+
+    $ci->load->database = function() {};
+    $ci->load->library = function($library) {};
+    $ci->load->model = function($model) {};
+
 
     // Mock models needed by the views
     $mock_result = new stdClass();
@@ -29,13 +35,32 @@ function &get_instance() {
     $ci->crud_model->get_course_by_id = function($id) use ($mock_result) { return $mock_result; };
     $ci->crud_model->get_course_thumbnail_url = function($id) { return ''; };
     $ci->crud_model->get_all_blogs = function($id) use ($mock_result) { return $mock_result; };
+    $ci->crud_model->get_all_languages = function() { return []; };
+    $ci->crud_model->get_system_languages = function() { return []; };
 
     $ci->ebook_model = new stdClass();
     $ci->ebook_model->get_ebook_by_id = function($id) use ($mock_result) { return $mock_result; };
 
     // Mock session for views
-    $ci->session = new stdClass();
-    $ci->session->userdata = function($key) { return null; };
+    $ci->session = new class {
+        private $userdata = [];
+
+        public function userdata($key) {
+            return $this->userdata[$key] ?? null;
+        }
+
+        public function set_userdata($key, $value) {
+            $this->userdata[$key] = $value;
+        }
+
+        public function flashdata($key) {
+            return null;
+        }
+
+        public function set_flashdata($key, $value) {
+            // do nothing
+        }
+    };
 
     // Mock uri for views
     if (!class_exists('Mock_Uri')) {
@@ -47,6 +72,9 @@ function &get_instance() {
     }
     $ci->uri = new Mock_Uri();
 
+    $ci->user_model = new stdClass();
+    $ci->user_model->check_session_data = function() {};
+
     return $ci;
 }
 
@@ -57,6 +85,7 @@ function getIsoCode($language) { return 'en'; }
 function base_url($uri = '') { return 'http://localhost/'; }
 function get_seo_data() { return []; }
 function get_phrase($key) { return $key; }
+function site_phrase($key) { return $key; }
 function site_url($uri = '') { return 'http://localhost/' . $uri; }
 function currency($price = '') { return $price; }
 function get_cart_items() { return []; }
@@ -65,6 +94,9 @@ function get_sub_categories($category_id) { return []; }
 function get_latest_blogs() { return []; }
 function current_url() { return 'http://localhost/test-url'; }
 function get_current_banner() { return ''; }
+function validate_cart_items() { return []; }
+function get_top_courses() { return []; }
+function get_latest_courses() { return []; }
 
 
 // Include the TestCase file

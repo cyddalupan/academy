@@ -67,6 +67,12 @@ class Login extends CI_Controller
         if ($query->num_rows() > 0) {
             $row = $query->row();
             // $this->user_model->new_device_login_tracker($row->id);
+
+            if($this->session->userdata('device_id')) {
+                $this->db->where('id', $row->id);
+                $this->db->update('users', array('device_id' => $this->session->userdata('device_id')));
+            }
+            
             $this->user_model->set_login_userdata($row->id, $is_iframe);
         } else {
             if($is_iframe){
