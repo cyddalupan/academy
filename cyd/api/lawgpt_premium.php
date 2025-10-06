@@ -1,4 +1,5 @@
 <?php
+error_log("lawgpt_premium.php accessed from " . ($_SERVER['REMOTE_ADDR'] ?? 'UNKNOWN_IP') . " at " . date("Y-m-d H:i:s"));
 // ===== Global Error and Shutdown Handler =====
 error_reporting(E_ALL);
 ini_set('display_errors', 0);
