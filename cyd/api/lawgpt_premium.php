@@ -314,7 +314,7 @@ if ($current_size > $payload_limit) {
 
 try {
         // If Tavily is used, disable the internal web search
-    $internal_web_search = $web_search ? false : $web_search;
+    $internal_web_search = !$web_search;
 
     $start_time = microtime(true);
     $ai = callXAI($messages, $internal_web_search, $high_reasoning);
