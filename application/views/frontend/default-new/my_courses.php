@@ -73,8 +73,14 @@
                                                     <img loading="lazy" class="ms-0" src="<?php echo $this->user_model->get_user_image_url($this->session->userdata('user_id')); ?>" alt="">
                                                     <span class="text-14px ms-1 mt-1"><?php echo $instructor_details['first_name'].' '.$instructor_details['last_name']; ?> </span>
                                                     <div class="star m-0">
+                                                        <?php
+                                                            $rating = 0;
+                                                            if (is_array($my_rating) && isset($my_rating['rating'])) {
+                                                                $rating = $my_rating['rating'];
+                                                            }
+                                                        ?>
                                                         <?php for($i = 1; $i <= 5; $i++): ?>
-                                                            <i class="fa-solid fa-star <?php if($my_rating && $my_rating['rating'] >= $i) echo 'gold'; ?>"></i>
+                                                            <i class="fa-solid fa-star <?php if($rating >= $i) echo 'gold'; ?>"></i>
                                                         <?php endfor; ?>
                                                     </div>
                                                 </div>
