@@ -71,6 +71,7 @@ header('Access-Control-Allow-Headers: Content-Type');
 header('Content-Type: application/json; charset=utf-8');
 
 require __DIR__ . '/../config.php';  // defines X_AI, $dsn, $username, $password
+require_once __DIR__ . '/tavily_util.php';
 
 // Handle preflight OPTIONS request
 if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
@@ -211,7 +212,7 @@ if ($web_search === true) {
     try {
         // Truncate the user message to 390 characters for the Tavily API call
         $truncated_message = substr($last_user_message, 0, 390);
-        $tavily_results = callTavily($truncated_message);
+        $tavily_results = callTavily("philippine law on intellectual property");
         $formatted_results = '';
         if (isset($tavily_results['results']) && is_array($tavily_results['results'])) {
             $char_limit = 8000;
@@ -354,7 +355,7 @@ try {
 }
 } // End of GEMINI_TEST_MODE block
 
-require_once __DIR__ . '/tavily_util.php';
+
 
 /**
  * Calculate the total character count of the 'content' fields in the messages array.
