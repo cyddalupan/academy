@@ -243,9 +243,35 @@ EOD;
 
 if ($needs_web_search) {
     try {
-        // Truncate the user message to 390 characters for the Tavily API call
-        $truncated_message = substr($last_user_message, 0, 390);
-        $tavily_results = callTavily($truncated_message);
+        // Generate a concise search query using a smaller model
+        $query_generation_prompt = <<<EOD
+You are a search query generation bot. Your only job is to take the user's message and transform it into a concise, effective search query for a legal information search engine. The query should be optimized to find relevant Philippine law and jurisprudence.
+
+Respond with only the search query.
+
+User message:
+"""
+{$last_user_message}
+"""
+EOD;
+        $query_messages = [['role' => 'system', 'content' => $query_generation_prompt]];
+        
+        try {
+            $search_query_response = callXAI($query_messages, false, false, 'grok-3-mini');
+            $search_query = trim($search_query_response['choices'][0]['message']['content'] ?? '');
+            // If the generated query is empty, fall back to the original message
+            if (empty($search_query)) {
+                $search_query = $last_user_message;
+            }
+        } catch (Exception $e) {
+            error_log("Search query generation failed: " . $e->getMessage() . ". Falling back to the original user message.");
+            $search_query = $last_user_message;
+        }
+
+        // Log the search query being used
+        error_log("Tavily Search Query: " . $search_query);
+
+        $tavily_results = callTavily($search_query);
         $formatted_results = '';
         if (isset($tavily_results['results']) && is_array($tavily_results['results'])) {
             $char_limit = 8000;
