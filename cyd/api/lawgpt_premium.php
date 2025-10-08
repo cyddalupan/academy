@@ -209,6 +209,7 @@ function getLastUserMessage(array $messages): string
 $last_user_message = getLastUserMessage($messages);
 
 if ($web_search === true) {
+    error_log('Tavily search block entered.');
     try {
         // Truncate the user message to 390 characters for the Tavily API call
         $truncated_message = substr($last_user_message, 0, 390);
