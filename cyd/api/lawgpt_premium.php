@@ -54,17 +54,6 @@ define('MAX_PAYLOAD_CHARS', 100000);
 $raw_input = isset($GLOBALS['mock_file_get_contents']) ? $GLOBALS['mock_file_get_contents']('php://input') : file_get_contents('php://input');
 $input = json_decode($raw_input, true) ?: [];
 
-// --- DEBUGGING ---
-error_log("--- INPUT DEBUG ---");
-error_log("Raw Input: " . $raw_input);
-$debug_web_search = 'NOT SET';
-if (isset($input['web_search'])) {
-    $debug_web_search = $input['web_search'];
-}
-error_log("Value of 'web_search': " . var_export($debug_web_search, true));
-error_log("--- END INPUT DEBUG ---");
-// --- END DEBUGGING ---
-
 // Check payload size before processing
 if (strlen($raw_input) > MAX_PAYLOAD_CHARS) {
     http_response_code(413); // Payload Too Large
@@ -103,7 +92,7 @@ try {
 $thread_id = $input['thread_id'] ?? '';
 $user_id = isset($input['user_id']) ? (int)$input['user_id'] : 0;
 $conversation = $input['conversation'] ?? [];
-$web_search = isset($input['web_search']) ? (bool)$input['web_search'] : false;
+
 $high_reasoning = isset($input['high_reasoning']) ? (bool)$input['high_reasoning'] : false;
 
 // Validate input
@@ -219,12 +208,44 @@ function getLastUserMessage(array $messages): string
 // Get the last user message from the conversation
 $last_user_message = getLastUserMessage($messages);
 
-if ($web_search === true) {
-    error_log('Tavily search block entered.');
+// ===== Web Search Triage =====
+$needs_web_search = false;
+$last_user_message = getLastUserMessage($messages);
+
+if (!empty($last_user_message)) {
+    $triage_prompt = <<<EOD
+You are a query analysis bot. Your only job is to determine if a web search is required to answer the following user query. The user is asking about Philippine law.
+
+Respond with only a single word:
+- "SEARCH" if the query requires current events, specific recent jurisprudence (e.g., from 2024-2025), or information outside of established legal principles.
+- "NO_SEARCH" if the query can be answered with general legal knowledge.
+
+User query:
+"""
+{$last_user_message}
+"""
+EOD;
+
+    $triage_messages = [['role' => 'system', 'content' => $triage_prompt]];
+
+    try {
+        $triage_response = callXAI($triage_messages, false, false, 'grok-3-mini');
+        $triage_decision = trim($triage_response['choices'][0]['message']['content'] ?? 'NO_SEARCH');
+        error_log("Triage Decision: " . $triage_decision);
+        if ($triage_decision === 'SEARCH') {
+            $needs_web_search = true;
+        }
+    } catch (Exception $e) {
+        error_log("Triage API call failed: " . $e->getMessage());
+        // Default to not searching if triage fails
+    }
+}
+
+if ($needs_web_search) {
     try {
         // Truncate the user message to 390 characters for the Tavily API call
         $truncated_message = substr($last_user_message, 0, 390);
-        $tavily_results = callTavily("philippine law on intellectual property");
+        $tavily_results = callTavily($truncated_message);
         $formatted_results = '';
         if (isset($tavily_results['results']) && is_array($tavily_results['results'])) {
             $char_limit = 8000;
@@ -249,6 +270,7 @@ if ($web_search === true) {
         // Continue execution without search results
     }
 }
+// ===== End Web Search Triage ======
 
 // ===== Payload Truncation Logic =====
 $payload_limit = 32000;
@@ -325,7 +347,7 @@ if ($current_size > $payload_limit) {
 
 try {
         // If Tavily is used, disable the internal web search
-    $internal_web_search = !$web_search;
+    $internal_web_search = false;
 
     $start_time = microtime(true);
     $ai = callXAI($messages, $internal_web_search, $high_reasoning);
@@ -386,7 +408,7 @@ function calculate_payload_size(array $messages): int
 /**
  * Fire off a chat-completions request
  */
-function callXAI(array $messages, bool $web_search, bool $high_reasoning): array
+function callXAI(array $messages, bool $web_search, bool $high_reasoning, string $model = 'grok-4'): array
 {
     if (isset($_GET['test_mode']) && $_GET['test_mode'] === 'true') {
         return [
@@ -404,7 +426,7 @@ function callXAI(array $messages, bool $web_search, bool $high_reasoning): array
     $url = 'https://api.x.ai/v1/chat/completions';
 
     $payload = [
-        'model' => 'grok-4',
+        'model' => $model,
         'temperature' => 0,
         'messages' => $messages,
         'web_search' => $web_search
