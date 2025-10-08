@@ -71,7 +71,7 @@
                                                 <?php $my_rating = $this->crud_model->get_user_specific_rating('course', $course_details['id']); ?>
                                                 <div class="d-flex align-items-center">
                                                     <img loading="lazy" class="ms-0" src="<?php echo $this->user_model->get_user_image_url($this->session->userdata('user_id')); ?>" alt="">
-                                                    <span class="text-14px ms-1 mt-1"><?php echo $instructor_details['first_name'].' '.$instructor_details['last_name']; ?> </span>
+                                                    <span class="text-14px ms-1 mt-1"><?php if($instructor_details) echo $instructor_details['first_name'].' '.$instructor_details['last_name']; ?> </span>
                                                     <div class="star m-0">
                                                         <?php
                                                             $rating = 0;
