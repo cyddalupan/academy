@@ -692,7 +692,7 @@ class User_model extends CI_Model
         }
     }
 
-    function set_login_userdata($user_id = "", $is_iframe = false){
+    function set_login_userdata($user_id = "", $is_iframe = false, $is_ajax = false){
         // Checking login credential for admin
         $query = $this->db->get_where('users', array('id' => $user_id));
 
@@ -708,11 +708,23 @@ class User_model extends CI_Model
             $this->session->set_flashdata('flash_message', get_phrase('welcome') . ' ' . $row->first_name . ' ' . $row->last_name);
             if ($row->role_id == 1) {
                 $this->session->set_userdata('admin_login', '1');
+                if ($is_ajax) {
+                    echo json_encode(['redirectTo' => site_url('admin/dashboard')]);
+                    exit;
+                }
                 redirect(site_url('admin/dashboard'));
             } else if ($row->role_id == 2) {
                 $this->session->set_userdata('user_login', '1');
                 if ($is_iframe) {
                     echo json_encode(['redirectTo' => site_url('mobilegpt?user_id=' . $row->id)]);
+                    exit;
+                }
+                if ($is_ajax) {
+                    if ($this->session->userdata('url_history')) {
+                        echo json_encode(['redirectTo' => $this->session->userdata('url_history')]);
+                        exit;
+                    }
+                    echo json_encode(['redirectTo' => site_url('home')]);
                     exit;
                 }
                 if($this->session->userdata('url_history')){
@@ -721,6 +733,10 @@ class User_model extends CI_Model
                 redirect(site_url('home'));
             }
         } else {
+            if ($is_ajax) {
+                echo json_encode(['error' => get_phrase('invalid_login_credentials')]);
+                exit;
+            }
             $this->session->set_flashdata('error_message', get_phrase('invalid_login_credentials'));
             redirect(site_url('login'));
         }

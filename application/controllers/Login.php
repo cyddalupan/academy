@@ -73,7 +73,7 @@ class Login extends CI_Controller
                 $this->db->update('users', array('device_id' => $this->session->userdata('device_id')));
             }
             
-            $this->user_model->set_login_userdata($row->id, $is_iframe);
+            $this->user_model->set_login_userdata($row->id, $is_iframe, $this->input->is_ajax_request());
         } else {
             if($is_iframe){
                 echo json_encode(['error' => 'Invalid login credentials']);
@@ -107,7 +107,7 @@ class Login extends CI_Controller
 
                 // For device login tracker
                 $this->user_model->new_device_login_tracker($row->id, true);
-                $this->user_model->set_login_userdata($row->id);
+                $this->user_model->set_login_userdata($row->id, false, $this->input->is_ajax_request());
             }
             $this->session->set_flashdata('error_message', get_phrase('something_is_wrong').'! '.site_phrase('please_try_again'));
             redirect(site_url('home'), 'refresh');
