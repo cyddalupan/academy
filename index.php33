@@ -63,7 +63,6 @@
 <body>
   <div class="container">
     <img src="https://academy.reviewcenterphil.com/uploads/system/06ddd1fe2c62f6ff26b9c4dfe46e6c23.png" alt="Topbar Assist PH Logo">
-<<<<<<< HEAD
     <h1>ðŸš§ Weâ€™re Under Maintenance ðŸš§</h1>
     <p>
       Our website is currently undergoing scheduled maintenance.<br>
@@ -71,15 +70,6 @@
     </p>
     <p>Thank you for your patience and understanding.</p>
     <div class="footer">â€” Topbar Assist PH Team</div>
-=======
-    <h1>🚧 We’re Under Maintenance 🚧</h1>
-    <p>
-      Our website is currently undergoing scheduled maintenance.<br>
-      We’ll be back online in just a few minutes.
-    </p>
-    <p>Thank you for your patience and understanding.</p>
-    <div class="footer">— Topbar Assist PH Team</div>
->>>>>>> 733412b (adonisUpdate)
   </div>
 </body>
 </html>
