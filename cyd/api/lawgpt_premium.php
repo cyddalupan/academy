@@ -54,6 +54,17 @@ define('MAX_PAYLOAD_CHARS', 100000);
 $raw_input = isset($GLOBALS['mock_file_get_contents']) ? $GLOBALS['mock_file_get_contents']('php://input') : file_get_contents('php://input');
 $input = json_decode($raw_input, true) ?: [];
 
+// --- DEBUGGING ---
+error_log("--- INPUT DEBUG ---");
+error_log("Raw Input: " . $raw_input);
+$debug_web_search = 'NOT SET';
+if (isset($input['web_search'])) {
+    $debug_web_search = $input['web_search'];
+}
+error_log("Value of 'web_search': " . var_export($debug_web_search, true));
+error_log("--- END INPUT DEBUG ---");
+// --- END DEBUGGING ---
+
 // Check payload size before processing
 if (strlen($raw_input) > MAX_PAYLOAD_CHARS) {
     http_response_code(413); // Payload Too Large
