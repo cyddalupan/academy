@@ -434,7 +434,8 @@ EOD;
         // Log the search query being used
         error_log("Tavily Search Query: " . $search_query);
 
-        $tavily_results = callTavily($search_query);
+        $prioritized_domains = ['lawphil.net', 'sc.judiciary.gov.ph'];
+        $tavily_results = callTavily($search_query, $prioritized_domains);
         $formatted_results = '';
         if (isset($tavily_results['results']) && is_array($tavily_results['results'])) {
             $char_limit = 8000;

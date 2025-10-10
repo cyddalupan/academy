@@ -2,7 +2,7 @@
 /**
  * Fire off a search request to Tavily
  */
-function callTavily(string $query): array
+function callTavily(string $query, array $domains = []): array
 {
     if (isset($_GET['test_mode']) && $_GET['test_mode'] === 'true') {
         return [
@@ -26,6 +26,10 @@ function callTavily(string $query): array
         'include_answer' => true,
         'max_results' => 5
     ];
+
+    if (!empty($domains)) {
+        $payload['include_domains'] = $domains;
+    }
 
     $ch = curl_init($url);
     curl_setopt_array($ch, [
