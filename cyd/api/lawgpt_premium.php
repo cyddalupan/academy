@@ -151,6 +151,9 @@ You are **lawGPT**, an AI assistant specializing in **Philippine law**.
 Your goal is to provide **highly accurate, well-reasoned, and verified** legal information based solely on official Philippine legal sources.
 Today's date is $todays_date.
 
+**Workflow Integration:**
+- If a system message provides pre-extracted case data (e.g., "A web search was conducted and the following case details were extracted..."), use that structured data as the primary source for your response. Prioritize it over your general knowledge.
+
 Follow these rules strictly.
 
 ---
@@ -406,8 +409,17 @@ EOD;
 
 if ($needs_web_search) {
     try {
-        // Generate a concise search query using a smaller model
-        $query_generation_prompt = <<<EOD
+        $search_query = '';
+        $is_case_retrieval = false;
+        
+        // Step 1: Detect G.R. number for case retrieval
+        if (preg_match('/(G\.R\. No\.\s*[\w\d-]+)/i', $last_user_message, $matches)) {
+            $search_query = $matches[0];
+            $is_case_retrieval = true;
+            error_log("Case Retrieval Mode Activated. Search Query: " . $search_query);
+        } else {
+            // Fallback to general query generation if no G.R. number is found
+            $query_generation_prompt = <<<EOD
 You are a search query generation bot. Your only job is to take the user's message and transform it into a concise, effective search query for a legal information search engine. The query should be optimized to find relevant Philippine law and jurisprudence.
 
 Respond with only the search query.
@@ -417,43 +429,107 @@ User message:
 {$last_user_message}
 """
 EOD;
-        $query_messages = [['role' => 'system', 'content' => $query_generation_prompt]];
-        
-        try {
-            $search_query_response = callXAI($query_messages, false, false, 'grok-3-mini');
-            $search_query = trim($search_query_response['choices'][0]['message']['content'] ?? '');
-            // If the generated query is empty, fall back to the original message
-            if (empty($search_query)) {
+            $query_messages = [['role' => 'system', 'content' => $query_generation_prompt]];
+            
+            try {
+                $search_query_response = callXAI($query_messages, false, false, 'grok-3-mini');
+                $search_query = trim($search_query_response['choices'][0]['message']['content'] ?? '');
+                if (empty($search_query)) {
+                    $search_query = $last_user_message;
+                }
+            } catch (Exception $e) {
+                error_log("Search query generation failed: " . $e->getMessage() . ". Falling back to the original user message.");
                 $search_query = $last_user_message;
             }
-        } catch (Exception $e) {
-            error_log("Search query generation failed: " . $e->getMessage() . ". Falling back to the original user message.");
-            $search_query = $last_user_message;
         }
 
-        // Log the search query being used
+        // Log the final search query being used
         error_log("Tavily Search Query: " . $search_query);
 
+        // Call Tavily
         $prioritized_domains = ['lawphil.net', 'sc.judiciary.gov.ph'];
         $tavily_results = callTavily($search_query, $prioritized_domains);
-        $formatted_results = '';
+
+        $search_results_content = '';
         if (isset($tavily_results['results']) && is_array($tavily_results['results'])) {
-            $char_limit = 8000;
+            $char_limit = 8000; // Limit for raw snippets
             foreach ($tavily_results['results'] as $result) {
                 $next_result = "Title: " . $result['title'] . "\n";
                 $next_result .= "Link: " . $result['url'] . "\n";
                 $next_result .= "Snippet: " . $result['content'] . "\n\n";
-                if (strlen($formatted_results) + strlen($next_result) > $char_limit) {
+                if (strlen($search_results_content) + strlen($next_result) > $char_limit) {
                     break;
                 }
-                $formatted_results .= $next_result;
+                $search_results_content .= $next_result;
             }
         }
-        if (!empty($formatted_results)) {
-            array_unshift($messages, [
-                'role' => 'system',
-                'content' => "Here are the web search results:\n\n" . $formatted_results
-            ]);
+
+        if (!empty($search_results_content)) {
+            // Step 2: If in Case Retrieval Mode, use the Extractor AI
+            if ($is_case_retrieval) {
+                $extractor_prompt = <<<EOD
+You are a legal data extraction bot. Based on the following search results, extract the specified information for the court case. Respond ONLY with a JSON object containing the extracted data. If a piece of information is not found, use `null`.
+
+SEARCH RESULTS:
+"""
+{$search_results_content}
+"""
+
+REQUIRED INFORMATION:
+- G.R. No.
+- Case Title
+- Date of Decision
+- Division / En Banc
+- Facts
+- Issue(s)
+
+JSON OUTPUT:
+EOD;
+                $extractor_messages = [['role' => 'system', 'content' => $extractor_prompt]];
+                
+                try {
+                    error_log("Calling Extractor AI for case data.");
+                    $extractor_response = callXAI($extractor_messages, false, false, 'grok-3-mini');
+                    $extracted_json = $extractor_response['choices'][0]['message']['content'] ?? '{}';
+                    $extracted_data = json_decode($extracted_json, true);
+
+                    if ($extracted_data) {
+                        // Format the extracted data for the main AI
+                        $formatted_extracted_data = "A web search was conducted and the following case details were extracted:\n\n";
+                        foreach ($extracted_data as $key => $value) {
+                            $formatted_key = ucwords(str_replace('_', ' ', $key));
+                            $formatted_extracted_data .= "- **{$formatted_key}:** " . (is_array($value) ? implode(', ', $value) : $value) . "\n";
+                        }
+                        
+                        // Prepend the clean, structured data to the messages array
+                        array_unshift($messages, [
+                            'role' => 'system',
+                            'content' => $formatted_extracted_data
+                        ]);
+                        error_log("Successfully extracted and formatted case data.");
+                    } else {
+                        // Fallback to raw results if extraction fails
+                        error_log("Failed to decode JSON from Extractor AI. Falling back to raw snippets.");
+                        array_unshift($messages, [
+                            'role' => 'system',
+                            'content' => "Here are the web search results:\n\n" . $search_results_content
+                        ]);
+                    }
+                } catch (Exception $e) {
+                    error_log("Extractor AI call failed: " . $e->getMessage() . ". Falling back to raw snippets.");
+                    // Fallback to raw results if the extractor call fails
+                    array_unshift($messages, [
+                        'role' => 'system',
+                        'content' => "Here are the web search results:\n\n" . $search_results_content
+                    ]);
+                }
+            } else {
+                // For normal searches, just prepend the raw results
+                array_unshift($messages, [
+                    'role' => 'system',
+                    'content' => "Here are the web search results:\n\n" . $search_results_content
+                ]);
+            }
         }
     } catch (Exception $e) {
         error_log("Tavily API call failed: " . $e->getMessage());
