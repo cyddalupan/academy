@@ -371,6 +371,63 @@ function getLastUserMessage(array $messages): string
     return $last_user_message;
 }
 
+/**
+ * Performs a focused search for a G.R. number and extracts structured data.
+ *
+ * @param string $gr_number The G.R. number to search for.
+ * @return string The formatted string of structured data, or an empty string on failure.
+ */
+function get_structured_case_data(string $gr_number): string
+{
+    try {
+        error_log("Fetching structured data for: " . $gr_number);
+        $tavily_results = callTavily($gr_number, ['lawphil.net', 'sc.judiciary.gov.ph']);
+
+        $snippets = '';
+        if (isset($tavily_results['results']) && is_array($tavily_results['results'])) {
+            foreach ($tavily_results['results'] as $result) {
+                $snippets .= "Title: " . $result['title'] . "\nSnippet: " . $result['content'] . "\n\n";
+            }
+        }
+
+        if (empty($snippets)) {
+            return '';
+        }
+
+        $extractor_prompt = <<<EOD
+You are a legal data extraction bot. Based on the following search results for {$gr_number}, extract the specified information. Respond ONLY with a JSON object. If a piece of information is not found, use `null`.
+SEARCH RESULTS:
+"""
+{$snippets}
+"""
+REQUIRED INFORMATION:
+- G.R. No.
+- Case Title
+- Date of Decision
+- Division / En Banc
+- Facts
+- Issue(s)
+JSON OUTPUT:
+EOD;
+        $extractor_messages = [['role' => 'system', 'content' => $extractor_prompt]];
+        $extractor_response = callXAI($extractor_messages, false, false, 'grok-3-mini');
+        $extracted_json = $extractor_response['choices'][0]['message']['content'] ?? '{}';
+        $extracted_data = json_decode($extracted_json, true);
+
+        if ($extracted_data) {
+            $formatted_data = "A web search was conducted for {$gr_number} and the following case details were extracted:\n\n";
+            foreach ($extracted_data as $key => $value) {
+                $formatted_key = ucwords(str_replace('_', ' ', $key));
+                $formatted_data .= "- **{$formatted_key}:** " . (is_array($value) ? implode(', ', $value) : $value) . "\n";
+            }
+            return $formatted_data;
+        }
+    } catch (Exception $e) {
+        error_log("Failed to get structured data for {$gr_number}: " . $e->getMessage());
+    }
+    return '';
+}
+
 // Get the last user message from the conversation
 $last_user_message = getLastUserMessage($messages);
 
@@ -409,136 +466,82 @@ EOD;
 
 if ($needs_web_search) {
     try {
-        $search_query = '';
-        $is_case_retrieval = false;
-        
-        // Step 1: Detect G.R. number for case retrieval
-        if (preg_match('/(G\.R\. No\.\s*[\w\d-]+)/i', $last_user_message, $matches)) {
-            $search_query = $matches[0];
-            $is_case_retrieval = true;
-            error_log("Case Retrieval Mode Activated. Search Query: " . $search_query);
+        $final_context_for_llm = '';
+        $is_direct_gr_lookup = preg_match('/(G\.R\. No\.\s*[\w\d-]+)/i', $last_user_message, $matches);
+
+        if ($is_direct_gr_lookup) {
+            // --- DIRECT G.R. NUMBER LOOKUP ---
+            $final_context_for_llm = get_structured_case_data($matches[0]);
         } else {
-            // Fallback to general query generation if no G.R. number is found
-            $query_generation_prompt = <<<EOD
-You are a search query generation bot. Your only job is to take the user's message and transform it into a concise, effective search query for a legal information search engine. The query should be optimized to find relevant Philippine law and jurisprudence.
-
-Respond with only the search query.
-
-User message:
-"""
-{$last_user_message}
-"""
-EOD;
-            $query_messages = [['role' => 'system', 'content' => $query_generation_prompt]];
+            // --- TWO-STEP SEARCH FOR GENERAL QUERIES ---
+            error_log("Two-Step Search Mode Activated for general query.");
             
-            try {
-                $search_query_response = callXAI($query_messages, false, false, 'grok-3-mini');
-                $search_query = trim($search_query_response['choices'][0]['message']['content'] ?? '');
-                if (empty($search_query)) {
-                    $search_query = $last_user_message;
+            // 1. Initial Broad Search to find G.R. numbers
+            $initial_search_query = "philippine supreme court jurisprudence on " . $last_user_message;
+            $initial_tavily_results = callTavily($initial_search_query, []);
+
+            $initial_search_snippets = '';
+            if (isset($initial_tavily_results['results']) && is_array($initial_tavily_results['results'])) {
+                foreach ($initial_tavily_results['results'] as $result) {
+                    $initial_search_snippets .= $result['content'] . "\n";
                 }
-            } catch (Exception $e) {
-                error_log("Search query generation failed: " . $e->getMessage() . ". Falling back to the original user message.");
-                $search_query = $last_user_message;
             }
-        }
 
-        // Log the final search query being used
-        error_log("Tavily Search Query: " . $search_query);
-
-        // Conditionally restrict domains for case retrieval
-        $domains_to_search = [];
-        if ($is_case_retrieval) {
-            $domains_to_search = ['lawphil.net', 'sc.judiciary.gov.ph'];
-            error_log("Restricting search to specific domains for case retrieval.");
-        }
-
-        // Call Tavily
-        $tavily_results = callTavily($search_query, $domains_to_search);
-
-        $search_results_content = '';
-        if (isset($tavily_results['results']) && is_array($tavily_results['results'])) {
-            $char_limit = 8000; // Limit for raw snippets
-            foreach ($tavily_results['results'] as $result) {
-                $next_result = "Title: " . $result['title'] . "\n";
-                $next_result .= "Link: " . $result['url'] . "\n";
-                $next_result .= "Snippet: " . $result['content'] . "\n\n";
-                if (strlen($search_results_content) + strlen($next_result) > $char_limit) {
-                    break;
-                }
-                $search_results_content .= $next_result;
-            }
-        }
-
-        if (!empty($search_results_content)) {
-            // Step 2: If in Case Retrieval Mode, use the Extractor AI
-            if ($is_case_retrieval) {
-                $extractor_prompt = <<<EOD
-You are a legal data extraction bot. Based on the following search results, extract the specified information for the court case. Respond ONLY with a JSON object containing the extracted data. If a piece of information is not found, use `null`.
-
-SEARCH RESULTS:
+            if (!empty($initial_search_snippets)) {
+                // 2. Extract G.R. Numbers from initial search
+                $gr_extractor_prompt = <<<EOD
+Based on the following text snippets, extract all unique Philippine Supreme Court G.R. numbers (e.g., "G.R. No. 123456"). Return them as a JSON array of strings. If none are found, return an empty array.
+Snippets:
 """
-{$search_results_content}
+{$initial_search_snippets}
 """
-
-REQUIRED INFORMATION:
-- G.R. No.
-- Case Title
-- Date of Decision
-- Division / En Banc
-- Facts
-- Issue(s)
-
-JSON OUTPUT:
+JSON Response:
 EOD;
-                $extractor_messages = [['role' => 'system', 'content' => $extractor_prompt]];
-                
-                try {
-                    error_log("Calling Extractor AI for case data.");
-                    $extractor_response = callXAI($extractor_messages, false, false, 'grok-3-mini');
-                    $extracted_json = $extractor_response['choices'][0]['message']['content'] ?? '{}';
-                    $extracted_data = json_decode($extracted_json, true);
+                $gr_extractor_messages = [['role' => 'system', 'content' => $gr_extractor_prompt]];
+                $gr_extractor_response = callXAI($gr_extractor_messages, false, false, 'grok-3-mini');
+                $gr_numbers_json = $gr_extractor_response['choices'][0]['message']['content'] ?? '[]';
+                $gr_numbers = json_decode($gr_numbers_json, true);
 
-                    if ($extracted_data) {
-                        // Format the extracted data for the main AI
-                        $formatted_extracted_data = "A web search was conducted and the following case details were extracted:\n\n";
-                        foreach ($extracted_data as $key => $value) {
-                            $formatted_key = ucwords(str_replace('_', ' ', $key));
-                            $formatted_extracted_data .= "- **{$formatted_key}:** " . (is_array($value) ? implode(', ', $value) : $value) . "\n";
-                        }
-                        
-                        // Prepend the clean, structured data to the messages array
-                        array_unshift($messages, [
-                            'role' => 'system',
-                            'content' => $formatted_extracted_data
-                        ]);
-                        error_log("Successfully extracted and formatted case data.");
-                    } else {
-                        // Fallback to raw results if extraction fails
-                        error_log("Failed to decode JSON from Extractor AI. Falling back to raw snippets.");
-                        array_unshift($messages, [
-                            'role' => 'system',
-                            'content' => "Here are the web search results:\n\n" . $search_results_content
-                        ]);
+                if (!empty($gr_numbers) && is_array($gr_numbers)) {
+                    $gr_numbers_unique = array_unique($gr_numbers);
+                    error_log("Two-Step: Found G.R. numbers: " . implode(', ', $gr_numbers_unique));
+                    
+                    // 3. Get structured data for the first 2 found G.R. numbers
+                    $all_cases_data = '';
+                    $gr_numbers_to_search = array_slice($gr_numbers_unique, 0, 2);
+                    foreach($gr_numbers_to_search as $gr_number) {
+                        $all_cases_data .= get_structured_case_data($gr_number) . "\n---\n";
                     }
-                } catch (Exception $e) {
-                    error_log("Extractor AI call failed: " . $e->getMessage() . ". Falling back to raw snippets.");
-                    // Fallback to raw results if the extractor call fails
-                    array_unshift($messages, [
-                        'role' => 'system',
-                        'content' => "Here are the web search results:\n\n" . $search_results_content
-                    ]);
+
+                    if(!empty($all_cases_data)) {
+                        $final_context_for_llm = "To answer the user's query, several relevant court cases were retrieved. Use the following structured case data as the primary basis for your answer:\n\n" . $all_cases_data;
+                    }
                 }
-            } else {
-                // For normal searches, just prepend the raw results
-                array_unshift($messages, [
-                    'role' => 'system',
-                    'content' => "Here are the web search results:\n\n" . $search_results_content
-                ]);
             }
         }
+
+        // Fallback if no context was generated by the pipelines
+        if (empty($final_context_for_llm)) {
+            error_log("Web search pipeline did not produce context. Falling back to simple broad search.");
+            $fallback_results = callTavily($last_user_message, []);
+            $fallback_snippets = '';
+            if (isset($fallback_results['results']) && is_array($fallback_results['results'])) {
+                foreach ($fallback_results['results'] as $result) {
+                    $fallback_snippets .= "Title: " . $result['title'] . "\nSnippet: " . $result['content'] . "\n\n";
+                }
+            }
+            if(!empty($fallback_snippets)) {
+                 $final_context_for_llm = "Here are some general web search results that may be relevant:\n\n" . $fallback_snippets;
+            }
+        }
+
+        // Prepend the final context to the main messages array
+        if (!empty($final_context_for_llm)) {
+            array_unshift($messages, ['role' => 'system', 'content' => $final_context_for_llm]);
+        }
+
     } catch (Exception $e) {
-        error_log("Tavily API call failed: " . $e->getMessage());
+        error_log("Web search pipeline failed: " . $e->getMessage());
         // Continue execution without search results
     }
 }
