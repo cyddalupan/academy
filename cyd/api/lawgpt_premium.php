@@ -446,9 +446,15 @@ EOD;
         // Log the final search query being used
         error_log("Tavily Search Query: " . $search_query);
 
+        // Conditionally restrict domains for case retrieval
+        $domains_to_search = [];
+        if ($is_case_retrieval) {
+            $domains_to_search = ['lawphil.net', 'sc.judiciary.gov.ph'];
+            error_log("Restricting search to specific domains for case retrieval.");
+        }
+
         // Call Tavily
-        $prioritized_domains = ['lawphil.net', 'sc.judiciary.gov.ph'];
-        $tavily_results = callTavily($search_query, $prioritized_domains);
+        $tavily_results = callTavily($search_query, $domains_to_search);
 
         $search_results_content = '';
         if (isset($tavily_results['results']) && is_array($tavily_results['results'])) {
