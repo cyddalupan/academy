@@ -146,6 +146,7 @@ foreach ($conversation as $m) {
         ];
     }
 }
+$todays_date = date("F d, Y");
 $system_prompt = <<<EOD
 You are **lawGPT**, an AI assistant specializing in **Philippine law**.
 Your goal is to provide **highly accurate, well-reasoned, and verified** legal information based solely on official Philippine legal sources.
@@ -496,7 +497,37 @@ if ($needs_web_search) {
             error_log("Two-Step Search Mode Activated for general query.");
             
             // 1. Initial Broad Search to find G.R. numbers
-            $initial_search_query = "philippine supreme court jurisprudence on " . $last_user_message;
+            $tavily_query = $last_user_message;
+            if (strlen($tavily_query) > 350) {
+                error_log("Query is long, attempting to summarize for search.");
+                $summarizer_prompt = <<<EOD
+You are a search query optimization bot. Convert the following user query into a concise and effective search query of less than 350 characters. Focus on the key legal terms, topics, and case identifiers. Respond only with the optimized search query and nothing else.
+
+User Query:
+"""
+{$tavily_query}
+"""
+
+Optimized Query:
+EOD;
+                $summarizer_messages = [['role' => 'system', 'content' => $summarizer_prompt]];
+                try {
+                    $summarizer_response = callXAI($summarizer_messages, false, false, 'grok-3-mini');
+                    $optimized_query = $summarizer_response['choices'][0]['message']['content'] ?? '';
+                    if (!empty($optimized_query)) {
+                        $tavily_query = $optimized_query;
+                        error_log("Successfully summarized query to: " . $tavily_query);
+                    } else {
+                        error_log("Summarization failed, falling back to truncation.");
+                        $tavily_query = mb_substr($tavily_query, 0, 350);
+                    }
+                } catch (Exception $e) {
+                    error_log("Summarization AI call failed: " . $e->getMessage() . ". Falling back to truncation.");
+                    $tavily_query = mb_substr($tavily_query, 0, 350);
+                }
+            }
+
+            $initial_search_query = "philippine supreme court jurisprudence on " . $tavily_query;
             $initial_tavily_results = callTavily($initial_search_query, []);
 
             $initial_search_snippets = '';
@@ -776,7 +807,7 @@ EOD;
 } catch (Exception $e) {
     error_log("xAI API call failed: " . $e->getMessage());
     http_response_code(500);
-    echo json_encode(['error' => $e->getMessage()]);
+    echo json_encode(['error' => 'The AI service is currently unavailable or taking too long to respond. Please try again in a few moments.']);
 }
 } // End of GEMINI_TEST_MODE block
 
