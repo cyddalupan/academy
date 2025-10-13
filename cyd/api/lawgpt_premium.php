@@ -720,36 +720,58 @@ try {
 
         if ($extracted_details['gr_number']) {
             $verification_prompt = <<<EOD
-You are a meticulous legal fact-checker. Using your web search capability, you must verify the accuracy of the following details for the provided G.R. number. Compare the provided details against the official records from lawphil.net or the Supreme Court e-Library.
+You are a meticulous legal fact-checker AI. Your sole task is to use your web search capability to find the official, correct data for the given G.R. number from lawphil.net or the Supreme Court e-Library.
 
 G.R. No.: {$extracted_details['gr_number']}
-Details to Verify:
-- Case Title: "{$extracted_details['case_title']}"
-- Date of Decision: "{$extracted_details['date_of_decision']}"
 
-Respond ONLY with a JSON object with two keys:
-1. `is_correct`: a boolean (true or false).
-2. `correct_data`: a JSON object containing the verified, correct data for all fields (G.R. No., Case Title, Date of Decision), or `null` if the provided details were correct.
+Respond ONLY with a single, clean JSON object containing the verified data. Do not add any commentary.
+
+JSON Schema:
+{
+  "G.R. No.": "string",
+  "Case Title": "string",
+  "Date of Decision": "string"
+}
 EOD;
-            
+
             try {
                 $verification_messages = [['role' => 'system', 'content' => $verification_prompt]];
                 $checker_response = callXAI($verification_messages, true, false, 'grok-4'); // Use grok-4 with web search
                 $checker_json = $checker_response['choices'][0]['message']['content'] ?? '{}';
                 $checker_json = trim(str_replace(['```json', '```'], '', $checker_json));
-                $verification_result = json_decode($checker_json, true);
+                $verified_data = json_decode($checker_json, true);
 
-                // ===== 3. Correction Step =====
-                if (isset($verification_result['is_correct']) && $verification_result['is_correct'] === false && !empty($verification_result['correct_data'])) {
-                    error_log("Verification failed. Inaccurate details found for " . $extracted_details['gr_number'] . ". Initiating correction step.");
-                    
+                // ===== 3. Correction Step (Revised Logic) =====
+
+                // Log the checker's findings for manual review
+                if (!empty($verified_data)) {
+                    error_log("AI Checker Result for " . $extracted_details['gr_number'] . ": " . json_encode($verified_data));
+                }
+
+                $original_title = $extracted_details['case_title'] ?? '';
+                $verified_title = $verified_data['Case Title'] ?? null;
+                $needs_correction = false;
+
+                if ($original_title && $verified_title) {
+                    similar_text($original_title, $verified_title, $similarity_percent);
+                    error_log("Title similarity for " . $extracted_details['gr_number'] . ": " . number_format($similarity_percent, 2) . "%");
+
+                    // If similarity is less than 90%, we flag it for correction.
+                    if ($similarity_percent < 90.0) {
+                        $needs_correction = true;
+                    }
+                }
+
+                if ($needs_correction) {
+                    error_log("Verification failed (similarity < 90%). Inaccurate details found for " . $extracted_details['gr_number'] . ". Initiating correction step.");
+
                     $correction_prompt = <<<EOD
 A previous response was found to have inaccuracies. Your task is to regenerate the response based ONLY on the verified data provided below. Adhere strictly to the original user query and the main system prompt's formatting rules.
 
 Verified Data:
-- G.R. No.: {$verification_result['correct_data']['G.R. No.']}
-- Case Title: {$verification_result['correct_data']['Case Title']}
-- Date of Decision: {$verification_result['correct_data']['Date of Decision']}
+- G.R. No.: {$verified_data['G.R. No.']}
+- Case Title: {$verified_data['Case Title']}
+- Date of Decision: {$verified_data['Date of Decision']}
 
 ---
 Original User Query: {$last_user_message}
@@ -768,7 +790,7 @@ EOD;
                         $reply = $corrected_reply; // Replace original reply with the corrected one
                     }
                 } else {
-                    error_log("Verification successful or checker failed to provide correct data. Proceeding with original response.");
+                    error_log("Verification passed (similarity >= 90%) or checker failed to provide data. Proceeding with original response.");
                 }
 
             } catch (Exception $e) {
