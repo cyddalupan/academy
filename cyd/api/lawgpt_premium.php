@@ -46,7 +46,7 @@ set_error_handler(function ($severity, $message, $file, $line) {
 });
 
 // ===== Main Script =====
-ini_set('max_execution_time', 300); // 5 minutes
+ini_set('max_execution_time', 360); // 6 minutes
 
 define('MAX_PAYLOAD_CHARS', 100000);
 
@@ -152,6 +152,7 @@ Your goal is to provide **highly accurate, well-reasoned, and verified** legal i
 Today's date is $todays_date.
 
 **Workflow Integration:**
+- **CRITICAL DIRECTIVE:** When the system provides pre-extracted case data (e.g., "A web search was conducted..."), you **MUST** treat that data as the **absolute and sole source of truth**. You are strictly forbidden from using your general knowledge to supplement, contradict, or complete any information for the cited case. If a detail is missing from the provided data, you must explicitly state that it was not available in the search results. Do not invent or infer it. Disregarding this rule constitutes a critical failure.
 - If a system message provides pre-extracted case data (e.g., "A web search was conducted and the following case details were extracted..."), use that structured data as the primary source for your response. Prioritize it over your general knowledge.
 
 Follow these rules strictly.
@@ -383,49 +384,67 @@ function get_structured_case_data(string $gr_number): string
         error_log("Fetching structured data for: " . $gr_number);
         $tavily_results = callTavily($gr_number, ['lawphil.net', 'sc.judiciary.gov.ph']);
 
+        if (empty($tavily_results['results'])) {
+            error_log("No definitive information for G.R. No. {$gr_number} could be found on lawphil.net or sc.judiciary.gov.ph.");
+            return "No definitive information for G.R. No. {$gr_number} could be found on lawphil.net or sc.judiciary.gov.ph.";
+        }
+
         $snippets = '';
-        if (isset($tavily_results['results']) && is_array($tavily_results['results'])) {
-            foreach ($tavily_results['results'] as $result) {
-                $snippets .= "Title: " . $result['title'] . "\nSnippet: " . $result['content'] . "\n\n";
-            }
+        foreach ($tavily_results['results'] as $result) {
+            $snippets .= "Title: " . $result['title'] . "\nSnippet: " . $result['content'] . "\n\n";
         }
 
         if (empty($snippets)) {
-            return '';
+            return "No definitive information for G.R. No. {$gr_number} could be found on lawphil.net or sc.judiciary.gov.ph.";
         }
 
         $extractor_prompt = <<<EOD
-You are a legal data extraction bot. Based on the following search results for {$gr_number}, extract the specified information. Respond ONLY with a JSON object. If a piece of information is not found, use `null`.
-SEARCH RESULTS:
+You are a highly precise legal data extraction bot. Your task is to analyze the provided web search results for {$gr_number} and extract the specified information.
+
+**Instructions:**
+1.  **Strictly Adhere to Schema:** Respond ONLY with a valid JSON object.
+2.  **Prioritize Sources:** Give preference to snippets from `lawphil.net` and `sc.judiciary.gov.ph`.
+3.  **Null for Missing Data:** If any piece of information cannot be found in the provided snippets, its value MUST be `null`. Do not infer or fabricate data.
+4.  **Exact Match:** Extract information exactly as it appears in the text.
+
+**SEARCH RESULTS:**
 """
 {$snippets}
 """
-REQUIRED INFORMATION:
-- G.R. No.
-- Case Title
-- Date of Decision
-- Division / En Banc
-- Facts
-- Issue(s)
-JSON OUTPUT:
+
+**JSON OUTPUT SCHEMA:**
+```json
+{
+  "G.R. No.": "string or null",
+  "Case Title": "string or null",
+  "Date of Decision": "string or null",
+  "Division / En Banc": "string or null",
+  "Facts": "string or null",
+  "Issue(s)": "string or null"
+}
+```
 EOD;
         $extractor_messages = [['role' => 'system', 'content' => $extractor_prompt]];
         $extractor_response = callXAI($extractor_messages, false, false, 'grok-3-mini');
         $extracted_json = $extractor_response['choices'][0]['message']['content'] ?? '{}';
+        
+        // Clean up the JSON response, removing markdown backticks if present
+        $extracted_json = trim(str_replace(['```json', '```'], '', $extracted_json));
+        
         $extracted_data = json_decode($extracted_json, true);
 
         if ($extracted_data) {
             $formatted_data = "A web search was conducted for {$gr_number} and the following case details were extracted:\n\n";
             foreach ($extracted_data as $key => $value) {
                 $formatted_key = ucwords(str_replace('_', ' ', $key));
-                $formatted_data .= "- **{$formatted_key}:** " . (is_array($value) ? implode(', ', $value) : $value) . "\n";
+                $formatted_data .= "- **{$formatted_key}:** " . (is_array($value) ? implode(', ', $value) : ($value ?? 'Not found')) . "\n";
             }
             return $formatted_data;
         }
     } catch (Exception $e) {
         error_log("Failed to get structured data for {$gr_number}: " . $e->getMessage());
     }
-    return '';
+    return "An error occurred while trying to fetch and structure case data for {$gr_number}.";
 }
 
 // Get the last user message from the conversation
@@ -618,20 +637,117 @@ if ($current_size > $payload_limit) {
 }
 // ===== End of Payload Truncation Logic =====
 
-// Call xAI
+/**
+ * Extracts key case details from a markdown string.
+ * @param string $markdown The markdown text of the AI's response.
+ * @return array An associative array with extracted details.
+ */
+function extractCaseDetailsFromMarkdown(string $markdown): array {
+    $details = [
+        'gr_number' => null,
+        'case_title' => null,
+        'date_of_decision' => null,
+    ];
 
+    // Extract G.R. No.
+    if (preg_match('/\*\*G\.R\. No\.:\*\*\s*([\w\d-]+)/i', $markdown, $matches)) {
+        $details['gr_number'] = trim($matches[1]);
+    }
+
+    // Extract Case Title
+    if (preg_match('/\*\*Case Title:\*\*\s*([^*]+)/i', $markdown, $matches)) {
+        $details['case_title'] = trim($matches[1]);
+    }
+
+    // Extract Date of Decision
+    if (preg_match('/\*\*Date of Decision:\*\*\s*([^*]+)/i', $markdown, $matches)) {
+        $details['date_of_decision'] = trim($matches[1]);
+    }
+
+    return $details;
+}
+
+// Call xAI
 try {
-        // If Tavily is used, disable the internal web search
+    // If Tavily is used, disable the internal web search
     $internal_web_search = false;
 
+    // ===== 1. Initial AI Call =====
     $start_time = microtime(true);
     $ai = callXAI($messages, $internal_web_search, $high_reasoning);
     $end_time = microtime(true);
     $execution_time = $end_time - $start_time;
-    error_log("callXAI execution time: " . $execution_time . " seconds");
+    error_log("Initial callXAI execution time: " . $execution_time . " seconds");
     $reply = $ai['choices'][0]['message']['content'] ?? '';
+
+    // ===== 2. AI-Powered Verification (Checker) =====
+    $gr_check_match = preg_match('/(G\.R\. No\.\s*[\w\d-]+)/i', $reply);
+
+    if ($gr_check_match) {
+        error_log("G.R. number found in response. Initiating verification step.");
+        $extracted_details = extractCaseDetailsFromMarkdown($reply);
+
+        if ($extracted_details['gr_number']) {
+            $verification_prompt = <<<EOD
+You are a meticulous legal fact-checker. Using your web search capability, you must verify the accuracy of the following details for the provided G.R. number. Compare the provided details against the official records from lawphil.net or the Supreme Court e-Library.
+
+G.R. No.: {$extracted_details['gr_number']}
+Details to Verify:
+- Case Title: "{$extracted_details['case_title']}"
+- Date of Decision: "{$extracted_details['date_of_decision']}"
+
+Respond ONLY with a JSON object with two keys:
+1. `is_correct`: a boolean (true or false).
+2. `correct_data`: a JSON object containing the verified, correct data for all fields (G.R. No., Case Title, Date of Decision), or `null` if the provided details were correct.
+EOD;
+            
+            try {
+                $verification_messages = [['role' => 'system', 'content' => $verification_prompt]];
+                $checker_response = callXAI($verification_messages, true, false, 'grok-4'); // Use grok-4 with web search
+                $checker_json = $checker_response['choices'][0]['message']['content'] ?? '{}';
+                $checker_json = trim(str_replace(['```json', '```'], '', $checker_json));
+                $verification_result = json_decode($checker_json, true);
+
+                // ===== 3. Correction Step =====
+                if (isset($verification_result['is_correct']) && $verification_result['is_correct'] === false && !empty($verification_result['correct_data'])) {
+                    error_log("Verification failed. Inaccurate details found for " . $extracted_details['gr_number'] . ". Initiating correction step.");
+                    
+                    $correction_prompt = <<<EOD
+A previous response was found to have inaccuracies. Your task is to regenerate the response based ONLY on the verified data provided below. Adhere strictly to the original user query and the main system prompt's formatting rules.
+
+Verified Data:
+- G.R. No.: {$verification_result['correct_data']['G.R. No.']}
+- Case Title: {$verification_result['correct_data']['Case Title']}
+- Date of Decision: {$verification_result['correct_data']['Date of Decision']}
+
+---
+Original User Query: {$last_user_message}
+---
+
+Generate the corrected legal analysis now, following all original formatting and citation rules.
+EOD;
+                    $correction_messages = $messages; // Start with original message history
+                    array_push($correction_messages, ['role' => 'system', 'content' => $correction_prompt]);
+
+                    $correction_ai = callXAI($correction_messages, false, $high_reasoning);
+                    $corrected_reply = $correction_ai['choices'][0]['message']['content'] ?? '';
+
+                    if (!empty($corrected_reply)) {
+                        error_log("Correction successful. Using new response.");
+                        $reply = $corrected_reply; // Replace original reply with the corrected one
+                    }
+                } else {
+                    error_log("Verification successful or checker failed to provide correct data. Proceeding with original response.");
+                }
+
+            } catch (Exception $e) {
+                error_log("Verification/Correction step failed: " . $e->getMessage());
+                // If checker/corrector fails, we proceed with the original reply but log the error.
+            }
+        }
+    }
     
-    // Store AI response in database
+    // Store final AI response in database
     try {
         $stmt = $pdo->prepare("
             INSERT INTO chat_history (thread_id, user_id, `from`, `text`, `role`, created_at)
@@ -715,7 +831,9 @@ function callXAI(array $messages, bool $web_search, bool $high_reasoning, string
             'Content-Type: application/json',
             'Authorization: Bearer ' . $apiKey
         ],
-        CURLOPT_POSTFIELDS => json_encode($payload)
+        CURLOPT_POSTFIELDS => json_encode($payload),
+        CURLOPT_TIMEOUT => 60, // 60-second timeout for the entire request
+        CURLOPT_CONNECTTIMEOUT => 10 // 10-second timeout for the connection phase
     ]);
 
     $resp = curl_exec($ch);

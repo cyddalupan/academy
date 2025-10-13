@@ -38,7 +38,9 @@ function callTavily(string $query, array $domains = []): array
         CURLOPT_HTTPHEADER => [
             'Content-Type: application/json',
         ],
-        CURLOPT_POSTFIELDS => json_encode($payload)
+        CURLOPT_POSTFIELDS => json_encode($payload),
+        CURLOPT_TIMEOUT => 60, // 60-second timeout for the entire request
+        CURLOPT_CONNECTTIMEOUT => 10 // 10-second timeout for the connection phase
     ]);
 
     $resp = curl_exec($ch);
