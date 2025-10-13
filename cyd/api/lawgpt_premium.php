@@ -862,9 +862,7 @@ function callXAI(array $messages, bool $web_search, bool $high_reasoning, string
             'Content-Type: application/json',
             'Authorization: Bearer ' . $apiKey
         ],
-        CURLOPT_POSTFIELDS => json_encode($payload),
-        CURLOPT_TIMEOUT => 60, // 60-second timeout for the entire request
-        CURLOPT_CONNECTTIMEOUT => 10 // 10-second timeout for the connection phase
+        CURLOPT_POSTFIELDS => json_encode($payload)
     ]);
 
     $resp = curl_exec($ch);
