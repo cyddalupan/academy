@@ -684,8 +684,20 @@ if ($current_size > $payload_limit) {
 }
 // ===== End of Payload Truncation Logic =====
 
+try {
+    // If Tavily is used, disable the internal web search
+    $internal_web_search = false;
 
-    
+    // ===== 1. Initial AI Call =====
+    $start_time = microtime(true);
+    $ai = callXAI($messages, $internal_web_search, $high_reasoning);
+    $end_time = microtime(true);
+    $execution_time = $end_time - $start_time;
+    error_log("Initial callXAI execution time: " . $execution_time . " seconds");
+    $reply = $ai['choices'][0]['message']['content'] ?? '';
+
+    // ===== VERIFICATION LOGIC HAS BEEN REMOVED =====
+
     // Store final AI response in database
     try {
         $stmt = $pdo->prepare("
