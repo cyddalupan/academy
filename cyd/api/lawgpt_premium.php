@@ -466,19 +466,25 @@ $needs_web_search = false;
 $last_user_message = getLastUserMessage($messages);
 
 if (!empty($last_user_message)) {
-    $triage_prompt = <<<EOD
-You are a query analysis bot. Your only job is to determine if a web search is required to answer the following user query. The user is asking about Philippine law.
-
-Respond with only a single word:
-- "SEARCH" if the query requires current events, specific recent jurisprudence (e.g., from 2024-2025), or information outside of established legal principles.
-- "NO_SEARCH" if the query can be answered with general legal knowledge.
-
-User query:
-"""
-{$last_user_message}
-"""
-EOD;
-
+        $triage_prompt = <<<EOD
+    You are a query analysis bot. Your only job is to determine if a web search is required to answer the following user query about Philippine law. A web search is crucial for finding specific, verifiable details.
+    
+    Respond with only a single word: "SEARCH" or "NO_SEARCH".
+    
+    - Respond "SEARCH" if the query asks for any of the following:
+      - A specific case (e.g., contains a G.R. number).
+      - Citations or sources ("cite the legal basis", "provide jurisprudence").
+      - The text of a specific law or statute.
+      - Information about recent events or jurisprudence (e.g., from 2024-2025).
+      - Any information that requires high-precision verification from an external source.
+    
+    - Respond "NO_SEARCH" only if the query is a very general legal question that can be answered with broad, established principles without needing a specific citation (e.g., "What is a contract?").
+    
+    User query:
+    """
+    {$last_user_message}
+    """
+    EOD;
     $triage_messages = [['role' => 'system', 'content' => $triage_prompt]];
 
     try {
