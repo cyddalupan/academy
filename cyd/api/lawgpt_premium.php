@@ -383,11 +383,21 @@ function get_structured_case_data(string $gr_number): string
 {
     try {
         error_log("Fetching structured data for: " . $gr_number);
-        $tavily_results = callTavily($gr_number, ['lawphil.net', 'sc.judiciary.gov.ph']);
+
+        // Transform G.R. number to 'gr_XXXXXX' format for a more robust search.
+        $search_query = $gr_number; // Default to original
+        if (preg_match('/[\d-]+/', $gr_number, $matches)) {
+            $number_part = $matches[0];
+            $search_query = 'gr_' . $number_part;
+        }
+        error_log("Transformed search query to: " . $search_query);
+
+        // Use the transformed query and remove site restrictions for a broader search.
+        $tavily_results = callTavily($search_query, []);
 
         if (empty($tavily_results['results'])) {
-            error_log("No definitive information for G.R. No. {$gr_number} could be found on lawphil.net or sc.judiciary.gov.ph.");
-            return "No definitive information for G.R. No. {$gr_number} could be found on lawphil.net or sc.judiciary.gov.ph.";
+            error_log("No definitive information for G.R. No. {$gr_number} could be found.");
+            return "No definitive information for G.R. No. {$gr_number} could be found.";
         }
 
         $snippets = '';
@@ -396,7 +406,7 @@ function get_structured_case_data(string $gr_number): string
         }
 
         if (empty($snippets)) {
-            return "No definitive information for G.R. No. {$gr_number} could be found on lawphil.net or sc.judiciary.gov.ph.";
+            return "No definitive information for G.R. No. {$gr_number} could be found.";
         }
 
         $extractor_prompt = <<<EOD
@@ -720,9 +730,13 @@ try {
 
         if ($extracted_details['gr_number']) {
             $verification_prompt = <<<EOD
-You are a meticulous legal fact-checker AI. Your sole task is to use your web search capability to find the official, correct data for the given G.R. number from lawphil.net or the Supreme Court e-Library.
+You are a meticulous legal fact-checker AI. Your sole task is to use your web search capability to find the official, correct data for the given G.R. number.
 
-G.R. No.: {$extracted_details['gr_number']}
+**Search Strategy:**
+- **Primary Sources:** Prioritize `lawphil.net` and the official Supreme Court e-Library (`sc.judiciary.gov.ph`).
+- **Be Flexible:** Try multiple search query formats to ensure you find the case. For example, search for both "G.R. No. {$extracted_details['gr_number']}" and "gr {$extracted_details['gr_number']}".
+
+**G.R. No.:** {$extracted_details['gr_number']}
 
 Respond ONLY with a single, clean JSON object containing the verified data. Do not add any commentary.
 
