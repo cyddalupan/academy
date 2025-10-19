@@ -402,15 +402,42 @@ function get_structured_case_data(string $gr_number): string
             return "No definitive information for G.R. No. {$gr_number} could be found.";
         }
 
+        // --- START DEEP READ LOGIC ---
         $snippets = '';
+        $best_url = '';
         foreach ($tavily_results['results'] as $result) {
-            $snippets .= "Title: " . $result['title'] . "\nSnippet: " . $result['content'] . "\n\n";
+            if (isset($result['url']) && (strpos($result['url'], 'judiciary.gov.ph') !== false || strpos($result['url'], 'lawphil.net') !== false)) {
+                $best_url = $result['url'];
+                break;
+            }
         }
-        error_log("[DIAGNOSTICS] Compiled snippets for extractor: " . $snippets);
+
+        if ($best_url) {
+            $html_content = fetch_url_content($best_url);
+            if (!empty($html_content)) {
+                // Strip HTML tags to get plain text for the AI
+                $snippets = strip_tags($html_content);
+                error_log("[DIAGNOSTICS] Deep Read: Successfully extracted plain text. Length: " . strlen($snippets));
+            } else {
+                error_log("[DIAGNOSTICS] Deep Read: Fetching full content failed. Falling back to snippets.");
+                // Fallback to using all snippets if fetch fails
+                foreach ($tavily_results['results'] as $result) {
+                    $snippets .= "Title: " . $result['title'] . "\nSnippet: " . $result['content'] . "\n\n";
+                }
+            }
+        } else {
+            error_log("[DIAGNOSTICS] Deep Read: No high-quality URL found. Falling back to using combined snippets.");
+            foreach ($tavily_results['results'] as $result) {
+                $snippets .= "Title: " . $result['title'] . "\nSnippet: " . $result['content'] . "\n\n";
+            }
+        }
+        // --- END DEEP READ LOGIC ---
+
+        error_log("[DIAGNOSTICS] Compiled snippets for extractor. Length: " . strlen($snippets));
 
 
         if (empty($snippets)) {
-            error_log("[DIAGNOSTICS] Failure: Tavily results were present, but snippets are empty.");
+            error_log("[DIAGNOSTICS] Failure: Snippets are empty after retrieval and deep read attempt.");
             return "No definitive information for G.R. No. {$gr_number} could be found.";
         }
 
@@ -756,6 +783,41 @@ try {
 } // End of GEMINI_TEST_MODE block
 
 
+
+/**
+ * Fetches the HTML content of a given URL using cURL.
+ */
+function fetch_url_content(string $url): string
+{
+    error_log("[DIAGNOSTICS] Deep Read: Fetching URL content from: " . $url);
+    $ch = curl_init($url);
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_FOLLOWLOCATION => true, // Follow redirects
+        CURLOPT_MAXREDIRS      => 5,
+        CURLOPT_TIMEOUT        => 30,   // 30-second timeout
+        CURLOPT_USERAGENT      => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36' // Set a common user agent
+    ]);
+
+    $html = curl_exec($ch);
+    $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+    if ($html === false) {
+        $error = curl_error($ch);
+        curl_close($ch);
+        error_log("[DIAGNOSTICS] Deep Read cURL Error: " . $error);
+        return '';
+    }
+    curl_close($ch);
+
+    if ($http_code !== 200) {
+        error_log("[DIAGNOSTICS] Deep Read HTTP request failed with status $http_code for URL: $url");
+        return '';
+    }
+
+    error_log("[DIAGNOSTICS] Deep Read: Successfully fetched content. Length: " . strlen($html));
+    return $html;
+}
 
 /**
  * Calculate the total character count of the 'content' fields in the messages array.
