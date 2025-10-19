@@ -470,15 +470,28 @@ EOD;
         error_log("[DIAGNOSTICS] Extractor prompt: " . $extractor_prompt);
 
         $extractor_messages = [['role' => 'system', 'content' => $extractor_prompt]];
+
+        // --- START SMART ESCALATION LOGIC ---
+        error_log("[DIAGNOSTICS] Smart Escalation: Attempting extraction with grok-3-mini.");
         $extractor_response = callXAI($extractor_messages, false, false, 'grok-3-mini');
-        $raw_extracted_json = $extractor_response['choices'][0]['message']['content'] ?? '{}';
-        error_log("[DIAGNOSTICS] Extractor raw response: " . $raw_extracted_json);
-        
-        // Clean up the JSON response, removing markdown backticks if present
+        $raw_extracted_json = $extractor_response['choices'][0]['message']['content'] ?? '';
         $extracted_json = trim(str_replace(['```json', '```'], '', $raw_extracted_json));
-        error_log("[DIAGNOSTICS] Extractor cleaned JSON string: " . $extracted_json);
-        
         $extracted_data = json_decode($extracted_json, true);
+
+        // Check if the first attempt failed (invalid JSON or empty result)
+        if (json_last_error() !== JSON_ERROR_NONE || empty($extracted_data)) {
+            error_log("[DIAGNOSTICS] Smart Escalation: grok-3-mini failed or returned empty data. Escalating to grok-4.");
+            
+            // Retry with grok-4
+            $extractor_response = callXAI($extractor_messages, false, false, 'grok-4');
+            $raw_extracted_json = $extractor_response['choices'][0]['message']['content'] ?? '';
+            $extracted_json = trim(str_replace(['```json', '```'], '', $raw_extracted_json));
+            $extracted_data = json_decode($extracted_json, true);
+        }
+        // --- END SMART ESCALATION LOGIC ---
+
+        error_log("[DIAGNOSTICS] Extractor raw response: " . $raw_extracted_json);
+        error_log("[DIAGNOSTICS] Extractor cleaned JSON string: " . $extracted_json);
 
         if (json_last_error() !== JSON_ERROR_NONE) {
             error_log("[DIAGNOSTICS] Failure: json_decode failed with error: " . json_last_error_msg());
@@ -493,7 +506,7 @@ EOD;
             }
             return $formatted_data;
         } else {
-             error_log("[DIAGNOSTICS] Failure: Extracted data was null or empty after JSON decode.");
+             error_log("[DIAGNOSTICS] Failure: Extracted data was null or empty after JSON decode, even after potential escalation.");
         }
     } catch (Exception $e) {
         error_log("[DIAGNOSTICS] Catastrophic failure in get_structured_case_data for {$gr_number}: " . $e->getMessage());
