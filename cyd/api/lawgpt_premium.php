@@ -382,7 +382,7 @@ function getLastUserMessage(array $messages): string
 function get_structured_case_data(string $gr_number): string
 {
     try {
-        error_log("Fetching structured data for: " . $gr_number);
+        error_log("[DIAGNOSTICS] Phase 1: Starting structured data fetch for: " . $gr_number);
 
         // Transform G.R. number to 'gr_XXXXXX' format for a more robust search.
         $search_query = $gr_number; // Default to original
@@ -390,13 +390,15 @@ function get_structured_case_data(string $gr_number): string
             $number_part = $matches[0];
             $search_query = 'gr_' . $number_part;
         }
-        error_log("Transformed search query to: " . $search_query);
+        error_log("[DIAGNOSTICS] Transformed search query to: " . $search_query);
 
         // Use the transformed query and remove site restrictions for a broader search.
         $tavily_results = callTavily($search_query, []);
+        error_log("[DIAGNOSTICS] Tavily raw response: " . json_encode($tavily_results, JSON_PRETTY_PRINT));
+
 
         if (empty($tavily_results['results'])) {
-            error_log("No definitive information for G.R. No. {$gr_number} could be found.");
+            error_log("[DIAGNOSTICS] Failure: Tavily returned no results for G.R. No. {$gr_number}.");
             return "No definitive information for G.R. No. {$gr_number} could be found.";
         }
 
@@ -404,8 +406,11 @@ function get_structured_case_data(string $gr_number): string
         foreach ($tavily_results['results'] as $result) {
             $snippets .= "Title: " . $result['title'] . "\nSnippet: " . $result['content'] . "\n\n";
         }
+        error_log("[DIAGNOSTICS] Compiled snippets for extractor: " . $snippets);
+
 
         if (empty($snippets)) {
+            error_log("[DIAGNOSTICS] Failure: Tavily results were present, but snippets are empty.");
             return "No definitive information for G.R. No. {$gr_number} could be found.";
         }
 
@@ -435,25 +440,36 @@ You are a highly precise legal data extraction bot. Your task is to analyze the 
 }
 ```
 EOD;
+        error_log("[DIAGNOSTICS] Extractor prompt: " . $extractor_prompt);
+
         $extractor_messages = [['role' => 'system', 'content' => $extractor_prompt]];
         $extractor_response = callXAI($extractor_messages, false, false, 'grok-3-mini');
-        $extracted_json = $extractor_response['choices'][0]['message']['content'] ?? '{}';
+        $raw_extracted_json = $extractor_response['choices'][0]['message']['content'] ?? '{}';
+        error_log("[DIAGNOSTICS] Extractor raw response: " . $raw_extracted_json);
         
         // Clean up the JSON response, removing markdown backticks if present
-        $extracted_json = trim(str_replace(['```json', '```'], '', $extracted_json));
+        $extracted_json = trim(str_replace(['```json', '```'], '', $raw_extracted_json));
+        error_log("[DIAGNOSTICS] Extractor cleaned JSON string: " . $extracted_json);
         
         $extracted_data = json_decode($extracted_json, true);
 
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            error_log("[DIAGNOSTICS] Failure: json_decode failed with error: " . json_last_error_msg());
+        }
+
         if ($extracted_data) {
+            error_log("[DIAGNOSTICS] Success: Extracted data is valid JSON.");
             $formatted_data = "A web search was conducted for {$gr_number} and the following case details were extracted:\n\n";
             foreach ($extracted_data as $key => $value) {
                 $formatted_key = ucwords(str_replace('_', ' ', $key));
                 $formatted_data .= "- **{$formatted_key}:** " . (is_array($value) ? implode(', ', $value) : ($value ?? 'Not found')) . "\n";
             }
             return $formatted_data;
+        } else {
+             error_log("[DIAGNOSTICS] Failure: Extracted data was null or empty after JSON decode.");
         }
     } catch (Exception $e) {
-        error_log("Failed to get structured data for {$gr_number}: " . $e->getMessage());
+        error_log("[DIAGNOSTICS] Catastrophic failure in get_structured_case_data for {$gr_number}: " . $e->getMessage());
     }
     return "An error occurred while trying to fetch and structure case data for {$gr_number}.";
 }
@@ -510,12 +526,12 @@ if ($needs_web_search) {
             $final_context_for_llm = get_structured_case_data($matches[0]);
         } else {
             // --- TWO-STEP SEARCH FOR GENERAL QUERIES ---
-            error_log("Two-Step Search Mode Activated for general query.");
+            error_log("[DIAGNOSTICS] Phase 1: Starting Two-Step Search Mode for general query.");
             
             // 1. Initial Broad Search to find G.R. numbers
             $tavily_query = $last_user_message;
             if (strlen($tavily_query) > 350) {
-                error_log("Query is long, attempting to summarize for search.");
+                error_log("[DIAGNOSTICS] Query is long (>350 chars), attempting to summarize for search.");
                 $summarizer_prompt = <<<EOD
 You are a search query optimization bot. Convert the following user query into a concise and effective search query of less than 350 characters. Focus on the key legal terms, topics, and case identifiers. Respond only with the optimized search query and nothing else.
 
@@ -532,18 +548,19 @@ EOD;
                     $optimized_query = $summarizer_response['choices'][0]['message']['content'] ?? '';
                     if (!empty($optimized_query)) {
                         $tavily_query = $optimized_query;
-                        error_log("Successfully summarized query to: " . $tavily_query);
+                        error_log("[DIAGNOSTICS] Successfully summarized query to: " . $tavily_query);
                     } else {
-                        error_log("Summarization failed, falling back to truncation.");
+                        error_log("[DIAGNOSTICS] Summarization failed, falling back to truncation.");
                         $tavily_query = mb_substr($tavily_query, 0, 350);
                     }
                 } catch (Exception $e) {
-                    error_log("Summarization AI call failed: " . $e->getMessage() . ". Falling back to truncation.");
+                    error_log("[DIAGNOSTICS] Summarization AI call failed: " . $e->getMessage() . ". Falling back to truncation.");
                     $tavily_query = mb_substr($tavily_query, 0, 350);
                 }
             }
 
             $initial_search_query = "philippine supreme court jurisprudence on " . $tavily_query;
+            error_log("[DIAGNOSTICS] Two-Step: Initial search query: " . $initial_search_query);
             $initial_tavily_results = callTavily($initial_search_query, []);
 
             $initial_search_snippets = '';
@@ -552,6 +569,7 @@ EOD;
                     $initial_search_snippets .= $result['content'] . "\n";
                 }
             }
+            error_log("[DIAGNOSTICS] Two-Step: Initial search snippets collected. Length: " . strlen($initial_search_snippets));
 
             if (!empty($initial_search_snippets)) {
                 // 2. Extract G.R. Numbers from initial search
@@ -566,15 +584,17 @@ EOD;
                 $gr_extractor_messages = [['role' => 'system', 'content' => $gr_extractor_prompt]];
                 $gr_extractor_response = callXAI($gr_extractor_messages, false, false, 'grok-3-mini');
                 $gr_numbers_json = $gr_extractor_response['choices'][0]['message']['content'] ?? '[]';
+                error_log("[DIAGNOSTICS] Two-Step: G.R. number extractor raw response: " . $gr_numbers_json);
                 $gr_numbers = json_decode($gr_numbers_json, true);
 
                 if (!empty($gr_numbers) && is_array($gr_numbers)) {
                     $gr_numbers_unique = array_unique($gr_numbers);
-                    error_log("Two-Step: Found G.R. numbers: " . implode(', ', $gr_numbers_unique));
+                    error_log("[DIAGNOSTICS] Two-Step: Successfully extracted G.R. numbers: " . implode(', ', $gr_numbers_unique));
                     
                     // 3. Get structured data for the first 2 found G.R. numbers
                     $all_cases_data = '';
                     $gr_numbers_to_search = array_slice($gr_numbers_unique, 0, 2);
+                    error_log("[DIAGNOSTICS] Two-Step: Proceeding to get structured data for: " . implode(', ', $gr_numbers_to_search));
                     foreach($gr_numbers_to_search as $gr_number) {
                         $all_cases_data .= get_structured_case_data($gr_number) . "\n---\n";
                     }
@@ -582,7 +602,11 @@ EOD;
                     if(!empty($all_cases_data)) {
                         $final_context_for_llm = "To answer the user's query, several relevant court cases were retrieved. Use the following structured case data as the primary basis for your answer:\n\n" . $all_cases_data;
                     }
+                } else {
+                    error_log("[DIAGNOSTICS] Two-Step Failure: Could not extract any G.R. numbers from initial search snippets.");
                 }
+            } else {
+                error_log("[DIAGNOSTICS] Two-Step Failure: Initial search for general query yielded no snippets.");
             }
         }
 
