@@ -65,11 +65,11 @@ try {
     $stmt = $pdo->prepare("UPDATE users SET has_used_premium_trial = 1 WHERE id = :user_id");
     $stmt->execute(['user_id' => $user_id]);
 
-    // Grant one day of premium
+    // Grant three days of premium
     $stmt = $pdo->prepare("
         INSERT INTO gpt_premium (user_id, expiration_date, remarks)
-        VALUES (:user_id, DATE_ADD(CURDATE(), INTERVAL 1 DAY), '1-day trial')
-        ON DUPLICATE KEY UPDATE expiration_date = DATE_ADD(GREATEST(expiration_date, CURDATE()), INTERVAL 1 DAY)
+        VALUES (:user_id, DATE_ADD(CURDATE(), INTERVAL 3 DAY), '3-day trial')
+        ON DUPLICATE KEY UPDATE expiration_date = DATE_ADD(GREATEST(expiration_date, CURDATE()), INTERVAL 3 DAY)
     ");
     $stmt->execute(['user_id' => $user_id]);
 
@@ -78,7 +78,7 @@ try {
     // Return JSON response
     echo json_encode([
         'success' => true,
-        'message' => 'Premium trial activated for one day.'
+        'message' => 'Premium trial activated for three days.'
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
 } catch (PDOException $e) {
