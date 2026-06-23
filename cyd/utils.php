@@ -9,11 +9,15 @@ function logMessage($message) {    $logDir = __DIR__ . '/../logs';
     $logFile = $logDir . '/api.log';    
     if (!is_dir($logDir)) {        mkdir($logDir, 0755, true);
     }    
-    $timestamp = date('Y-m-d H:i:s');    file_put_contents($logFile, "[$timestamp] $message
-", FILE_APPEND | LOCK_EX);
+    $timestamp = date('Y-m-d H:i:s');    file_put_contents($logFile, "[$timestamp] $message\n", FILE_APPEND | LOCK_EX);
 }
-function callGrokAI($userInput, $expected){
-    $apiKey = X_AI;    $url = 'https://api.x.ai/v1/chat/completions';
+
+/**
+ * Call DeepSeek v4-flash (OpenAI-compatible) to grade an answer
+ */
+function callDeepSeekAI($userInput, $expected){
+    $apiKey = DEEPSEEK_API_KEY;
+    $url = 'https://api.deepseek.com/v1/chat/completions';
     $maxRetries = 3;    $attempt = 0;
 
     while ($attempt < $maxRetries) {
@@ -24,7 +28,8 @@ function callGrokAI($userInput, $expected){
             ];
 
             $postData = json_encode([
-                "model" => "grok-4",
+                "model" => "deepseek-v4-flash",
+                "reasoning" => false,
                 "temperature" => 0,
                 "messages" => [
                     [
@@ -69,7 +74,7 @@ EOD
             }
 
             $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            logMessage("API HTTP status: " . $httpCode . " for callGrokAI");
+            logMessage("API HTTP status: " . $httpCode . " for callDeepSeekAI");
             if ($httpCode !== 200) {
                 logMessage("Raw API response on non-200: " . $response);
                 throw new Exception('HTTP error: ' . $httpCode);
@@ -85,11 +90,11 @@ EOD
             logMessage("Decoded API response: " . json_encode($data, JSON_PRETTY_PRINT));
 
             if (isset($data['error'])) {
-                throw new Exception('xAI API Error: ' . json_encode($data['error']));
+                throw new Exception('DeepSeek API Error: ' . json_encode($data['error']));
             }
 
             if (!isset($data['choices'][0]['message']['content'])) {
-                throw new Exception('Invalid Grok-4 response or missing content');
+                throw new Exception('Invalid DeepSeek response or missing content');
             }
 
             curl_close($ch);
@@ -97,9 +102,9 @@ EOD
         } catch (Exception $e) {
             $attempt++;
             curl_close($ch);
-            logMessage("Grok-4 call attempt $attempt failed: " . $e->getMessage());
+            logMessage("DeepSeek call attempt $attempt failed: " . $e->getMessage());
             if ($attempt >= $maxRetries) {
-                throw new Exception('Grok-4 API call failed after retries: ' . $e->getMessage());
+                throw new Exception('DeepSeek API call failed after retries: ' . $e->getMessage());
             }
             sleep(1);
         }
@@ -121,8 +126,8 @@ function calculateAverageScore($answers, $totalQuestions)
 
 function summarizeFeedback($answers)
 {
-    $apiKey = X_AI;
-    $url = 'https://api.x.ai/v1/chat/completions';
+    $apiKey = DEEPSEEK_API_KEY;
+    $url = 'https://api.deepseek.com/v1/chat/completions';
 
     try {
         $headers = [
@@ -140,7 +145,8 @@ function summarizeFeedback($answers)
         }
 
         $postData = json_encode([
-            "model" => "grok-4",
+            "model" => "deepseek-v4-flash",
+                "reasoning" => false,
             "messages" => $messages,
         ]);
         $ch = curl_init($url);
@@ -172,7 +178,7 @@ function summarizeFeedback($answers)
         logMessage("Decoded API response: " . json_encode($data, JSON_PRETTY_PRINT));
 
         if (isset($data['error'])) {
-            throw new Exception('xAI API Error: ' . json_encode($data['error']));
+            throw new Exception('DeepSeek API Error: ' . json_encode($data['error']));
         }
 
         curl_close($ch);
@@ -185,8 +191,8 @@ function summarizeFeedback($answers)
 
 function ai_email_diagnose($answers, $fullname)
 {
-    $apiKey = X_AI;
-    $url = 'https://api.x.ai/v1/chat/completions';
+    $apiKey = DEEPSEEK_API_KEY;
+    $url = 'https://api.deepseek.com/v1/chat/completions';
 
     try {
         $headers = [
@@ -204,7 +210,8 @@ function ai_email_diagnose($answers, $fullname)
         }
 
         $postData = json_encode([
-            "model" => "grok-4",
+            "model" => "deepseek-v4-flash",
+                "reasoning" => false,
             "messages" => $messages,
         ]);
 
@@ -237,7 +244,7 @@ function ai_email_diagnose($answers, $fullname)
         logMessage("Decoded API response: " . json_encode($data, JSON_PRETTY_PRINT));
 
         if (isset($data['error'])) {
-            throw new Exception('xAI API Error: ' . json_encode($data['error']));
+            throw new Exception('DeepSeek API Error: ' . json_encode($data['error']));
         }
 
         curl_close($ch);
@@ -254,8 +261,10 @@ function processResponse($pdo, $userId, $questionId, $userInput, $courseId, $res
         $content = $response['choices'][0]['message']['content'];
         logMessage("Response content for userId=$userId, questionId=$questionId: " . $content);
         if (empty($content)) {
-            throw new Exception('Empty response content from Grok-4');
+            throw new Exception('Empty response content from DeepSeek');
         }
+        // Sanitize: strip control characters (except tab, newline, cr) that break json_decode
+        $content = preg_replace("/[\x00-\x08\x0B\x0C\x0E-\x1F]/", "", $content);
         $decodedParams = json_decode($content, true);
         if ($decodedParams === null) {
             logMessage("JSON decode error in processResponse: " . json_last_error_msg());
