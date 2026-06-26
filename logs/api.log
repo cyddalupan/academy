@@ -1,0 +1,132 @@
+[2026-06-23 03:25:37] API HTTP status: 200 for callDeepSeekAI
+[2026-06-23 03:25:37] Decoded API response: {
+    "id": "c72e0560-56c8-4b61-b3d9-983255137be4",
+    "object": "chat.completion",
+    "created": 1782185126,
+    "model": "deepseek-v4-flash",
+    "choices": [
+        {
+            "index": 0,
+            "message": {
+                "role": "assistant",
+                "content": "{\n  \"score\": 90,\n  \"feedback\": \"<table class='table table-bordered'><thead><tr><th>Criteria<\/th><th>Score (out of 5)<\/th><th>Explanation<\/th><\/tr><\/thead><tbody><tr><td>Answer<\/td><td>4<\/td><td>The user provided the correct dosage (500mg Paracetamol) but omitted the full context ('The patient should be given'). The core information is accurate but slightly less formal.<\/td><\/tr><tr><td>Legal Basis<\/td><td>5<\/td><td>No legal basis is required for this simple medication instruction. Both the expected and user responses omit any reference, so no points deducted.<\/td><\/tr><tr><td>Application<\/td><td>5<\/td><td>The dose application is correct: 500mg Paracetamol matches the expected answer exactly.<\/td><\/tr><tr><td>Conclusion<\/td><td>5<\/td><td>The conclusion is implicit and correct \u2013 the patient receives the correct dose without further elaboration.<\/td><\/tr><tr><td>Legal Writing<\/td><td>3<\/td><td>The user answer is a fragment rather than a complete sentence. Good legal\/medical writing typically uses full sentences for clarity. However, the brevity does not change the meaning.<\/td><\/tr><tr><td><strong>Total<\/strong><\/td><td><strong>22\/25<\/strong><\/td><td><strong>Score: 88% \u2192 90\/100<\/strong><\/td><\/tr><\/tbody><\/table>\\n\\n<strong>Additional Insights<\/strong><br><strong>Correct expected_answer:<\/strong> The patient should be given 500mg of Paracetamol<br><br><strong>\ud83d\udd0e Mistakes<\/strong><br>\u274c The user answer lacks a complete sentence structure \u2013 it is a noun phrase instead of a full instruction.<br><br><strong>Suggestions for improvement:<\/strong><br>For medical instructions, always write in full sentences to avoid ambiguity. Example: 'Administer 500mg of Paracetamol to the patient.'<br><br>Since the user scored 90\/100, this is an excellent response. The core medical information is perfectly correct, and the only area for improvement is sentence structure. Well done!\"\n}",
+                "reasoning_content": "We need to compare user_answer \"500mg Paracetamol\" to expected_answer \"The patient should be given 500mg of Paracetamol\". The user answer is a concise version. It's essentially the same information but missing some words. That's a close match. Score likely 85-95. I'll assign 90. Then generate feedback with bootstrap-styled HTML table, evaluating Answer, Legal Basis, Application, Conclusion, Legal Writing. But note: this is a medical scenario, not legal. The instruction mentions \"Legal Basis\" etc. Possibly a mistake in the prompt? But the prompt says \"Legal Basis, Application, Conclusion, and Legal Writing\" so I'll follow that. However, given it's a medical answer, I'll adapt. But keep the criteria names as given. For each criterion, grade out of 5. For Answer: user answer is correct but less formal, 5\/5? Actually expected_answer is a full sentence, user answer is a phrase. That might be considered incomplete formally. But the content is identical. I'd give 4\/5 for missing \"The patient should be given\". For Legal Basis: there is none, but maybe the expected answer doesn't have one either. So perhaps N\/A? But criteria require grading. I'll assume there is no legal basis mentioned, so 0\/5? But that would lower total. Better to interpret \"Legal Basis\" as the basis for the answer (e.g., medical guidelines). The expected answer doesn't specify either. So both lack legal basis. So 5\/5 if both absent? That seems odd. Perhaps the prompt expects to evaluate the answer based on the expected_answer. Since expected_answer is provided, we can compare. For \"Legal Basis\", maybe the correct answer includes a reference? But it doesn't. So I'll give 5\/5 because no basis needed. Application: user answer correctly applies dose. 5\/5. Conclusion: same. 5\/5. Legal Writing: user answer is not a sentence, so 3\/5. Total 4+5+5+5+3=22\/25 -> 88% -> score 90. Feedback table with explanations. Then Additional Insights: correct expected_answer (provided), Mistakes: user answer lacks full sentence structure, but no factual mistake. Suggestions: use full sentence. If perfect? Not perfect. Then congratulate if perfect? Not applicable. I'll produce JSON.\n\nNote: output only valid JSON. So I'll write it."
+            },
+            "logprobs": null,
+            "finish_reason": "stop"
+        }
+    ],
+    "usage": {
+        "prompt_tokens": 234,
+        "completion_tokens": 1001,
+        "total_tokens": 1235,
+        "prompt_tokens_details": {
+            "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+            "reasoning_tokens": 513
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 234
+    },
+    "system_fingerprint": "fp_8b330d02d0_prod0820_fp8_kvcache_20260402"
+}
+[2026-06-23 03:28:09] API HTTP status: 200 for callDeepSeekAI
+[2026-06-23 03:28:09] Decoded API response: {
+    "id": "982c98bc-24d0-4d66-9ea9-6efd52e8175f",
+    "object": "chat.completion",
+    "created": 1782185281,
+    "model": "deepseek-v4-flash",
+    "choices": [
+        {
+            "index": 0,
+            "message": {
+                "role": "assistant",
+                "content": "{\n  \"score\": 10,\n  \"feedback\": \"<table class='table table-bordered'><thead><tr><th>Criterion<\/th><th>Grade (out of 5)<\/th><th>Explanation<\/th><\/tr><\/thead><tbody><tr><td>Answer<\/td><td>0\/5<\/td><td>The provided answer does not match the expected answer at all. Expected: 'expected correct answer', got: 'test answer here'.<\/td><\/tr><tr><td>Legal Basis<\/td><td>0\/5<\/td><td>No legal basis was provided or referenced in the answer.<\/td><\/tr><tr><td>Application<\/td><td>0\/5<\/td><td>The answer fails to apply any legal reasoning or analysis to the facts.<\/td><\/tr><tr><td>Conclusion<\/td><td>0\/5<\/td><td>No conclusion is drawn; the answer is incomplete and irrelevant.<\/td><\/tr><tr><td>Legal Writing<\/td><td>1\/5<\/td><td>The answer is too brief and lacks structure. However, it is grammatically correct.<\/td><\/tr><\/tbody><\/table><p><strong>Additional Insights<\/strong><\/p><p><strong>a) Correct Expected Answer:<\/strong> expected correct answer<\/p><p><strong>\ud83d\udd0e Mistakes<\/strong><br>\u274c The entire answer is a generic placeholder ('test answer here') with no substance.<br>\u274c No attempt was made to address the question or provide any legal analysis.<br>\u274c The answer does not incorporate the expected legal basis or conclusion.<\/p><p><strong>b) Suggestions for Improvement:<\/strong><br>- Carefully read the question and ensure your response directly addresses the issue.<br>- Structure your answer with clear headings: Issue, Rule, Application, Conclusion (IRAC).<br>- Provide specific legal authority and explain how it applies to the facts.<br>- Proofread and expand your answer to demonstrate thorough understanding.<\/p><p><strong>c) Perfect Score Note:<\/strong> Not applicable; the answer requires substantial revision.<\/p>\"\n}",
+                "reasoning_content": "We need to compare the user_answer to expected_answer. The expected_answer is provided as \"expected correct answer\". The user_answer is \"test answer here\". Clearly a mismatch. So score should be low, say 0-30. But we need to generate a JSON with score and feedback. The feedback must be a Bootstrap-styled HTML table with criteria: Answer, Legal Basis, Application, Conclusion, Legal Writing. Each graded 5\/5 if perfect. Total 25 points = 100%. Here, user answer is nonsensical and doesn't match expected. So each criterion likely 0 or 1. Also need \"Additional Insights\" section with expected_answer (which is given), Mistakes, Suggestions, and if perfect congratulate. Since not perfect, congratulate not needed.\n\nWe must output only valid JSON. Ensure no markdown.\n\nLet's construct the JSON. Score: I'd say 5 out of 100? Maybe 10? But guidelines: 0-30 for mismatch. So pick 10.\n\nFeedback: Build HTML table. Use Bootstrap classes like table, table-bordered, etc. Inside table, rows for each criterion with Grade explanation. Then after table, Additional Insights.\n\nWe'll produce the HTML as a string.\n\nLet's craft."
+            },
+            "logprobs": null,
+            "finish_reason": "stop"
+        }
+    ],
+    "usage": {
+        "prompt_tokens": 222,
+        "completion_tokens": 702,
+        "total_tokens": 924,
+        "prompt_tokens_details": {
+            "cached_tokens": 128
+        },
+        "completion_tokens_details": {
+            "reasoning_tokens": 255
+        },
+        "prompt_cache_hit_tokens": 128,
+        "prompt_cache_miss_tokens": 94
+    },
+    "system_fingerprint": "fp_8b330d02d0_prod0820_fp8_kvcache_20260402"
+}
+[2026-06-23 03:29:58] API HTTP status: 200 for callDeepSeekAI
+[2026-06-23 03:29:58] Decoded API response: {
+    "id": "215ef5ca-e181-4fea-8a02-a9a87676cb1f",
+    "object": "chat.completion",
+    "created": 1782185378,
+    "model": "deepseek-v4-flash",
+    "choices": [
+        {
+            "index": 0,
+            "message": {
+                "role": "assistant",
+                "content": "{\n  \"score\": 40,\n  \"feedback\": \"<div class='table-responsive'><table class='table table-bordered'><thead><tr><th>Criterion<\/th><th>Score<\/th><th>Max<\/th><th>Explanation<\/th><\/tr><\/thead><tbody><tr><td>Answer<\/td><td>3<\/td><td>5<\/td><td>The user correctly identifies the drug (Paracetamol) and dose (500mg) but omits the frequency (every 6 hours) and indication (as needed for pain). This is a partial answer.<\/td><\/tr><tr><td>Legal Basis<\/td><td>0<\/td><td>5<\/td><td>No legal basis was provided. The user did not cite any law or regulation supporting the prescription.<\/td><\/tr><tr><td>Application<\/td><td>2<\/td><td>5<\/td><td>The user applies the drug and dose but fails to apply the proper prescribing schedule and context. The missing details affect safe and appropriate use.<\/td><\/tr><tr><td>Conclusion<\/td><td>2<\/td><td>5<\/td><td>The conclusion is vague. The user states only that the patient needs 500mg paracetamol, without a complete prescription format.<\/td><\/tr><tr><td>Legal Writing<\/td><td>3<\/td><td>5<\/td><td>The writing is a simple sentence but lacks completeness and professional prescription format. It could be improved by including all necessary elements.<\/td><\/tr><\/tbody><\/table><\/div>\\n\\nAdditional Insights:\\nCorrect Expected Answer: Paracetamol 500mg every 6 hours as needed for pain\\n\\n\ud83d\udd0e Mistakes\\n\u274c Missing frequency: \\\"every 6 hours\\\"\\n\u274c Missing indication: \\\"as needed for pain\\\"\\n\u274c The phrase \\\"The patient needs\\\" is not standard in a prescription; a prescription should be directive (e.g., \\\"Take 500mg every 6 hours PRN pain\\\").\\n\\nSuggestions for improvement:\\n- Always include the dosing frequency and indication.\\n- Use standard prescription format: drug name, dose, route, frequency, and indication.\\n- Verify that the prescription matches the intended regimen.\\n\\nIf the user scored perfectly, congratulate them. (Not applicable here.)\"\n}",
+                "reasoning_content": "We need to compare user_answer to expected_answer. Expected: \"Paracetamol 500mg every 6 hours as needed for pain\". User: \"The patient needs 500mg paracetamol\". The user missed \"every 6 hours\" and \"as needed for pain\". So it's a partial match. Score around 50-60? But criteria: full match 100, close 70-95, mismatch 0-30. This is not a full match; it's missing key dosing schedule and indication. I'd say around 40-50? But the instruction says output only valid JSON. Also need to include HTML table, additional insights with mistakes, etc. Must be valid JSON, so escape properly.\n\nLet's design score: 45? But careful: user_answer mentions \"500mg paracetamol\" but missing frequency and indication. Also \"The patient needs\" is not exactly the same wording. So not a close match; it's a partial match. I'd give 50? Or 60? Let's think: The core drug and dose are correct, but schedule and indication are missing. That's a significant omission. I'd score 45. But we need to grade each criterion: Answer, Legal Basis, Application, Conclusion, Legal Writing. However, this seems like a clinical question, not legal? The instruction mentions \"Legal Basis\" etc. Possibly a legal exam about prescription? But expected_answer is a prescription. We'll adapt: The criteria are generic.\n\nI'll create a table with 5 criteria, each max 5 points, total 25 = 100%. For the user, answer: dose correct but incomplete -> maybe 3\/5. Legal Basis: not applicable? But we can say \"no legal basis provided\" -> 0\/5. Application: partially applied but missing details -> 2\/5. Conclusion: vague -> 2\/5. Legal Writing: the user wrote a sentence but not well structured -> 3\/5. Total = 10\/25 = 40%. So score 40. That fits mismatch (0-30? 40 is above 30, but not close match 70-95). Actually 40 is between 30 and 70? The description says 0-30 for mismatch, 70-95 for close, 100 for full. So 40 is in a gap? But maybe they intend: 0-30 = poor, 70-95 = good, 100 = perfect. 40-69 could be partial? But they didn't mention that. I'll assume 40 is acceptable as partial but not close. Or we could adjust to 30 to make it \"mismatch\"? But user got dose right, so not completely wrong. I'll stick with 40.\n\nBut to follow instruction, \"compare the user_answer to expected_answer and output only a valid JSON object\". So we must output JSON with score and feedback. feedback is Bootstrap-styled HTML table. Need to include Bootstrap classes like table, table-bordered, etc. Also additional insights with sections.\n\nLet me construct the JSON.\n\nNote: The expected_answer is provided. For additional insights, we include correct expected_answer (already given) and then mistakes.\n\nUser answer: \"The patient needs 500mg paracetamol\"\nMistakes: \n- Missing dosing frequency \"every 6 hours\"\n- Missing indication \"as needed for pain\"\n- Instead of \"500mg every 6 hours\", user wrote \"500mg paracetamol\" without schedule.\n\nAlso the user added \"The patient needs\" which is not part of the standard prescription format.\n\nFeedback table: For each criterion, give score and explanation.\n\nI'll write the HTML table with Bootstrap classes. Use <div class=\"table-responsive\"> maybe. But just table tag with class=\"table table-bordered\". Include thead and tbody with criteria, score, max, explanation.\n\nThen after table, \"Additional Insights\" with plain text sections: use markdown-like headings? It says \"plain text\" but we can use simple text with line breaks. Since it's inside JSON, we need to escape double quotes and newlines properly.\n\nI'll produce:\n\n{\n  \"score\": 40,\n  \"feedback\": \"<div class='table-responsive'><table class='table table-bordered'><thead><tr><th>Criterion<\/th><th>Score<\/th><th>Max<\/th><th>Explanation<\/th><\/tr><\/thead><tbody><tr><td>Answer<\/td><td>3<\/td><td>5<\/td><td>The user correctly identifies the drug (Paracetamol) and dose (500mg) but omits the frequency (every 6 hours) and indication (as needed for pain). This is a partial answer.<\/td><\/tr><tr><td>Legal Basis<\/td><td>0<\/td><td>5<\/td><td>No legal basis was provided. The user did not cite any law or regulation supporting the prescription.<\/td><\/tr><tr><td>Application<\/td><td>2<\/td><td>5<\/td><td>The user applies the drug and dose but fails to apply the proper prescribing schedule and context. The missing details affect safe and appropriate use.<\/td><\/tr><tr><td>Conclusion<\/td><td>2<\/td><td>5<\/td><td>The conclusion is vague. The user states only that the patient needs 500mg paracetamol, without a complete prescription format.<\/td><\/tr><tr><td>Legal Writing<\/td><td>3<\/td><td>5<\/td><td>The writing is a simple sentence but lacks completeness and professional prescription format. It could be improved by including all necessary elements.<\/td><\/tr><\/tbody><\/table><\/div>\\n\\nAdditional Insights:\\nCorrect Expected Answer: Paracetamol 500mg every 6 hours as needed for pain\\n\\n\ud83d\udd0e Mistakes\\n\u274c Missing frequency: \\\"every 6 hours\\\"\\n\u274c Missing indication: \\\"as needed for pain\\\"\\n\u274c The phrase \\\"The patient needs\\\" is not standard in a prescription; a prescription should be directive (e.g., \\\"Take 500mg every 6 hours PRN pain\\\").\\n\\nSuggestions for improvement:\\n- Always include the dosing frequency and indication.\\n- Use standard prescription format: drug name, dose, route, frequency, and indication.\\n- Verify that the prescription matches the intended regimen.\\n\\nIf the user scored perfectly, congratulate them. (Not applicable here.)\"\n}\n\nBut we need to ensure the score is integer. I'll set score: 40.\n\nAlternatively, I could adjust to 50 and make it \"partial\" but within the given ranges, 40 is fine. However, the instruction says \"70-95 for close match\" - this is not close because missing key info. So 40 is appropriate.\n\nI'll output the JSON."
+            },
+            "logprobs": null,
+            "finish_reason": "stop"
+        }
+    ],
+    "usage": {
+        "prompt_tokens": 239,
+        "completion_tokens": 1928,
+        "total_tokens": 2167,
+        "prompt_tokens_details": {
+            "cached_tokens": 128
+        },
+        "completion_tokens_details": {
+            "reasoning_tokens": 1431
+        },
+        "prompt_cache_hit_tokens": 128,
+        "prompt_cache_miss_tokens": 111
+    },
+    "system_fingerprint": "fp_8b330d02d0_prod0820_fp8_kvcache_20260402"
+}
+[2026-06-23 03:50:58] API HTTP status: 200 for callDeepSeekAI
+[2026-06-23 03:50:58] Decoded API response: {
+    "id": "312ad973-9e4b-4d0e-8f77-8b9925d0c6f3",
+    "object": "chat.completion",
+    "created": 1782186653,
+    "model": "deepseek-v4-flash",
+    "choices": [
+        {
+            "index": 0,
+            "message": {
+                "role": "assistant",
+                "content": "{\n  \"score\": 95,\n  \"feedback\": \"<table class=\\\"table table-bordered table-striped\\\">\\n  <thead class=\\\"table-dark\\\">\\n    <tr>\\n      <th>Criterion<\/th>\\n      <th>Score (out of 5)<\/th>\\n      <th>Explanation<\/th>\\n    <\/tr>\\n  <\/thead>\\n  <tbody>\\n    <tr>\\n      <td>Answer<\/td>\\n      <td>5<\/td>\\n      <td>Perfectly states that the marriage is void (void ab initio).<\/td>\\n    <\/tr>\\n    <tr>\\n      <td>Legal Basis<\/td>\\n      <td>5<\/td>\\n      <td>Correctly identifies the reason: both parties below 18. Relevant law (e.g., Family Code) supports this.<\/td>\\n    <\/tr>\\n    <tr>\\n      <td>Application<\/td>\\n      <td>5<\/td>\\n      <td>Applies the rule accurately to the facts.<\/td>\\n    <\/tr>\\n    <tr>\\n      <td>Conclusion<\/td>\\n      <td>5<\/td>\\n      <td>Clear and concise conclusion matching the expected answer.<\/td>\\n    <\/tr>\\n    <tr>\\n      <td>Legal Writing<\/td>\\n      <td>4<\/td>\\n      <td>Well-written, but minor improvement: \\\"should be void ab initio\\\" is slightly less formal than \\\"is void ab initio.\\\" Otherwise excellent.<\/td>\\n    <\/tr>\\n  <\/tbody>\\n  <tfoot>\\n    <tr class=\\\"table-info\\\">\\n      <td><strong>Total<\/strong><\/td>\\n      <td><strong>24 \/ 25<\/strong><\/td>\\n      <td><strong>96%<\/strong> (rounded to 95 in score)<\/td>\\n    <\/tr>\\n  <\/tfoot>\\n<\/table>\\n\\n<p><strong>Additional Insights<\/strong><\/p>\\n<p><strong>Expected Answer:<\/strong> Yes, the marriage is void.<\/p>\\n<p><strong>\ud83d\udd0e Mistakes<\/strong><br>\\n\u274c No significant mistakes. The user provided a more detailed and equally correct answer.<\/p>\\n<p><strong>Suggestions for Improvement:<\/strong><br>\\n- Consider using \\\"is void ab initio\\\" instead of \\\"should be void ab initio\\\" for stronger legal phrasing.<br>\\n- Including a specific legal provision (e.g., Article 35 of the Family Code) would further strengthen the answer.<\/p>\\n<p><strong>\ud83c\udf89 Congratulations!<\/strong> Your answer is excellent and fully addresses the question.<\/p>\"\n}",
+                "reasoning_content": "We need to compare user_answer to expected_answer. Expected: \"Yes, the marriage is void.\" User: \"The marriage should be void ab initio because both parties were below 18.\" The user's answer is more detailed and gives a reason (both below 18) which matches the expected \"void\". However, the expected_answer didn't specify \"ab initio\" but it's implied. The user's answer is essentially correct, perhaps even more precise. Score should be high, maybe 90-95? But we need to output JSON with score and feedback. The feedback should be an HTML table evaluating criteria with 5 points each. Let's generate."
+            },
+            "logprobs": null,
+            "finish_reason": "stop"
+        }
+    ],
+    "usage": {
+        "prompt_tokens": 239,
+        "completion_tokens": 738,
+        "total_tokens": 977,
+        "prompt_tokens_details": {
+            "cached_tokens": 128
+        },
+        "completion_tokens_details": {
+            "reasoning_tokens": 135
+        },
+        "prompt_cache_hit_tokens": 128,
+        "prompt_cache_miss_tokens": 111
+    },
+    "system_fingerprint": "fp_8b330d02d0_prod0820_fp8_kvcache_20260402"
+}

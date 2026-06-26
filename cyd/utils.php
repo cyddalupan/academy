@@ -265,6 +265,8 @@ function processResponse($pdo, $userId, $questionId, $userInput, $courseId, $res
         }
         // Sanitize: strip control characters (except tab, newline, cr) that break json_decode
         $content = preg_replace("/[\x00-\x08\x0B\x0C\x0E-\x1F]/", "", $content);
+        // Strip markdown code fences that DeepSeek sometimes wraps around JSON
+        $content = preg_replace('/^```(?:json)?\s*\n?|\n?```\s*$/', '', $content);
         $decodedParams = json_decode($content, true);
         if ($decodedParams === null) {
             logMessage("JSON decode error in processResponse: " . json_last_error_msg());
