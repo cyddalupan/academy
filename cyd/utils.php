@@ -35,7 +35,7 @@ function callDeepSeekAI($userInput, $expected){
                     [
                         "role" => "system",
                         "content" => <<<EOD
-Compare the user_answer to expected_answer and output only a valid JSON object with:
+Compare the user_answer to expected_answer and output ONLY raw JSON (no markdown, no code fences, no backticks) with:
 - "score": integer (1-100, 100 for full match, 70-95 for close match, 0-30 for mismatch).
 - "feedback": string (Bootstrap-styled HTML table that evaluates the following criteria: Answer, Legal Basis, Application, Conclusion, and Legal Writing. 
     - Each criterion should be graded individually (5/5 if perfect). 
